@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { HOW_IT_WORKS_STEPS } from "@/lib/constants";
-import { Search, Users, KeyRound } from "lucide-react";
+import { Search, Users, KeyRound, CheckCircle2, ArrowRight } from "lucide-react";
 
 export function HowItWorks() {
   const getIcon = (iconName: string) => {
@@ -23,12 +23,17 @@ export function HowItWorks() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="max-w-3xl mb-16">
-          <h2 className="font-heading text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#4C061D] tracking-tight mb-4">
-            How Delala works.
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#4C061D]/10 text-[#4C061D] text-xs font-extrabold mb-4 border border-[#4C061D]/20">
+            <CheckCircle2 className="w-3.5 h-3.5 text-[#4C061D]" />
+            <span>3 Simple Steps</span>
+          </div>
+
+          <h2 className="font-heading text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#4C061D] tracking-tight mb-4 leading-tight">
+            How Delala works for house hunters and owners.
           </h2>
 
           <p className="text-base sm:text-lg text-[#2D2D2D]/80 font-normal leading-relaxed">
-            Finding your house in Ethiopia is as simple as search, visit, and move in.
+            Finding or sharing a property in Ethiopia is as simple as discover, connect, and finalize.
           </p>
         </div>
 
@@ -41,11 +46,11 @@ export function HowItWorks() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: idx * 0.1 }}
-              className="bg-white p-8 rounded-3xl border border-[#ECE7DA] shadow-xs flex flex-col justify-between"
+              className="bg-white p-8 rounded-3xl border border-[#ECE7DA] shadow-xs hover:shadow-lg hover:border-[#B4C292] transition-all duration-300 flex flex-col justify-between relative group"
             >
               <div>
                 <div className="flex items-center justify-between mb-8">
-                  <span className="font-heading font-black text-3xl text-[#736F4E]">
+                  <span className="font-heading font-black text-4xl text-[#736F4E]/40 group-hover:text-[#4C061D] transition-colors">
                     {step.number}
                   </span>
                   <div className="w-12 h-12 rounded-2xl bg-[#FAF8F4] border border-[#ECE7DA] flex items-center justify-center">
@@ -56,13 +61,18 @@ export function HowItWorks() {
                 <h3 className="font-heading text-2xl font-bold text-[#4C061D] mb-1">
                   {step.title}
                 </h3>
-                <div className="text-xs font-semibold text-[#736F4E] mb-4">
+                <div className="text-xs font-semibold text-[#736F4E] mb-4 uppercase tracking-wider">
                   {step.subtitle}
                 </div>
 
                 <p className="text-sm sm:text-base text-[#2D2D2D]/80 leading-relaxed">
                   {step.description}
                 </p>
+              </div>
+
+              <div className="mt-8 pt-4 border-t border-[#ECE7DA] flex items-center justify-between text-xs font-bold text-[#4C061D]">
+                <span>Step {step.number} of 03</span>
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </div>
             </motion.div>
           ))}

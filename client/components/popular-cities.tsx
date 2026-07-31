@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { POPULAR_CITIES } from "@/lib/constants";
-import { ArrowRight, Building } from "lucide-react";
+import { ArrowRight, Building, MapPin } from "lucide-react";
 
 export function PopularCities() {
   return (
@@ -11,18 +11,23 @@ export function PopularCities() {
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
           <div className="max-w-2xl">
-            <h2 className="font-heading text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#4C061D] tracking-tight mb-4">
-              Explore homes across Ethiopia.
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#B4C292]/30 text-[#4C061D] text-xs font-extrabold mb-4 border border-[#B4C292]/50">
+              <MapPin className="w-3.5 h-3.5" />
+              <span>Regional Hubs & Sub-Cities</span>
+            </div>
+
+            <h2 className="font-heading text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#4C061D] tracking-tight mb-4 leading-tight">
+              Explore verified homes across Ethiopia.
             </h2>
 
             <p className="text-base sm:text-lg text-[#2D2D2D]/80 font-normal leading-relaxed">
-              From the vibrant neighborhoods of Addis Ababa to lakeside homes in Hawassa, Delala has verified listings across major hubs.
+              From the bustling diplomatic sub-cities of Addis Ababa to lakeside homes in Hawassa and tech centers in Adama.
             </p>
           </div>
 
           <a
             href="#download"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#4C061D] text-white font-semibold text-sm hover:bg-[#3B3923] transition-colors shrink-0 group"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#4C061D] text-white font-bold text-sm hover:bg-[#3B3923] transition-colors shrink-0 group"
           >
             <span>Browse All Cities</span>
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -38,37 +43,39 @@ export function PopularCities() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: idx * 0.08 }}
-              className="group relative bg-white rounded-3xl overflow-hidden border border-[#ECE7DA] shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col justify-between"
+              className="group relative bg-white rounded-3xl overflow-hidden border border-[#ECE7DA] shadow-xs hover:shadow-xl hover:border-[#B4C292] transition-all duration-500 flex flex-col justify-between"
             >
+              {/* City Photo Banner */}
               <div className="relative h-56 w-full overflow-hidden">
                 <img
                   src={city.image}
-                  alt={city.name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  alt={`Delala verified homes in ${city.name}`}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#3B3923]/80 via-transparent to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#1c1b12]/90 via-[#1c1b12]/20 to-transparent" />
 
-                <div className="absolute bottom-4 left-4 right-4 z-10 text-white">
+                <div className="absolute bottom-4 left-5 right-5 z-10 text-white">
                   <h3 className="font-heading text-2xl font-extrabold tracking-tight mb-1">
                     {city.name}
                   </h3>
-                  <div className="flex items-center gap-2 text-xs text-[#B4C292] font-medium">
+                  <div className="flex items-center gap-2 text-xs text-[#B4C292] font-semibold">
                     <Building className="w-3.5 h-3.5" />
                     <span>{city.propertiesCount}</span>
                   </div>
                 </div>
               </div>
 
+              {/* City Neighborhood Details */}
               <div className="p-6 flex flex-col justify-between flex-1 bg-white">
                 <div>
-                  <div className="text-xs font-semibold text-[#736F4E] mb-2 uppercase tracking-wider">
-                    Popular Areas
+                  <div className="text-[11px] font-extrabold text-[#736F4E] mb-2.5 uppercase tracking-wider">
+                    Popular Neighborhoods
                   </div>
                   <div className="flex flex-wrap gap-1.5 mb-6">
                     {city.popularAreas.map((area) => (
                       <span
                         key={area}
-                        className="px-2.5 py-1 rounded-lg bg-[#FAF8F4] text-[#2D2D2D] text-xs font-medium border border-[#ECE7DA]"
+                        className="px-2.5 py-1 rounded-lg bg-[#FAF8F4] text-[#2D2D2D] text-xs font-semibold border border-[#ECE7DA]"
                       >
                         {area}
                       </span>
@@ -78,14 +85,14 @@ export function PopularCities() {
 
                 <div className="pt-4 border-t border-[#ECE7DA] flex items-center justify-between">
                   <div>
-                    <span className="text-[11px] text-[#736F4E] block">Starting rent</span>
-                    <span className="text-sm font-extrabold text-[#4C061D]">
+                    <span className="text-[10px] uppercase font-bold text-[#736F4E] block">Starting Rent</span>
+                    <span className="text-sm font-black text-[#4C061D]">
                       {city.startingPrice}
                     </span>
                   </div>
                   <a
                     href="#download"
-                    className="p-2.5 rounded-full bg-[#FAF8F4] text-[#4C061D] group-hover:bg-[#4C061D] group-hover:text-white transition-colors"
+                    className="p-3 rounded-full bg-[#FAF8F4] text-[#4C061D] border border-[#ECE7DA] group-hover:bg-[#4C061D] group-hover:text-white group-hover:border-[#4C061D] transition-colors"
                   >
                     <ArrowRight className="w-4 h-4" />
                   </a>
