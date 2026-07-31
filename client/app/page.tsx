@@ -1,11 +1,11 @@
 import { Navbar } from "@/components/navbar";
 import { Hero } from "@/components/hero";
 import { SocialProof } from "@/components/social-proof";
+import { WhyDelala } from "@/components/why-delala";
 import { Features } from "@/components/features";
 import { HowItWorks } from "@/components/how-it-works";
 import { AppShowcase } from "@/components/app-showcase";
 import { PopularCities } from "@/components/popular-cities";
-import { WhyDelala } from "@/components/why-delala";
 import { Testimonials } from "@/components/testimonials";
 import { FAQ } from "@/components/faq";
 import { FinalCTA } from "@/components/final-cta";
@@ -14,39 +14,39 @@ import { Footer } from "@/components/footer";
 export default function Home() {
   return (
     <div className="min-h-screen flex flex-col bg-[#FAF8F4] selection:bg-[#B4C292]/40 selection:text-[#4C061D]">
-      {/* Top Navbar */}
+      {/* Top Navbar Header */}
       <Navbar />
 
-      {/* Main Content Flow */}
-      <main className="flex-grow pt-24 sm:pt-28">
-        {/* 1. Reference Layout Inspired Hero */}
+      {/* Main Content Flow for Storytelling */}
+      <main id="main-content" className="flex-grow pt-24 sm:pt-28">
+        {/* 1. Unforgettable Hero Section */}
         <Hero />
 
-        {/* 2. Social Proof Stat Counter */}
+        {/* 2. Key Social Proof Metrics */}
         <SocialProof />
 
-        {/* 3. Bento Grid Features */}
-        <Features />
-
-        {/* 4. How It Works 3-Step Journey */}
-        <HowItWorks />
-
-        {/* 5. Mobile App Showcase */}
-        <AppShowcase />
-
-        {/* 6. Popular Cities Showcase */}
-        <PopularCities />
-
-        {/* 7. Why Delala */}
+        {/* 3. Problem vs. Solution Framing (Traditional Telegram Chaos vs. Delala Standard) */}
         <WhyDelala />
 
-        {/* 8. Verified Testimonials */}
+        {/* 4. Human Outcome-Oriented Features */}
+        <Features />
+
+        {/* 5. 3-Step Simple Journey */}
+        <HowItWorks />
+
+        {/* 6. Hero Product Mobile App Showcase */}
+        <AppShowcase />
+
+        {/* 7. Regional Hubs & Popular Ethiopian Cities */}
+        <PopularCities />
+
+        {/* 8. Verified Community Reviews & Testimonials */}
         <Testimonials />
 
-        {/* 9. FAQ Accordion */}
+        {/* 9. Objection Handling Accordion (FAQ) */}
         <FAQ />
 
-        {/* 10. Grand Final CTA Banner */}
+        {/* 10. Grand App Download CTA Banner */}
         <FinalCTA />
       </main>
 
