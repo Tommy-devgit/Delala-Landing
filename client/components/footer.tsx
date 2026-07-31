@@ -46,6 +46,11 @@ export function Footer() {
                   </Link>
                 </li>
               ))}
+              <li>
+                <Link href="/download" className="hover:text-[#B4C292] transition-colors">
+                  Download App
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -56,24 +61,24 @@ export function Footer() {
             </h4>
             <ul className="space-y-2.5 text-sm text-[#FAF8F4]/75 font-medium">
               <li>
-                <a href="#cities" className="hover:text-[#B4C292] transition-colors">
-                  Addis Ababa
-                </a>
+                <Link href="/features" className="hover:text-[#B4C292] transition-colors">
+                  Addis Ababa (Bole, Kazanchis)
+                </Link>
               </li>
               <li>
-                <a href="#cities" className="hover:text-[#B4C292] transition-colors">
-                  Hawassa
-                </a>
+                <Link href="/features" className="hover:text-[#B4C292] transition-colors">
+                  Hawassa Lakeside
+                </Link>
               </li>
               <li>
-                <a href="#cities" className="hover:text-[#B4C292] transition-colors">
-                  Adama
-                </a>
+                <Link href="/features" className="hover:text-[#B4C292] transition-colors">
+                  Adama Tech Zone
+                </Link>
               </li>
               <li>
-                <a href="#cities" className="hover:text-[#B4C292] transition-colors">
-                  Bahir Dar
-                </a>
+                <Link href="/features" className="hover:text-[#B4C292] transition-colors">
+                  Bahir Dar Tana
+                </Link>
               </li>
             </ul>
           </div>
@@ -111,15 +116,15 @@ export function Footer() {
           </div>
 
           <div className="flex items-center gap-6">
-            <a href="#" className="hover:text-white transition-colors">
+            <Link href="/about" className="hover:text-white transition-colors">
               Privacy Policy
-            </a>
-            <a href="#" className="hover:text-white transition-colors">
+            </Link>
+            <Link href="/about" className="hover:text-white transition-colors">
               Terms of Service
-            </a>
-            <a href="#" className="hover:text-white transition-colors">
+            </Link>
+            <Link href="/about" className="hover:text-white transition-colors">
               Broker Code of Conduct
-            </a>
+            </Link>
           </div>
         </div>
       </div>

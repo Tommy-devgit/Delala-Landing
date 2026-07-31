@@ -4,11 +4,11 @@ export interface NavItem {
 }
 
 export const NAV_ITEMS: NavItem[] = [
-  { label: "Home", href: "#hero" },
-  { label: "Features", href: "#features" },
-  { label: "How It Works", href: "#how-it-works" },
-  { label: "About", href: "#why-delala" },
-  { label: "FAQ", href: "#faq" },
+  { label: "Home", href: "/" },
+  { label: "Features", href: "/features" },
+  { label: "How It Works", href: "/how-it-works" },
+  { label: "About", href: "/about" },
+  { label: "FAQ", href: "/faq" },
 ];
 
 export const STATS_DATA = [

@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Manrope, Inter } from "next/font/google";
+import { Navbar } from "@/components/navbar";
+import { Footer } from "@/components/footer";
 import "./globals.css";
 
 const manrope = Manrope({
@@ -104,7 +106,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
-      <body className="min-h-screen bg-[#FAF8F4] text-[#2D2D2D] font-sans selection:bg-[#B4C292]/30 selection:text-[#4C061D]">
+      <body className="min-h-screen flex flex-col bg-[#FAF8F4] text-[#2D2D2D] font-sans selection:bg-[#B4C292]/30 selection:text-[#4C061D]">
         {/* Accessibility Skip Link */}
         <a
           href="#main-content"
@@ -112,7 +114,17 @@ export default function RootLayout({
         >
           Skip to main content
         </a>
-        {children}
+
+        {/* Shared Top Navbar */}
+        <Navbar />
+
+        {/* Dynamic Route Content */}
+        <main id="main-content" className="flex-grow pt-24 sm:pt-28">
+          {children}
+        </main>
+
+        {/* Shared Footer */}
+        <Footer />
       </body>
     </html>
   );

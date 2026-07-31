@@ -1,19 +1,20 @@
 "use client";
 
+import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight, Smartphone, ShieldCheck, CheckCircle2 } from "lucide-react";
 
 export function Hero() {
   return (
     <section id="hero" className="relative pt-32 sm:pt-36 md:pt-40 pb-16 sm:pb-24 overflow-hidden select-none bg-[#FAF8F4]">
-      {/* Background Soft Glows */}
+      {/* Background Ambient Radial Glow */}
       <div className="absolute top-12 left-1/2 -translate-x-1/2 w-full max-w-4xl h-96 bg-radial from-[#B4C292]/25 via-transparent to-transparent blur-3xl pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 relative z-10">
         {/* Minimal Hero Header & Copy */}
         <div className="max-w-3xl mx-auto text-center flex flex-col items-center mb-12 sm:mb-16">
           
-          {/* Subtle Ethio Brand Pill */}
+          {/* Subtle Ethiopian Tech Brand Pill */}
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
@@ -52,26 +53,26 @@ export function Hero() {
             className="flex flex-wrap items-center justify-center gap-4"
           >
             {/* Primary CTA */}
-            <a
-              href="#download"
+            <Link
+              href="/download"
               className="inline-flex items-center justify-center px-8 py-4 rounded-full bg-[#4C061D] text-white font-extrabold text-sm sm:text-base shadow-md hover:bg-[#3B3923] transition-all duration-200 group"
             >
               <Smartphone className="w-4 h-4 mr-2" />
               <span>Download App</span>
-            </a>
+            </Link>
 
             {/* Secondary CTA */}
-            <a
-              href="#features"
+            <Link
+              href="/features"
               className="inline-flex items-center justify-center px-8 py-4 rounded-full bg-white text-[#2D2D2D] border border-[#ECE7DA] font-bold text-sm sm:text-base shadow-xs hover:border-[#4C061D] hover:text-[#4C061D] transition-all duration-200 group"
             >
               <span>Learn More</span>
               <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-            </a>
+            </Link>
           </motion.div>
         </div>
 
-        {/* Minimal Hero Visual Frame (One Beautiful Property & Subtle Mobile App Preview) */}
+        {/* Minimal Hero Visual Frame */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -88,7 +89,7 @@ export function Hero() {
           {/* Gentle Gradient Vignette Overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent pointer-events-none" />
 
-          {/* Minimal Floating App Preview Glass Badge */}
+          {/* Floating Glass Badge */}
           <div className="absolute bottom-6 left-6 right-6 sm:bottom-8 sm:left-8 sm:right-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 z-10">
             <div className="bg-white/90 backdrop-blur-md p-4 rounded-2xl border border-white/40 shadow-xl max-w-md">
               <div className="flex items-center gap-2 text-xs font-extrabold text-[#4C061D] mb-1">

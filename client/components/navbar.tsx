@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { NAV_ITEMS } from "@/lib/constants";
 import { Menu, X, ArrowUpRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -9,6 +10,7 @@ import { motion, AnimatePresence } from "framer-motion";
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -32,7 +34,7 @@ export function Navbar() {
               : "bg-transparent py-1 px-2"
           }`}
         >
-          {/* LEFT: Logo (Delala + Amharic Script Tag) */}
+          {/* FAR LEFT: Logo */}
           <div className="flex items-center shrink-0 z-10">
             <Link href="/" className="flex items-center gap-2 group">
               <span className="font-heading font-black text-2xl tracking-tight text-[#4C061D] group-hover:text-[#3B3923] transition-colors">
@@ -44,31 +46,42 @@ export function Navbar() {
             </Link>
           </div>
 
-          {/* CENTER: Navigation Links (Mathematically Centered) */}
+          {/* PERFECTLY CENTERED: Navigation Links */}
           <nav
             aria-label="Main Navigation"
             className="hidden md:flex items-center justify-center gap-7 lg:gap-9 absolute left-1/2 -translate-x-1/2 text-sm font-bold text-[#2D2D2D]"
           >
-            {NAV_ITEMS.map((item) => (
-              <Link
-                key={item.label}
-                href={item.href}
-                className="hover:text-[#4C061D] transition-colors text-xs lg:text-sm font-bold tracking-tight py-1"
-              >
-                {item.label}
-              </Link>
-            ))}
+            {NAV_ITEMS.map((item) => {
+              const isActive = pathname === item.href;
+              return (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  className={`transition-colors text-xs lg:text-sm font-bold tracking-tight py-1 relative ${
+                    isActive ? "text-[#4C061D]" : "hover:text-[#4C061D] text-[#2D2D2D]/80"
+                  }`}
+                >
+                  {item.label}
+                  {isActive && (
+                    <motion.div
+                      layoutId="activeTabIndicator"
+                      className="absolute -bottom-1 left-0 right-0 h-0.5 bg-[#4C061D] rounded-full"
+                    />
+                  )}
+                </Link>
+              );
+            })}
           </nav>
 
-          {/* RIGHT: Action Button (Download App) */}
+          {/* FAR RIGHT: Download App Button */}
           <div className="hidden md:flex items-center shrink-0 z-10">
-            <a
-              href="#download"
+            <Link
+              href="/download"
               className="inline-flex items-center justify-center px-5 py-2.5 rounded-full bg-[#4C061D] text-white font-bold text-xs sm:text-sm shadow-xs hover:bg-[#3B3923] transition-all duration-200 group"
             >
               <span>Download App</span>
               <ArrowUpRight className="w-3.5 h-3.5 ml-1.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-            </a>
+            </Link>
           </div>
 
           {/* Mobile Menu Button */}
@@ -102,26 +115,31 @@ export function Navbar() {
             </div>
 
             <div className="flex flex-col space-y-3">
-              {NAV_ITEMS.map((item) => (
-                <Link
-                  key={item.label}
-                  href={item.href}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="text-base font-bold text-[#2D2D2D] hover:text-[#4C061D] transition-colors py-1"
-                >
-                  {item.label}
-                </Link>
-              ))}
+              {NAV_ITEMS.map((item) => {
+                const isActive = pathname === item.href;
+                return (
+                  <Link
+                    key={item.label}
+                    href={item.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`text-base font-bold transition-colors py-1 ${
+                      isActive ? "text-[#4C061D]" : "text-[#2D2D2D] hover:text-[#4C061D]"
+                    }`}
+                  >
+                    {item.label}
+                  </Link>
+                );
+              })}
             </div>
 
             <div className="pt-2 border-t border-[#ECE7DA]">
-              <a
-                href="#download"
+              <Link
+                href="/download"
                 onClick={() => setMobileMenuOpen(false)}
                 className="block text-center py-3 rounded-2xl bg-[#4C061D] text-white font-bold text-sm shadow-sm"
               >
                 Download App
-              </a>
+              </Link>
             </div>
           </motion.div>
         )}
