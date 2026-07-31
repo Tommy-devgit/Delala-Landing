@@ -1,136 +1,154 @@
 "use client";
 
 import { useState } from "react";
-import { HeroComposition } from "@/components/hero-composition";
 import { VideoModal } from "@/components/video-modal";
-import {
-  Smartphone,
-  Play,
-  ShieldCheck,
-  Building2,
-  Sparkles,
-  ArrowRight,
-  CheckCircle2,
-} from "lucide-react";
+import { NAV_ITEMS } from "@/lib/constants";
+import { Play, Info, ArrowUpRight, MapPin, ShieldCheck } from "lucide-react";
 import { motion } from "framer-motion";
+import Link from "next/link";
 
 export function Hero() {
   const [videoModalOpen, setVideoModalOpen] = useState(false);
 
   return (
-    <section className="relative pt-28 pb-16 lg:pt-36 lg:pb-24 overflow-hidden bg-[#FAF8F4]">
-      {/* Background Subtle Radial Gradient Glows */}
-      <div className="absolute top-10 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[600px] pointer-events-none overflow-hidden">
-        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] hero-glow-primary rounded-full blur-3xl opacity-60" />
-        <div className="absolute top-20 right-1/4 w-[450px] h-[450px] hero-glow-accent rounded-full blur-3xl opacity-70" />
-      </div>
+    <section className="relative pt-6 sm:pt-10 pb-12 bg-[#FAF8F4] select-none">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Main Hero Container Frame matching reference layout structure */}
+        <div className="relative w-full rounded-[32px] sm:rounded-[44px] md:rounded-[56px] overflow-hidden bg-[#3B3923] shadow-2xl border border-[#ECE7DA]">
+          
+          {/* TOP SECTION: Massive High-Res Photo Canvas with Integrated Top Pill Bar */}
+          <div className="relative min-h-[480px] sm:min-h-[540px] lg:min-h-[620px] w-full flex flex-col justify-between p-6 sm:p-10">
+            {/* Background Visual Asset */}
+            <img
+              src="/images/hero_property.png"
+              alt="Delala Luxury Ethiopian Property"
+              className="absolute inset-0 w-full h-full object-cover object-center opacity-90"
+            />
+            {/* Dark vignette gradient for contrast */}
+            <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/70" />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        {/* Main Reference-Inspired Frame Outer Container */}
-        <div className="relative bg-white/70 backdrop-blur-xl rounded-[36px] sm:rounded-[48px] p-6 sm:p-10 lg:p-14 border border-[#ECE7DA] hero-frame-shadow overflow-hidden">
-          {/* Subtle Top Accent Pill Tag */}
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#B4C292]/25 border border-[#B4C292]/40 text-[#4C061D] text-xs font-semibold mb-6 sm:mb-8"
-          >
-            <Sparkles className="w-3.5 h-3.5 text-[#4C061D]" />
-            <span>The Modern Standard for Ethiopian Real Estate</span>
-            <span className="w-1.5 h-1.5 rounded-full bg-[#4C061D]" />
-            <span className="font-heading text-xs text-[#4C061D]">ደላላ</span>
-          </motion.div>
+            {/* INTEGRATED NAVBAR MATCHING REFERENCE NOTCH STYLE */}
+            <div className="relative z-20 flex items-center justify-between w-full">
+              {/* Brand Logo */}
+              <Link href="/" className="font-heading font-black text-2xl sm:text-3xl tracking-tight text-white drop-shadow-md">
+                Delala
+              </Link>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
-            {/* Left Content Column */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-              className="lg:col-span-6 flex flex-col items-start text-left"
-            >
-              <h1 className="font-heading text-4xl sm:text-5xl lg:text-6xl font-extrabold text-[#4C061D] leading-[1.1] tracking-tight mb-6">
-                Find your next home,{" "}
-                <span className="block text-[#3B3923] relative">
-                  without the hassle.
-                  <svg
-                    className="absolute -bottom-2 left-0 w-48 sm:w-64 h-3 text-[#B4C292]/70"
-                    viewBox="0 0 200 12"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
+              {/* Integrated Center Pill Notch */}
+              <nav className="hidden md:flex items-center gap-8 bg-white/95 backdrop-blur-md px-8 py-3 rounded-full border border-white/60 shadow-lg text-sm font-semibold text-[#2D2D2D]">
+                {NAV_ITEMS.map((item) => (
+                  <Link
+                    key={item.label}
+                    href={item.href}
+                    className="hover:text-[#4C061D] transition-colors"
                   >
-                    <path
-                      d="M2 10C50 3 150 3 198 10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                      strokeLinecap="round"
-                    />
-                  </svg>
-                </span>
-              </h1>
+                    {item.label}
+                  </Link>
+                ))}
+              </nav>
 
-              <p className="text-lg sm:text-xl text-[#2D2D2D]/80 leading-relaxed font-normal mb-8 max-w-xl">
-                Browse verified homes, trusted brokers, and apartments across
-                Ethiopia—all in one place. No chaotic Telegram chats or unverified brokers.
-              </p>
-
-              {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full sm:w-auto mb-10">
+              {/* Right Action Buttons */}
+              <div className="flex items-center gap-3">
                 <a
                   href="#download"
-                  className="inline-flex items-center justify-center gap-3 px-8 py-4 rounded-full bg-[#4C061D] text-[#FAF8F4] font-semibold text-base shadow-md hover:bg-[#3B3923] hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 group"
+                  className="px-5 py-2.5 rounded-full bg-white text-[#4C061D] font-bold text-xs sm:text-sm shadow-md hover:bg-[#FAF8F4] transition-all"
                 >
-                  <Smartphone className="w-5 h-5 text-[#B4C292] group-hover:rotate-12 transition-transform duration-300" />
-                  <span>Download App</span>
-                  <ArrowRight className="w-5 h-5 text-[#B4C292] group-hover:translate-x-1 transition-transform duration-200" />
+                  Download App
                 </a>
+              </div>
+            </div>
 
-                <button
-                  onClick={() => setVideoModalOpen(true)}
-                  className="inline-flex items-center justify-center gap-3 px-7 py-4 rounded-full bg-white text-[#4C061D] border border-[#ECE7DA] font-semibold text-base shadow-xs hover:border-[#B4C292] hover:bg-[#FAF8F4] hover:shadow-sm transition-all duration-200 group"
-                >
-                  <div className="w-7 h-7 rounded-full bg-[#B4C292]/30 flex items-center justify-center text-[#4C061D] group-hover:scale-110 transition-transform">
-                    <Play className="w-3.5 h-3.5 fill-[#4C061D] translate-x-0.5" />
+            {/* FLOATING MEDIA CARD ON BOTTOM RIGHT MATCHING REFERENCE PHOTO */}
+            <div className="relative z-20 self-end mt-auto pt-10">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+                className="w-72 sm:w-80 md:w-96 bg-white/95 backdrop-blur-xl p-4 sm:p-5 rounded-3xl border border-white/80 shadow-2xl text-[#2D2D2D]"
+              >
+                <div className="relative h-44 sm:h-52 w-full rounded-2xl overflow-hidden mb-4 group cursor-pointer" onClick={() => setVideoModalOpen(true)}>
+                  <img
+                    src="/images/city_addis_ababa.png"
+                    alt="Addis Ababa Bole Property"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors" />
+
+                  {/* Play Button Icon */}
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-12 h-12 rounded-full bg-white/90 backdrop-blur-md text-[#4C061D] flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                      <Play className="w-5 h-5 fill-[#4C061D] translate-x-0.5" />
+                    </div>
                   </div>
-                  <span>Watch Demo</span>
-                </button>
-              </div>
 
-              {/* Trust Micro Indicators */}
-              <div className="pt-6 border-t border-[#ECE7DA] w-full flex flex-wrap items-center gap-y-3 gap-x-6 text-xs sm:text-sm font-medium text-[#736F4E]">
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-[#B4C292]" />
-                  <span>100% In-Person Verified</span>
+                  {/* Verified Tag */}
+                  <span className="absolute top-3 left-3 bg-[#4C061D] text-white text-[10px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1 shadow-xs">
+                    <ShieldCheck className="w-3 h-3 text-[#B4C292]" /> Verified Villa
+                  </span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <ShieldCheck className="w-4 h-4 text-[#B4C292]" />
-                  <span>Certified Local Brokers</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Building2 className="w-4 h-4 text-[#B4C292]" />
-                  <span>Transparent ETB Pricing</span>
-                </div>
-              </div>
-            </motion.div>
 
-            {/* Right Side Artistic GSAP Composition */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.7, delay: 0.2 }}
-              className="lg:col-span-6"
-            >
-              <HeroComposition />
-            </motion.div>
+                <div className="flex items-start justify-between mb-2">
+                  <div>
+                    <h3 className="font-heading font-extrabold text-lg text-[#4C061D] leading-tight">
+                      Bole Luxury Villa
+                    </h3>
+                    <div className="flex items-center gap-1 text-xs text-[#736F4E] font-medium mt-0.5">
+                      <MapPin className="w-3 h-3 text-[#4C061D]" /> Addis Ababa • 45,000 ETB/mo
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setVideoModalOpen(true)}
+                    className="p-1.5 rounded-full hover:bg-[#FAF8F4] text-[#2D2D2D]/60 hover:text-[#4C061D] transition-colors"
+                  >
+                    <Info className="w-5 h-5" />
+                  </button>
+                </div>
+
+                <p className="text-xs text-[#2D2D2D]/70 font-normal leading-relaxed line-clamp-2">
+                  Physically verified 4-bedroom villa with full generator backup, garden, and direct owner contract.
+                </p>
+              </motion.div>
+            </div>
           </div>
+
+          {/* BOTTOM LEFT SECTION: INSET WHITE CONTENT CONTAINER MATCHING REFERENCE LAYOUT */}
+          <div className="bg-white p-8 sm:p-12 lg:p-16 border-t border-[#ECE7DA] relative z-20">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-end">
+              {/* Left Headline Area */}
+              <div className="lg:col-span-7">
+                <h1 className="font-heading text-4xl sm:text-5xl lg:text-7xl font-extrabold text-[#4C061D] tracking-tight leading-[1.05]">
+                  Find your next home, <br />
+                  without the hassle.
+                </h1>
+              </div>
+
+              {/* Right Subtitle & Action Area matching reference layout */}
+              <div className="lg:col-span-5 flex flex-col sm:flex-row items-start sm:items-center gap-6">
+                {/* Vertical Divider Line */}
+                <div className="hidden sm:block w-px h-16 bg-[#ECE7DA]" />
+
+                <div className="space-y-4">
+                  <p className="text-sm sm:text-base text-[#2D2D2D]/80 leading-relaxed font-normal">
+                    Browse verified homes, trusted brokers, and apartments across Ethiopia—all in one place.
+                  </p>
+
+                  <a
+                    href="#download"
+                    className="inline-flex items-center justify-center px-8 py-3.5 rounded-full bg-[#4C061D] text-white font-bold text-sm shadow-md hover:bg-[#3B3923] transition-all group"
+                  >
+                    <span>Download App</span>
+                    <ArrowUpRight className="w-4 h-4 ml-2 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
 
-      {/* Video Modal Trigger */}
-      <VideoModal
-        isOpen={videoModalOpen}
-        onClose={() => setVideoModalOpen(false)}
-      />
+      {/* Interactive Video Modal */}
+      <VideoModal isOpen={videoModalOpen} onClose={() => setVideoModalOpen(false)} />
     </section>
   );
 }
