@@ -33,7 +33,7 @@ export function Testimonials() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: idx * 0.1 }}
-              className="bg-white p-8 rounded-3xl border border-[#ECE7DA] shadow-xs hover:shadow-lg hover:border-[#B4C292] transition-all duration-300 flex flex-col justify-between"
+              className="bg-white p-8 rounded-lg border border-[#ECE7DA] shadow-xs hover:shadow-lg hover:border-[#B4C292] transition-all duration-300 flex flex-col justify-between"
             >
               <div>
                 <div className="flex items-center justify-between mb-6">

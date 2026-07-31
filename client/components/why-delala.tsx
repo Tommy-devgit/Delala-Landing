@@ -26,20 +26,20 @@ export function WhyDelala() {
 
         {/* Side-by-Side Comparison Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
-          {/* Traditional Telegram / Street Broker Way */}
+          {/* Traditional Way */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.4 }}
-            className="bg-white p-8 sm:p-10 rounded-3xl border border-[#ECE7DA] shadow-xs flex flex-col justify-between"
+            className="bg-white p-8 sm:p-10 rounded-xl border border-[#ECE7DA] shadow-xs flex flex-col justify-between"
           >
             <div>
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-heading text-2xl font-extrabold text-[#2D2D2D]">
                   {COMPARISON_DATA.traditional.title}
                 </h3>
-                <span className="p-2 rounded-xl bg-rose-50 border border-rose-100 text-rose-600">
+                <span className="p-2 rounded-lg bg-rose-50 border border-rose-100 text-rose-600">
                   <AlertTriangle className="w-5 h-5" />
                 </span>
               </div>
@@ -52,7 +52,7 @@ export function WhyDelala() {
                 {COMPARISON_DATA.traditional.points.map((point) => (
                   <div
                     key={point}
-                    className="flex items-start gap-3 p-3.5 rounded-2xl bg-[#FAF8F4] border border-[#ECE7DA]"
+                    className="flex items-start gap-3 p-3.5 rounded-lg bg-[#FAF8F4] border border-[#ECE7DA]"
                   >
                     <XCircle className="w-5 h-5 text-rose-500 shrink-0 mt-0.5" />
                     <span className="text-sm font-medium text-[#2D2D2D]/80 leading-relaxed">
@@ -69,23 +69,20 @@ export function WhyDelala() {
             </div>
           </motion.div>
 
-          {/* The Delala Way */}
+          {/* Delala Way */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.4, delay: 0.1 }}
-            className="bg-[#4C061D] text-white p-8 sm:p-10 rounded-3xl border border-[#B4C292]/40 shadow-xl flex flex-col justify-between relative overflow-hidden"
+            className="bg-[#4C061D] text-white p-8 sm:p-10 rounded-xl border border-[#B4C292]/40 shadow-xl flex flex-col justify-between relative overflow-hidden"
           >
-            {/* Ambient Background Glow */}
-            <div className="absolute top-0 right-0 w-64 h-64 bg-radial from-[#B4C292]/20 via-transparent to-transparent blur-2xl pointer-events-none" />
-
             <div className="relative z-10">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-heading text-2xl font-extrabold text-white">
                   {COMPARISON_DATA.delala.title}
                 </h3>
-                <span className="p-2 rounded-xl bg-white/10 border border-white/20 text-[#B4C292]">
+                <span className="p-2 rounded-lg bg-white/10 border border-white/20 text-[#B4C292]">
                   <ShieldCheck className="w-5 h-5" />
                 </span>
               </div>
@@ -98,7 +95,7 @@ export function WhyDelala() {
                 {COMPARISON_DATA.delala.points.map((point) => (
                   <div
                     key={point}
-                    className="flex items-start gap-3 p-3.5 rounded-2xl bg-white/10 border border-white/15 backdrop-blur-xs"
+                    className="flex items-start gap-3 p-3.5 rounded-lg bg-white/10 border border-white/15 backdrop-blur-xs"
                   >
                     <CheckCircle2 className="w-5 h-5 text-[#B4C292] shrink-0 mt-0.5" />
                     <span className="text-sm font-medium text-white/95 leading-relaxed">

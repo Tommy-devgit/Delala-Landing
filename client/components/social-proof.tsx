@@ -10,7 +10,6 @@ function Counter({ targetValue }: { targetValue: string }) {
   const ref = useRef<HTMLSpanElement>(null);
   const isInView = useInView(ref, { once: true });
 
-  // Extract number and suffix from string like "2,000+" or "98%"
   const numericMatch = targetValue.match(/\d+[\d,]*/);
   const rawNumber = numericMatch ? parseInt(numericMatch[0].replace(/,/g, ""), 10) : 0;
   const suffix = targetValue.replace(/[\d,]/g, "");
@@ -27,7 +26,6 @@ function Counter({ targetValue }: { targetValue: string }) {
     const timer = setInterval(() => {
       frame++;
       const progress = frame / totalFrames;
-      // Ease out cubic
       const currentCount = Math.round(rawNumber * (1 - Math.pow(1 - progress, 3)));
       setCount(currentCount);
 
@@ -75,9 +73,9 @@ export function SocialProof() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: idx * 0.08 }}
-              className="bg-white p-6 rounded-3xl border border-[#ECE7DA] shadow-xs text-center hover:border-[#B4C292] hover:shadow-md transition-all duration-300 flex flex-col items-center justify-between group"
+              className="bg-white p-6 rounded-lg border border-[#ECE7DA] shadow-xs text-center hover:border-[#B4C292] hover:shadow-md transition-all duration-300 flex flex-col items-center justify-between group"
             >
-              <div className="w-10 h-10 rounded-2xl bg-[#FAF8F4] border border-[#ECE7DA] flex items-center justify-center mb-3 group-hover:bg-[#4C061D]/5 transition-colors">
+              <div className="w-10 h-10 rounded-lg bg-[#FAF8F4] border border-[#ECE7DA] flex items-center justify-center mb-3 group-hover:bg-[#4C061D]/5 transition-colors">
                 {getStatIcon(idx)}
               </div>
 
