@@ -11,12 +11,9 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 lg:gap-12 mb-12">
           {/* Brand Column */}
           <div className="lg:col-span-2 space-y-4">
-            <Link href="/" className="flex items-center gap-2.5">
-              <span className="font-heading font-black text-2xl tracking-tight text-white">
+            <Link href="/" className="group">
+              <span className="font-heading font-black text-2xl tracking-tight text-white group-hover:text-[#B4C292] transition-colors">
                 Delala
-              </span>
-              <span className="px-2 py-0.5 rounded-full bg-[#B4C292]/20 text-[#B4C292] font-bold text-xs border border-[#B4C292]/30">
-                ደላላ
               </span>
             </Link>
 

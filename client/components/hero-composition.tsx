@@ -99,14 +99,9 @@ export function HeroComposition() {
         <div className="relative w-full h-full bg-[#FAF8F4] rounded-[32px] overflow-hidden flex flex-col pt-8 pb-3 px-3.5 font-sans">
           {/* App Header */}
           <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-1.5">
-              <div className="w-6 h-6 rounded-md bg-[#4C061D] text-[#B4C292] text-xs font-bold flex items-center justify-center">
-                D
-              </div>
-              <span className="font-heading font-extrabold text-sm text-[#4C061D]">
-                Delala
-              </span>
-            </div>
+            <span className="font-heading font-black text-sm text-[#4C061D]">
+              Delala
+            </span>
             <div className="flex items-center gap-1 bg-[#B4C292]/30 px-2 py-0.5 rounded-full text-[10px] font-semibold text-[#4C061D]">
               <ShieldCheck className="w-3 h-3 text-[#4C061D]" /> Verified
             </div>

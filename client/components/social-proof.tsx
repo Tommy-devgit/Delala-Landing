@@ -1,8 +1,52 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+import { motion, useInView } from "framer-motion";
 import { STATS_DATA } from "@/lib/constants";
 import { ShieldCheck, Award, MapPin, Smile } from "lucide-react";
+
+function Counter({ targetValue }: { targetValue: string }) {
+  const [count, setCount] = useState(0);
+  const ref = useRef<HTMLSpanElement>(null);
+  const isInView = useInView(ref, { once: true });
+
+  // Extract number and suffix from string like "2,000+" or "98%"
+  const numericMatch = targetValue.match(/\d+[\d,]*/);
+  const rawNumber = numericMatch ? parseInt(numericMatch[0].replace(/,/g, ""), 10) : 0;
+  const suffix = targetValue.replace(/[\d,]/g, "");
+
+  useEffect(() => {
+    if (!isInView) return;
+
+    let start = 0;
+    const duration = 2000;
+    const frameTime = 1000 / 60;
+    const totalFrames = Math.round(duration / frameTime);
+    let frame = 0;
+
+    const timer = setInterval(() => {
+      frame++;
+      const progress = frame / totalFrames;
+      // Ease out cubic
+      const currentCount = Math.round(rawNumber * (1 - Math.pow(1 - progress, 3)));
+      setCount(currentCount);
+
+      if (frame >= totalFrames) {
+        clearInterval(timer);
+        setCount(rawNumber);
+      }
+    }, frameTime);
+
+    return () => clearInterval(timer);
+  }, [isInView, rawNumber]);
+
+  return (
+    <span ref={ref}>
+      {count.toLocaleString()}
+      {suffix}
+    </span>
+  );
+}
 
 export function SocialProof() {
   const getStatIcon = (index: number) => {
@@ -31,15 +75,15 @@ export function SocialProof() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: idx * 0.08 }}
-              className="bg-white p-6 rounded-3xl border border-[#ECE7DA] shadow-xs text-center hover:border-[#B4C292] hover:shadow-md transition-all duration-300 flex flex-col items-center justify-between"
+              className="bg-white p-6 rounded-3xl border border-[#ECE7DA] shadow-xs text-center hover:border-[#B4C292] hover:shadow-md transition-all duration-300 flex flex-col items-center justify-between group"
             >
-              <div className="w-10 h-10 rounded-2xl bg-[#FAF8F4] border border-[#ECE7DA] flex items-center justify-center mb-3">
+              <div className="w-10 h-10 rounded-2xl bg-[#FAF8F4] border border-[#ECE7DA] flex items-center justify-center mb-3 group-hover:bg-[#4C061D]/5 transition-colors">
                 {getStatIcon(idx)}
               </div>
 
               <div>
                 <div className="font-heading text-3xl sm:text-4xl lg:text-5xl font-black text-[#4C061D] tracking-tight mb-1">
-                  {stat.value}
+                  <Counter targetValue={stat.value} />
                 </div>
                 <div className="font-heading text-sm sm:text-base font-bold text-[#2D2D2D] mb-1">
                   {stat.label}

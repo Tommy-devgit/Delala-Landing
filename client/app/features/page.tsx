@@ -4,7 +4,7 @@ import { FinalCTA } from "@/components/final-cta";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Features & Locations | Delala (ደላላ)",
+  title: "Features & Locations | Delala",
   description:
     "Explore Delala's verified housing features: 100% inspected homes, transparent Birr pricing, sub-city map search, and direct owner messaging.",
 };

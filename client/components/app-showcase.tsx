@@ -158,16 +158,11 @@ export function AppShowcase() {
                   {/* Screen Content Container */}
                   <div className="w-full h-[calc(100%-24px)] bg-[#FAF8F4] rounded-[34px] p-4 text-[#2D2D2D] flex flex-col pt-3 font-sans overflow-hidden">
                     
-                    {/* App Bar */}
+                    {/* App Bar - Clean Typography Brand Name */}
                     <div className="flex items-center justify-between mb-3 pb-2 border-b border-[#ECE7DA]">
-                      <div className="flex items-center gap-1.5">
-                        <div className="w-6 h-6 rounded-md bg-[#4C061D] text-[#B4C292] text-xs font-black flex items-center justify-center">
-                          D
-                        </div>
-                        <span className="font-heading font-black text-sm text-[#4C061D]">
-                          Delala App
-                        </span>
-                      </div>
+                      <span className="font-heading font-black text-base text-[#4C061D]">
+                        Delala
+                      </span>
                       <span className="text-[10px] font-bold text-[#4C061D] bg-[#B4C292]/30 px-2 py-0.5 rounded-full">
                         Addis Ababa
                       </span>

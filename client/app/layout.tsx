@@ -24,12 +24,11 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Delala (ደላላ) | The Modern Way Ethiopians Find Homes",
+  title: "Delala | The Modern Way Ethiopians Find Homes",
   description:
     "Delala is Ethiopia's digital housing platform. Browse 100% physically verified homes, connect with ID-checked brokers, and find your next apartment in Addis Ababa, Hawassa, Adama & beyond.",
   keywords: [
     "Delala",
-    "ደላላ",
     "Ethiopia Real Estate",
     "Addis Ababa Apartments for Rent",
     "Ethiopian House Hunting",
@@ -40,11 +39,11 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "Delala Technologies Inc." }],
   openGraph: {
-    title: "Delala (ደላላ) | The Modern Way Ethiopians Find Homes",
+    title: "Delala | The Modern Way Ethiopians Find Homes",
     description:
       "Find verified homes across Ethiopia without middleman fraud. Clean Birr pricing, ID-checked brokers, and direct owner contacts.",
     url: "https://delala.et",
-    siteName: "Delala (ደላላ)",
+    siteName: "Delala",
     locale: "en_US",
     type: "website",
     images: [
@@ -52,13 +51,13 @@ export const metadata: Metadata = {
         url: "/images/hero_property.png",
         width: 1200,
         height: 630,
-        alt: "Delala Luxury Property in Addis Ababa",
+        alt: "Delala Property in Addis Ababa",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Delala (ደላላ) | Verified Ethiopian Housing Platform",
+    title: "Delala | Verified Ethiopian Housing Platform",
     description:
       "Browse physically inspected homes across Addis Ababa and regional hubs.",
     images: ["/images/hero_property.png"],
@@ -78,7 +77,6 @@ export default function RootLayout({
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
     name: "Delala",
-    alternateName: "ደላላ",
     operatingSystem: "iOS, Android",
     applicationCategory: "RealEstateApplication",
     offers: {

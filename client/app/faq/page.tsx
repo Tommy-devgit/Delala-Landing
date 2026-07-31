@@ -3,7 +3,7 @@ import { FinalCTA } from "@/components/final-cta";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Frequently Asked Questions | Delala (ደላላ)",
+  title: "Frequently Asked Questions | Delala",
   description:
     "Find answers to common questions about searching for homes, listing properties, physical verification, and lease protection on Delala.",
 };
