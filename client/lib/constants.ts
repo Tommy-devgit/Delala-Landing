@@ -4,11 +4,11 @@ export interface NavItem {
 }
 
 export const NAV_ITEMS: NavItem[] = [
-  { label: "Why Delala", href: "#why-delala" },
-  { label: "How It Works", href: "#how-it-works" },
+  { label: "Home", href: "#hero" },
   { label: "Features", href: "#features" },
-  { label: "App Experience", href: "#app-showcase" },
-  { label: "Cities", href: "#cities" },
+  { label: "How It Works", href: "#how-it-works" },
+  { label: "About", href: "#why-delala" },
+  { label: "FAQ", href: "#faq" },
 ];
 
 export const STATS_DATA = [
@@ -17,23 +17,6 @@ export const STATS_DATA = [
   { value: "15+", label: "Regional Hubs", subtext: "Covering major Ethiopian cities" },
   { value: "98%", label: "Trust Score", subtext: "Zero hidden middleman markups" },
 ];
-
-export const HERO_AUDIENCE_DATA = {
-  seekers: {
-    headline: "Find your next home in Ethiopia, without the hassle.",
-    subtitle: "Say goodbye to chaotic Telegram channels and unverified street brokers. Delala brings 100% physically inspected homes, clear Birr pricing, and direct owner contacts right to your phone.",
-    cta: "Explore Homes on App",
-    badge: "For Renters & Home Buyers",
-    highlights: ["In-person inspected photos", "Transparent monthly Birr prices", "Direct contact with owners"],
-  },
-  sharers: {
-    headline: "Reach thousands of serious renters across Ethiopia.",
-    subtitle: "Are you a property owner or certified broker? Stop posting in unorganized social groups. List your home on Delala to get verified leads, zero upfront listing fees, and legal contract tools.",
-    cta: "List Your Property",
-    badge: "For Owners & Verified Brokers",
-    highlights: ["Verified tenant inquiries", "Free physical property check", "Standardized legal contracts"],
-  },
-};
 
 export const FEATURES_DATA = [
   {
