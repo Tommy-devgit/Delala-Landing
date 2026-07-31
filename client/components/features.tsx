@@ -9,7 +9,6 @@ import {
   MapPin,
   MessageSquare,
   FileText,
-  Sparkles,
 } from "lucide-react";
 
 export function Features() {
@@ -38,7 +37,7 @@ export function Features() {
         {/* Section Header */}
         <div className="max-w-3xl mb-16">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#B4C292]/30 text-[#4C061D] text-xs font-extrabold mb-4 border border-[#B4C292]/50">
-            <Sparkles className="w-3.5 h-3.5" />
+            <ShieldCheck className="w-3.5 h-3.5" />
             <span>Built for Modern House Hunters & Owners</span>
           </div>
 

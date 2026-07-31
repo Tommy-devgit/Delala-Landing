@@ -12,7 +12,6 @@ import {
   CheckCircle2,
   Heart,
   Building2,
-  Sparkles,
 } from "lucide-react";
 
 export function HeroComposition() {
@@ -289,7 +288,6 @@ export function HeroComposition() {
         <div>
           <div className="text-[11px] font-bold text-[#2D2D2D] flex items-center gap-1">
             Direct Owner Chat
-            <Sparkles className="w-3 h-3 text-[#4C061D]" />
           </div>
           <div className="text-[9px] text-[#736F4E]">No hidden fees</div>
         </div>
