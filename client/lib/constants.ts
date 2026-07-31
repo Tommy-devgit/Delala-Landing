@@ -44,6 +44,31 @@ export const STORY_SECTIONS = {
   },
 };
 
+export const COMPARISON_DATA = {
+  traditional: {
+    title: "Traditional House Hunting",
+    subtitle: "Telegram channels & unverified street brokers",
+    points: [
+      "Chaotic Telegram groups flooded with outdated, fake listings",
+      "Unverified brokers demanding upfront cash before showing homes",
+      "Photos copied from internet with unexpected price increases at the door",
+      "Endless phone calls, wasted weekends, and unreturned messages",
+      "Zero legal contracts or security deposit guarantees",
+    ],
+  },
+  delala: {
+    title: "The Delala Standard",
+    subtitle: "Ethiopia's verified digital housing platform",
+    points: [
+      "100% physically inspected & verified property listings",
+      "Government ID-checked brokers with transparent ratings",
+      "Upfront Birr pricing with zero hidden middleman fees",
+      "1-click walkthrough scheduling & direct owner messaging",
+      "Standardized legal lease agreements protecting your deposit",
+    ],
+  },
+};
+
 export const TWO_SIDED_BENEFITS = {
   seekers: {
     title: "For Home Seekers",
