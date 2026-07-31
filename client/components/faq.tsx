@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FAQ_DATA } from "@/lib/constants";
-import { ChevronDown, HelpCircle, Sparkles } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 
 export function FAQ() {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
@@ -13,21 +13,16 @@ export function FAQ() {
   };
 
   return (
-    <section id="faq" className="py-20 lg:py-28 bg-[#FAF8F4] relative border-t border-[#ECE7DA]/80">
+    <section id="faq" className="py-20 lg:py-28 bg-[#FAF8F4] relative border-t border-[#ECE7DA]">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="text-center max-w-2xl mx-auto mb-16">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#B4C292]/30 text-[#4C061D] text-xs font-bold mb-4">
-            <HelpCircle className="w-3.5 h-3.5 text-[#4C061D]" />
-            <span>Got Questions?</span>
-          </div>
-
+        <div className="max-w-2xl mb-16">
           <h2 className="font-heading text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#4C061D] tracking-tight mb-4">
             Frequently Asked Questions.
           </h2>
 
           <p className="text-base sm:text-lg text-[#2D2D2D]/80 font-normal leading-relaxed">
-            Everything you need to know about searching, listing, and verifying homes on Delala.
+            Everything you need to know about searching and listing properties on Delala.
           </p>
         </div>
 
@@ -41,12 +36,8 @@ export function FAQ() {
                 initial={{ opacity: 0, y: 15 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: idx * 0.08 }}
-                className={`bg-white rounded-2xl border transition-all duration-200 overflow-hidden ${
-                  isOpen
-                    ? "border-[#4C061D] shadow-md ring-2 ring-[#4C061D]/10"
-                    : "border-[#ECE7DA] hover:border-[#B4C292]"
-                }`}
+                transition={{ duration: 0.3, delay: idx * 0.05 }}
+                className="bg-white rounded-2xl border border-[#ECE7DA] overflow-hidden"
               >
                 <button
                   onClick={() => toggleAccordion(idx)}
@@ -58,7 +49,7 @@ export function FAQ() {
                   </span>
                   <div
                     className={`w-8 h-8 rounded-full bg-[#FAF8F4] flex items-center justify-center text-[#4C061D] shrink-0 transition-transform duration-300 ${
-                      isOpen ? "rotate-180 bg-[#4C061D] text-[#B4C292]" : ""
+                      isOpen ? "rotate-180 bg-[#4C061D] text-white" : ""
                     }`}
                   >
                     <ChevronDown className="w-5 h-5" />
@@ -73,7 +64,7 @@ export function FAQ() {
                       exit={{ opacity: 0, height: 0 }}
                       transition={{ duration: 0.25, ease: "easeInOut" }}
                     >
-                      <div className="px-6 pb-6 pt-0 text-sm sm:text-base text-[#2D2D2D]/80 leading-relaxed border-t border-[#ECE7DA]/60 mt-1">
+                      <div className="px-6 pb-6 pt-0 text-sm sm:text-base text-[#2D2D2D]/80 leading-relaxed border-t border-[#ECE7DA] mt-1">
                         <div className="pt-4">{item.answer}</div>
                       </div>
                     </motion.div>

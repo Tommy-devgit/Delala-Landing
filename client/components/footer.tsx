@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { NAV_ITEMS } from "@/lib/constants";
-import { MapPin, Mail, Phone, Heart } from "lucide-react";
+import { MapPin, Mail, Phone } from "lucide-react";
 
 export function Footer() {
   return (
@@ -11,18 +11,8 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 lg:gap-12 mb-12">
           {/* Brand Col */}
           <div className="lg:col-span-2 space-y-4">
-            <Link href="/" className="flex items-center gap-2.5">
-              <div className="w-10 h-10 rounded-xl bg-[#4C061D] flex items-center justify-center text-[#B4C292] font-semibold text-xl border border-[#B4C292]/30">
-                D
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="font-heading font-extrabold text-2xl tracking-tight text-white">
-                  Delala
-                </span>
-                <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-[#B4C292]/20 text-[#B4C292] border border-[#B4C292]/30">
-                  ደላላ
-                </span>
-              </div>
+            <Link href="/" className="font-heading font-black text-2xl tracking-tight text-white">
+              Delala
             </Link>
 
             <p className="text-sm text-[#FAF8F4]/75 leading-relaxed max-w-sm">
@@ -35,7 +25,7 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Quick Navigation Links */}
+          {/* Navigation */}
           <div>
             <h4 className="font-heading font-bold text-sm text-white uppercase tracking-wider mb-4">
               Navigation
@@ -54,7 +44,7 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Top Cities */}
+          {/* Featured Cities */}
           <div>
             <h4 className="font-heading font-bold text-sm text-white uppercase tracking-wider mb-4">
               Featured Cities
@@ -62,36 +52,31 @@ export function Footer() {
             <ul className="space-y-2.5 text-sm text-[#FAF8F4]/70 font-medium">
               <li>
                 <a href="#cities" className="hover:text-[#B4C292] transition-colors">
-                  Addis Ababa (አዲስ አበባ)
+                  Addis Ababa
                 </a>
               </li>
               <li>
                 <a href="#cities" className="hover:text-[#B4C292] transition-colors">
-                  Hawassa (ሀዋሳ)
+                  Hawassa
                 </a>
               </li>
               <li>
                 <a href="#cities" className="hover:text-[#B4C292] transition-colors">
-                  Adama (አዳማ)
+                  Adama
                 </a>
               </li>
               <li>
                 <a href="#cities" className="hover:text-[#B4C292] transition-colors">
-                  Bahir Dar (ባሕር ዳር)
-                </a>
-              </li>
-              <li>
-                <a href="#cities" className="hover:text-[#B4C292] transition-colors">
-                  Dire Dawa (ድሬዳዋ)
+                  Bahir Dar
                 </a>
               </li>
             </ul>
           </div>
 
-          {/* Contact Details */}
+          {/* Contact */}
           <div>
             <h4 className="font-heading font-bold text-sm text-white uppercase tracking-wider mb-4">
-              Contact & Support
+              Contact
             </h4>
             <ul className="space-y-3 text-sm text-[#FAF8F4]/70">
               <li className="flex items-center gap-2.5">
@@ -106,19 +91,13 @@ export function Footer() {
                   +251 911 002 233
                 </a>
               </li>
-              <li className="text-xs text-[#FAF8F4]/50 pt-2">
-                Mon - Sat: 8:30 AM - 6:00 PM EAT
-              </li>
             </ul>
           </div>
         </div>
 
-        {/* Bottom Copyright & Legal */}
         <div className="pt-8 border-t border-[#ECE7DA]/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#FAF8F4]/60">
-          <div className="flex items-center gap-1">
-            <span>© {new Date().getFullYear()} Delala Technologies Inc. Made with</span>
-            <Heart className="w-3.5 h-3.5 fill-[#B4C292] text-[#B4C292] inline mx-0.5" />
-            <span>for Ethiopia.</span>
+          <div>
+            © {new Date().getFullYear()} Delala Technologies Inc. All rights reserved.
           </div>
 
           <div className="flex items-center gap-6">
@@ -127,9 +106,6 @@ export function Footer() {
             </a>
             <a href="#" className="hover:text-white transition-colors">
               Terms of Service
-            </a>
-            <a href="#" className="hover:text-white transition-colors">
-              Broker Charter
             </a>
           </div>
         </div>

@@ -3,10 +3,10 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { NAV_ITEMS } from "@/lib/constants";
-import { Menu, X, Smartphone } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-export function Navbar({ variant = "sticky" }: { variant?: "sticky" | "embedded" }) {
+export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -18,49 +18,6 @@ export function Navbar({ variant = "sticky" }: { variant?: "sticky" | "embedded"
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  if (variant === "embedded") {
-    return (
-      <header className="w-full py-6 px-6 sm:px-10 flex items-center justify-between z-30 relative">
-        {/* Brand Logo */}
-        <Link href="/" className="font-heading font-black text-2xl tracking-tight text-white hover:opacity-90 transition-opacity">
-          Delala
-        </Link>
-
-        {/* Center Integrated Pill Navigation bar */}
-        <nav className="hidden md:flex items-center gap-6 bg-white/90 backdrop-blur-md px-8 py-2.5 rounded-full border border-white/40 shadow-sm text-sm font-medium text-[#2D2D2D]">
-          {NAV_ITEMS.map((item) => (
-            <Link
-              key={item.label}
-              href={item.href}
-              className="hover:text-[#4C061D] transition-colors"
-            >
-              {item.label}
-            </Link>
-          ))}
-        </nav>
-
-        {/* Right CTA */}
-        <div className="hidden md:flex items-center gap-3">
-          <a
-            href="#download"
-            className="px-6 py-2.5 rounded-full bg-white text-[#4C061D] font-semibold text-sm shadow-sm hover:bg-[#FAF8F4] transition-all"
-          >
-            Download App
-          </a>
-        </div>
-
-        {/* Mobile Menu Button */}
-        <button
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="md:hidden p-2.5 rounded-xl bg-white/20 backdrop-blur-md text-white border border-white/30"
-          aria-label="Toggle menu"
-        >
-          {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-        </button>
-      </header>
-    );
-  }
-
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
@@ -71,11 +28,16 @@ export function Navbar({ variant = "sticky" }: { variant?: "sticky" | "embedded"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between">
-          <Link href="/" className="font-heading font-black text-2xl tracking-tight text-[#4C061D]">
+          {/* Logo */}
+          <Link
+            href="/"
+            className="font-heading font-black text-2xl tracking-tight text-[#4C061D] hover:opacity-90 transition-opacity"
+          >
             Delala
           </Link>
 
-          <nav className="hidden md:flex items-center gap-6 bg-white px-7 py-2 rounded-full border border-[#ECE7DA] shadow-xs text-sm font-medium text-[#2D2D2D]">
+          {/* Center Nav Links (3 items: Listings, Cities, How it Works) */}
+          <nav className="hidden md:flex items-center gap-8 bg-white px-8 py-2.5 rounded-full border border-[#ECE7DA] shadow-xs text-sm font-bold text-[#2D2D2D]">
             {NAV_ITEMS.map((item) => (
               <Link
                 key={item.label}
@@ -87,24 +49,28 @@ export function Navbar({ variant = "sticky" }: { variant?: "sticky" | "embedded"
             ))}
           </nav>
 
+          {/* Right Action CTA */}
           <div className="hidden md:flex items-center gap-3">
             <a
               href="#download"
-              className="px-5 py-2.5 rounded-full bg-[#4C061D] text-white font-medium text-sm shadow-xs hover:bg-[#3B3923] transition-colors"
+              className="px-6 py-2.5 rounded-full bg-[#4C061D] text-white font-bold text-sm shadow-xs hover:bg-[#3B3923] transition-colors"
             >
               Download App
             </a>
           </div>
 
+          {/* Mobile Menu Button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="md:hidden p-2 rounded-xl bg-white border border-[#ECE7DA] text-[#2D2D2D]"
+            aria-label="Toggle menu"
           >
             {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
         </div>
       </div>
 
+      {/* Mobile Drawer Menu */}
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div

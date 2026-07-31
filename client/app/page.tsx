@@ -14,11 +14,11 @@ import { Footer } from "@/components/footer";
 export default function Home() {
   return (
     <div className="min-h-screen flex flex-col bg-[#FAF8F4] selection:bg-[#B4C292]/40 selection:text-[#4C061D]">
-      {/* Sticky Header */}
+      {/* Top Navbar */}
       <Navbar />
 
       {/* Main Content Flow */}
-      <main className="flex-grow">
+      <main className="flex-grow pt-24 sm:pt-28">
         {/* 1. Reference Layout Inspired Hero */}
         <Hero />
 
@@ -31,13 +31,13 @@ export default function Home() {
         {/* 4. How It Works 3-Step Journey */}
         <HowItWorks />
 
-        {/* 5. Mobile App Dual Device Showcase */}
+        {/* 5. Mobile App Showcase */}
         <AppShowcase />
 
         {/* 6. Popular Cities Showcase */}
         <PopularCities />
 
-        {/* 7. Why Delala (Traditional vs Delala) */}
+        {/* 7. Why Delala */}
         <WhyDelala />
 
         {/* 8. Verified Testimonials */}
