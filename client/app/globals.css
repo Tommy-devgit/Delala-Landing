@@ -1,26 +1,83 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-primary: #4C061D;
+  --color-accent: #B4C292;
+  --color-secondary: #736F4E;
+  --color-dark: #3B3923;
+  --color-bg-warm: #FAF8F4;
+  --color-card-white: #FFFFFF;
+  --color-border-warm: #ECE7DA;
+  --color-text-main: #2D2D2D;
+
+  --font-manrope: var(--font-manrope), system-ui, sans-serif;
+  --font-inter: var(--font-inter), system-ui, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --primary: #4C061D;
+    --accent: #B4C292;
+    --secondary: #736F4E;
+    --dark: #3B3923;
+    --bg-warm: #FAF8F4;
+    --card-white: #FFFFFF;
+    --border-warm: #ECE7DA;
+    --text-main: #2D2D2D;
+  }
+
+  body {
+    background-color: var(--bg-warm);
+    color: var(--text-main);
+    font-family: var(--font-inter), sans-serif;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-manrope), sans-serif;
+    letter-spacing: -0.025em;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Custom Utilities & Glass Effects */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(236, 231, 218, 0.6);
 }
+
+.glass-panel-dark {
+  background: rgba(76, 6, 29, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(180, 194, 146, 0.2);
+}
+
+.hero-glow-primary {
+  background: radial-gradient(circle, rgba(76, 6, 29, 0.15) 0%, rgba(250, 248, 244, 0) 70%);
+}
+
+.hero-glow-accent {
+  background: radial-gradient(circle, rgba(180, 194, 146, 0.25) 0%, rgba(250, 248, 244, 0) 70%);
+}
+
+.hero-frame-shadow {
+  box-shadow: 0 25px 50px -12px rgba(59, 57, 35, 0.08), 0 0 0 1px rgba(236, 231, 218, 0.8);
+}
+
+/* Smooth custom scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #FAF8F4;
+}
+::-webkit-scrollbar-thumb {
+  background: #B4C292;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #736F4E;
+}
+
