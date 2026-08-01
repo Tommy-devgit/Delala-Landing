@@ -1,6 +1,6 @@
 "use client";
 
-import { useParams } from "react";
+import { useParams } from "next/navigation";
 import Link from "next/link";
 import { CITIES, PROPERTIES } from "@/lib/data";
 import { PropertyCard } from "@/components/property-card";

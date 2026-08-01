@@ -1,6 +1,6 @@
 "use client";
 
-import { useParams } from "react";
+import { useParams } from "next/navigation";
 import { BROKERS, PROPERTIES } from "@/lib/data";
 import { PropertyCard } from "@/components/property-card";
 import { ShieldCheck, Star, Phone, Mail, Clock, MapPin } from "lucide-react";
