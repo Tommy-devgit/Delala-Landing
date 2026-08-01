@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Manrope, Inter } from "next/font/google";
+import { Manrope, Inter, DM_Serif_Display, Roboto_Mono } from "next/font/google";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import "./globals.css";
@@ -12,6 +12,19 @@ const manrope = Manrope({
 
 const inter = Inter({
   variable: "--font-inter",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+const dmSerifDisplay = DM_Serif_Display({
+  weight: "400",
+  variable: "--font-serif-display",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+const robotoMono = Roboto_Mono({
+  variable: "--font-mono-label",
   subsets: ["latin"],
   display: "swap",
 });
@@ -96,7 +109,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${manrope.variable} ${inter.variable} scroll-smooth antialiased`}
+      className={`${manrope.variable} ${inter.variable} ${dmSerifDisplay.variable} ${robotoMono.variable} scroll-smooth antialiased`}
     >
       <head>
         <script

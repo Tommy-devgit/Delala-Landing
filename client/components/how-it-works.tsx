@@ -16,44 +16,43 @@ export function HowItWorks() {
         
         {/* Header */}
         <div className="max-w-3xl mb-12 sm:mb-16">
-          <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#4C061D]/10 text-[#4C061D] text-xs font-extrabold mb-4 border border-[#4C061D]/20">
-            <ShieldCheck className="w-3.5 h-3.5" />
-            <span>Structured Process</span>
+          <span className="font-mono-label text-[11px] text-[#4C061D] bg-white px-3.5 py-1.5 rounded-full border border-[#ECE7DA] inline-block mb-4">
+            STRUCTURED PROCESS
           </span>
 
-          <h1 className="font-heading text-4xl sm:text-5xl lg:text-6xl font-black text-[#1c1b12] tracking-tight mb-6 leading-tight">
-            How Delala works.
+          <h1 className="font-serif-display text-4xl sm:text-5xl lg:text-6xl font-light text-[#4C061D] tracking-tight mb-6 leading-[0.95]">
+            How <span className="italic font-normal text-[#1c1b12]">Delala</span> works.
           </h1>
 
-          <p className="text-base sm:text-xl text-[#2D2D2D]/80 font-normal leading-relaxed">
+          <p className="text-base sm:text-lg text-[#736F4E] font-normal leading-relaxed">
             Select your journey below to see how Delala creates a safe, transparent connection between house hunters and property managers.
           </p>
         </div>
 
         {/* Journey Audience Selector Tabs */}
-        <div className="flex items-center gap-3 mb-12 bg-white p-1.5 rounded-full border border-[#ECE7DA] shadow-xs max-w-md">
+        <div className="flex items-center gap-3 mb-12 bg-white p-1.5 rounded-lg border border-[#ECE7DA] shadow-xs max-w-md">
           <button
             onClick={() => setActiveAudience("seekers")}
-            className={`flex-1 py-3 px-5 rounded-full text-xs sm:text-sm font-extrabold transition-all flex items-center justify-center gap-2 ${
+            className={`flex-1 py-2.5 px-4 rounded-md font-mono-label text-[11px] transition-all flex items-center justify-center gap-2 ${
               activeAudience === "seekers"
-                ? "bg-[#4C061D] text-white shadow-md"
-                : "text-[#2D2D2D]/70 hover:text-[#4C061D]"
+                ? "bg-[#4C061D] text-white shadow-xs"
+                : "text-[#736F4E] hover:text-[#4C061D]"
             }`}
           >
-            <Users className="w-4 h-4" />
-            <span>For Home Seekers</span>
+            <Users className="w-3.5 h-3.5" />
+            <span>FOR HOUSE HUNTERS</span>
           </button>
 
           <button
             onClick={() => setActiveAudience("owners")}
-            className={`flex-1 py-3 px-5 rounded-full text-xs sm:text-sm font-extrabold transition-all flex items-center justify-center gap-2 ${
+            className={`flex-1 py-2.5 px-4 rounded-md font-mono-label text-[11px] transition-all flex items-center justify-center gap-2 ${
               activeAudience === "owners"
-                ? "bg-[#3B3923] text-white shadow-md"
-                : "text-[#2D2D2D]/70 hover:text-[#3B3923]"
+                ? "bg-[#3B3923] text-white shadow-xs"
+                : "text-[#736F4E] hover:text-[#3B3923]"
             }`}
           >
-            <Building2 className="w-4 h-4" />
-            <span>For Owners & Brokers</span>
+            <Building2 className="w-3.5 h-3.5" />
+            <span>FOR OWNERS & BROKERS</span>
           </button>
         </div>
 
@@ -70,11 +69,11 @@ export function HowItWorks() {
             {steps.map((item) => (
               <div
                 key={item.step}
-                className="bg-white p-8 rounded-lg border border-[#ECE7DA] shadow-xs flex flex-col justify-between hover:border-[#B4C292] hover:shadow-md transition-all duration-300"
+                className="bg-white p-8 feature-card-radius border border-[#ECE7DA] shadow-xs flex flex-col justify-between hover:border-[#B4C292] hover:shadow-md transition-all duration-300 group"
               >
                 <div>
                   <div className="flex items-center justify-between mb-6">
-                    <span className="font-heading font-black text-4xl text-[#736F4E]/40">
+                    <span className="font-serif-display text-4xl font-light text-[#736F4E]/35">
                       {item.step}
                     </span>
                     <span className="p-2 rounded-lg bg-[#FAF8F4] text-[#4C061D]">
@@ -82,22 +81,22 @@ export function HowItWorks() {
                     </span>
                   </div>
 
-                  <h3 className="font-heading text-2xl font-bold text-[#1c1b12] mb-1">
+                  <h3 className="font-serif-display text-2xl font-light text-[#1c1b12] mb-1">
                     {item.title}
                   </h3>
 
-                  <div className="text-xs font-bold text-[#736F4E] mb-4 uppercase tracking-wider">
+                  <div className="font-mono-label text-[10px] text-[#736F4E] mb-4">
                     {item.subtitle}
                   </div>
 
-                  <p className="text-sm sm:text-base text-[#2D2D2D]/85 leading-relaxed font-normal">
+                  <p className="text-sm text-[#736F4E] leading-relaxed font-normal">
                     {item.description}
                   </p>
                 </div>
 
-                <div className="mt-8 pt-4 border-t border-[#ECE7DA] flex items-center justify-between text-xs font-bold text-[#4C061D]">
-                  <span>Step {item.step} of 03</span>
-                  <ArrowRight className="w-4 h-4" />
+                <div className="mt-8 pt-4 border-t border-[#ECE7DA] flex items-center justify-between font-mono-label text-[10px] text-[#4C061D]">
+                  <span>STEP {item.step} OF 03</span>
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </div>
               </div>
             ))}
@@ -105,9 +104,9 @@ export function HowItWorks() {
         </AnimatePresence>
 
         {/* Bottom Callout Banner */}
-        <div className="mt-16 bg-[#4C061D] text-white p-8 sm:p-12 rounded-xl shadow-xl flex flex-col sm:flex-row items-center justify-between gap-6">
+        <div className="mt-16 bg-[#4C061D] text-white p-8 sm:p-12 rounded-2xl shadow-xl flex flex-col sm:flex-row items-center justify-between gap-6">
           <div>
-            <h3 className="font-heading text-2xl font-bold mb-2">
+            <h3 className="font-serif-display text-3xl font-light mb-2">
               Ready to start your journey?
             </h3>
             <p className="text-sm text-white/80 max-w-xl font-normal">
@@ -117,9 +116,9 @@ export function HowItWorks() {
 
           <Link
             href="/download"
-            className="px-8 py-3.5 rounded-full bg-[#B4C292] text-[#4C061D] font-extrabold text-sm hover:bg-white transition-colors shrink-0"
+            className="px-6 py-3 rounded-lg bg-[#B4C292] text-[#4C061D] font-bold text-sm hover:bg-white transition-colors shrink-0"
           >
-            Download Delala App
+            Download Delala App →
           </Link>
         </div>
 
@@ -127,3 +126,4 @@ export function HowItWorks() {
     </section>
   );
 }
+
