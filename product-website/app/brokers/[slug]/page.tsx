@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { useParams } from "next/navigation";
 import { BROKERS, PROPERTIES } from "@/lib/data";
 import { PropertyCard } from "@/components/property-card";
