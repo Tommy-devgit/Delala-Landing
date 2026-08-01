@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useMemo } from "react";
+export const dynamic = "force-dynamic";
+
+import { useState, useMemo, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { PropertyCard } from "@/components/property-card";
 import { FilterModal } from "@/components/filter-modal";
