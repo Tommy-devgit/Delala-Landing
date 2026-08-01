@@ -1,7 +1,5 @@
 "use client";
 
-export const dynamic = "force-dynamic";
-
 import { useState, useMemo, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { PropertyCard } from "@/components/property-card";
@@ -11,7 +9,7 @@ import { PROPERTIES } from "@/lib/data";
 import { FilterState } from "@/lib/types";
 import { SlidersHorizontal, Map, Grid, ShieldCheck, ArrowUpDown } from "lucide-react";
 
-export default function SearchPage() {
+function SearchContent() {
   const searchParams = useSearchParams();
 
   const [viewMode, setViewMode] = useState<"grid" | "split" | "map">("split");
@@ -211,3 +209,18 @@ export default function SearchPage() {
     </div>
   );
 }
+
+export default function SearchPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[#FAF8F4] flex items-center justify-center p-8">
+        <div className="font-mono-label text-xs text-[#4C061D] animate-pulse">
+          LOADING MARKETPLACE SEARCH...
+        </div>
+      </div>
+    }>
+      <SearchContent />
+    </Suspense>
+  );
+}
+
