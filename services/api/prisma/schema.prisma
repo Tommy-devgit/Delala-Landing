@@ -1,0 +1,260 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum UserRole {
+  GUEST
+  USER
+  OWNER
+  BROKER
+  MODERATOR
+  ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+}
+
+enum PropertyStatus {
+  PENDING_APPROVAL
+  APPROVED
+  REJECTED
+  ARCHIVED
+}
+
+enum VisitStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+}
+
+enum ReportStatus {
+  PENDING
+  RESOLVED
+  DISMISSED
+}
+
+model User {
+  id          String     @id @default(uuid())
+  email       String     @unique
+  role        UserRole   @default(USER)
+  status      UserStatus @default(ACTIVE)
+  supabaseUid String     @unique
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  profile     Profile?
+  broker      Broker?
+  favorites   Favorite[]
+  reviews     Review[]
+  visits      Visit[]     @relation("SeekerVisits")
+  reports     Report[]    @relation("ReporterReports")
+  auditLogs   AuditLog[]
+
+  @@map("users")
+}
+
+model Profile {
+  id          String   @id @default(uuid())
+  userId      String   @unique
+  fullName    String
+  avatarUrl   String?
+  phone       String?
+  bio         String?
+  languages   String[] @default(["Amharic", "English"])
+  verified    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("profiles")
+}
+
+model City {
+  id               String         @id @default(uuid())
+  slug             String         @unique
+  name             String
+  tagline          String
+  startingRentETB  Int
+  propertiesCount  Int            @default(0)
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  neighborhoods    Neighborhood[]
+  properties       Property[]
+
+  @@map("cities")
+}
+
+model Neighborhood {
+  id                   String     @id @default(uuid())
+  slug                 String     @unique
+  name                 String
+  subCity              String
+  cityId               String
+  securityScore        Float
+  generatorPenetration String
+  waterReliability     String
+  averageRentETB       Int
+  createdAt            DateTime   @default(now())
+  updatedAt            DateTime   @updatedAt
+
+  city                 City       @relation(fields: [cityId], references: [id], onDelete: Cascade)
+  properties           Property[]
+
+  @@map("neighborhoods")
+}
+
+model Broker {
+  id               String     @id @default(uuid())
+  slug             String     @unique
+  userId           String     @unique
+  agencyName       String
+  licenseNumber    String     @unique
+  verified         Boolean    @default(false)
+  rating           Float      @default(5.0)
+  reviewsCount     Int        @default(0)
+  responseTime     String     @default("Under 15 minutes")
+  specializedAreas String[]
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+
+  user             User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  properties       Property[]
+  reviews          Review[]
+  visits           Visit[]
+
+  @@map("brokers")
+}
+
+model Property {
+  id              String         @id @default(uuid())
+  slug            String         @unique
+  title           String
+  description     String
+  propertyType    String
+  rentETB         Int
+  cityId          String
+  neighborhoodId  String
+  bedrooms        Int
+  bathrooms       Float
+  areaSqm         Int
+  generator       Boolean        @default(false)
+  waterTank       Boolean        @default(false)
+  parking         Boolean        @default(false)
+  furnished       Boolean        @default(false)
+  securityGuard   Boolean        @default(false)
+  balcony         Boolean        @default(false)
+  status          PropertyStatus @default(PENDING_APPROVAL)
+  rejectionReason String?
+  fieldAgentNotes String?
+  brokerId        String
+  ownerId         String?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  city            City           @relation(fields: [cityId], references: [id])
+  neighborhood    Neighborhood   @relation(fields: [neighborhoodId], references: [id])
+  broker          Broker         @relation(fields: [brokerId], references: [id])
+  images          PropertyImage[]
+  favorites       Favorite[]
+  reviews         Review[]
+  visits          Visit[]
+  reports         Report[]
+
+  @@map("properties")
+}
+
+model PropertyImage {
+  id           String   @id @default(uuid())
+  propertyId   String
+  url          String
+  displayOrder Int      @default(0)
+  isHero       Boolean  @default(false)
+
+  property     Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@map("property_images")
+}
+
+model Favorite {
+  id         String   @id @default(uuid())
+  userId     String
+  propertyId String
+  createdAt  DateTime @default(now())
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, propertyId])
+  @@map("favorites")
+}
+
+model Review {
+  id         String   @id @default(uuid())
+  userId     String
+  brokerId   String?
+  propertyId String?
+  rating     Float
+  comment    String
+  createdAt  DateTime @default(now())
+
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  broker     Broker?   @relation(fields: [brokerId], references: [id])
+  property   Property? @relation(fields: [propertyId], references: [id])
+
+  @@map("reviews")
+}
+
+model Visit {
+  id            String      @id @default(uuid())
+  propertyId    String
+  seekerId      String
+  brokerId      String
+  scheduledDate String
+  timeSlot      String
+  status        VisitStatus @default(PENDING)
+  createdAt     DateTime    @default(now())
+
+  property      Property    @relation(fields: [propertyId], references: [id])
+  seeker        User        @relation("SeekerVisits", fields: [seekerId], references: [id])
+  broker        Broker      @relation(fields: [brokerId], references: [id])
+
+  @@map("visits")
+}
+
+model Report {
+  id          String       @id @default(uuid())
+  reporterId  String
+  propertyId  String?
+  reason      String
+  status      ReportStatus @default(PENDING)
+  createdAt   DateTime     @default(now())
+
+  reporter    User         @relation("ReporterReports", fields: [reporterId], references: [id])
+  property    Property?    @relation(fields: [propertyId], references: [id])
+
+  @@map("reports")
+}
+
+model AuditLog {
+  id           String   @id @default(uuid())
+  userId       String
+  action       String
+  targetEntity String
+  entityId     String
+  details      String
+  createdAt    DateTime @default(now())
+
+  user         User     @relation(fields: [userId], references: [id])
+
+  @@map("audit_logs")
+}

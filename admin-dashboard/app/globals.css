@@ -1,0 +1,64 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-admin-bg: #0F172A;
+  --color-admin-card: #1E293B;
+  --color-admin-border: #334155;
+  --color-admin-text: #F8FAFC;
+  --color-[#4C061D]: #4C061D;
+  --color-[#B4C292]: #B4C292;
+}
+
+@layer base {
+  body {
+    background-color: #0F172A;
+    color: #F8FAFC;
+    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* Dense Admin Table Styling */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  th {
+    text-transform: uppercase;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+    color: #94A3B8;
+    background-color: #1E293B;
+    padding: 10px 16px;
+    border-bottom: 1px solid #334155;
+    text-align: left;
+  }
+
+  td {
+    font-size: 12px;
+    color: #E2E8F0;
+    padding: 12px 16px;
+    border-bottom: 1px solid #334155;
+  }
+
+  tr:hover td {
+    background-color: #1E293B;
+  }
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0F172A;
+}
+::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
