@@ -1,3 +1,10 @@
 reference.png
 Home Away From Home (1).jfif
 design.md
+
+# Environment & Credential files
+.env
+.env.local
+.env.*.local
+.env.example
+*.env
