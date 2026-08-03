@@ -1,7 +1,5 @@
 "use client";
 
-import { Building, ShieldCheck, Zap, Droplets } from "lucide-react";
-
 const NEIGHBORHOODS_DATA = [
   { id: "n1", name: "Bole Medhanialem", subCity: "Bole", city: "Addis Ababa", securityScore: 4.9, generator: "92%", water: "98%" },
   { id: "n2", name: "Kazanchis", subCity: "Kirkos", city: "Addis Ababa", securityScore: 4.8, generator: "88%", water: "95%" },
@@ -11,15 +9,20 @@ const NEIGHBORHOODS_DATA = [
 
 export default function AdminNeighborhoodsPage() {
   return (
-    <div className="space-y-6 font-sans">
-      <div>
-        <h1 className="text-xl font-bold text-white tracking-tight">SUB-CITY NEIGHBORHOOD INFRASTRUCTURE</h1>
-        <p className="text-xs text-[#94A3B8] font-mono mt-0.5">
+    <div className="space-y-8 font-sans">
+      <div className="border-b border-[#ECE7DA] pb-6">
+        <span className="text-[11px] font-mono-label font-bold text-[#736F4E] tracking-widest uppercase">
+          INFRASTRUCTURE INDEX
+        </span>
+        <h1 className="text-3xl font-serif-display font-light text-[#1C1B12] tracking-tight mt-1">
+          Sub-City Neighborhood Infrastructure
+        </h1>
+        <p className="text-xs text-[#736F4E] font-mono-label mt-1">
           Neighborhood security ratings & backup generator/water reliability statistics
         </p>
       </div>
 
-      <div className="bg-[#1E293B] rounded-xl border border-[#334155] overflow-hidden">
+      <div className="bg-white rounded-2xl border border-[#ECE7DA] overflow-hidden shadow-xs">
         <table>
           <thead>
             <tr>
@@ -34,12 +37,12 @@ export default function AdminNeighborhoodsPage() {
           <tbody>
             {NEIGHBORHOODS_DATA.map((n) => (
               <tr key={n.id}>
-                <td className="font-bold text-white">{n.name}</td>
-                <td className="font-mono text-xs text-[#E2E8F0]">{n.subCity}</td>
-                <td className="font-mono text-xs text-[#94A3B8]">{n.city}</td>
-                <td className="font-mono font-bold text-amber-400">★ {n.securityScore} / 5.0</td>
-                <td className="font-mono font-bold text-emerald-400">{n.generator}</td>
-                <td className="font-mono font-bold text-emerald-400">{n.water}</td>
+                <td className="font-bold text-[#1C1B12]">{n.name}</td>
+                <td className="font-mono-label text-xs text-[#1C1B12]">{n.subCity}</td>
+                <td className="font-mono-label text-xs text-[#736F4E]">{n.city}</td>
+                <td className="font-mono-label font-bold text-amber-600">★ {n.securityScore} / 5.0</td>
+                <td className="font-mono-label font-bold text-[#4C061D]">{n.generator}</td>
+                <td className="font-mono-label font-bold text-[#4C061D]">{n.water}</td>
               </tr>
             ))}
           </tbody>

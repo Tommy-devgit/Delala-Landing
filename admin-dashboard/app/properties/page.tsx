@@ -4,7 +4,6 @@ import { useState } from "react";
 import { PropertyTable } from "@/components/property-table";
 import { ApprovalModal } from "@/components/approval-modal";
 import { ADMIN_PROPERTIES, AdminProperty } from "@/lib/mock-admin-data";
-import { Building2, SlidersHorizontal, Plus } from "lucide-react";
 
 export default function AdminPropertiesPage() {
   const [properties, setProperties] = useState<AdminProperty[]>(ADMIN_PROPERTIES);
@@ -23,23 +22,30 @@ export default function AdminPropertiesPage() {
   };
 
   return (
-    <div className="space-y-6 font-sans">
-      <div className="flex items-center justify-between">
+    <div className="space-y-8 font-sans">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#ECE7DA] pb-6">
         <div>
-          <h1 className="text-xl font-bold text-white tracking-tight">PROPERTY MANAGEMENT</h1>
-          <p className="text-xs text-[#94A3B8] font-mono mt-0.5">
-            Full marketplace database catalog & agent field audit status
+          <span className="text-[11px] font-mono-label font-bold text-[#736F4E] tracking-widest uppercase">
+            DATABASE CATALOG
+          </span>
+          <h1 className="text-3xl font-serif-display font-light text-[#1C1B12] tracking-tight mt-1">
+            Property Management
+          </h1>
+          <p className="text-xs text-[#736F4E] font-mono-label mt-1">
+            Marketplace listings directory & field agent physical verification status
           </p>
         </div>
 
         {/* Filter pills */}
-        <div className="flex items-center gap-2 bg-[#1E293B] p-1 rounded-lg border border-[#334155]">
+        <div className="flex items-center gap-1.5 bg-white p-1.5 rounded-full border border-[#ECE7DA] shadow-xs">
           {["ALL", "APPROVED", "PENDING_APPROVAL", "REJECTED"].map((status) => (
             <button
               key={status}
               onClick={() => setFilterStatus(status)}
-              className={`px-3 py-1 rounded-md text-xs font-mono font-bold transition-colors ${
-                filterStatus === status ? "bg-[#4C061D] text-white" : "text-[#94A3B8] hover:text-white"
+              className={`px-4 py-1.5 rounded-full text-xs font-mono-label font-bold transition-all ${
+                filterStatus === status
+                  ? "bg-[#4C061D] text-white shadow-xs"
+                  : "text-[#736F4E] hover:text-[#4C061D]"
               }`}
             >
               {status.replace("_", " ")}

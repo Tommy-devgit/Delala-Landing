@@ -21,71 +21,73 @@ export function ApprovalModal({
   if (!isOpen || !property) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs">
-      <div className="bg-[#1E293B] w-full max-w-lg rounded-xl border border-[#334155] shadow-2xl overflow-hidden font-sans">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
+      <div className="bg-white w-full max-w-lg rounded-2xl border border-[#ECE7DA] shadow-2xl overflow-hidden font-sans">
         
         {/* Header */}
-        <div className="p-4 bg-[#0F172A] border-b border-[#334155] flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <ShieldCheck className="w-4 h-4 text-[#B4C292]" />
-            <h3 className="font-bold text-sm text-[#F8FAFC]">
-              Review Property Listing #{property.id}
+        <div className="p-5 bg-[#FAF8F4] border-b border-[#ECE7DA] flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-[#4C061D] text-white flex items-center justify-center">
+              <ShieldCheck className="w-4 h-4 text-[#B4C292]" />
+            </div>
+            <h3 className="font-serif-display text-lg text-[#1C1B12]">
+              Review Listing #{property.id}
             </h3>
           </div>
-          <button onClick={onClose} className="text-[#94A3B8] hover:text-white">
+          <button onClick={onClose} className="p-1 rounded-lg text-[#736F4E] hover:text-[#4C061D] hover:bg-[#ECE7DA] transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-5 space-y-4">
-          <div className="bg-[#0F172A] p-3.5 rounded-lg border border-[#334155]">
-            <div className="text-[10px] font-mono text-[#94A3B8] mb-1">
+        <div className="p-6 space-y-4">
+          <div className="bg-[#FAF8F4] p-4 rounded-xl border border-[#ECE7DA]">
+            <div className="text-[10px] font-mono-label text-[#736F4E] font-bold mb-1">
               {property.subCity.toUpperCase()} • {property.city.toUpperCase()} • ETB {property.rentETB.toLocaleString()}/mo
             </div>
-            <div className="font-bold text-base text-[#F8FAFC]">
+            <div className="font-bold text-base text-[#1C1B12]">
               {property.title}
             </div>
-            <div className="text-xs text-[#94A3B8] mt-1">
-              Submitted by Broker: <strong className="text-white">{property.brokerName}</strong> on {property.submittedAt}
+            <div className="text-xs text-[#736F4E] mt-1 font-mono-label">
+              Submitted by Broker: <strong className="text-[#4C061D]">{property.brokerName}</strong> on {property.submittedAt}
             </div>
           </div>
 
           <div>
-            <label className="block text-[10px] font-mono text-[#94A3B8] uppercase mb-1">
+            <label className="block text-[10px] font-mono-label text-[#736F4E] font-bold uppercase mb-1">
               FIELD AGENT AUDIT NOTES
             </label>
             <textarea
               rows={2}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="e.g. 45kVA generator tested clean. Underground water tank verified operational."
-              className="w-full p-2.5 rounded-lg bg-[#0F172A] border border-[#334155] text-xs text-white placeholder-[#64748B] focus:outline-none"
+              placeholder="e.g. 45kVA standby generator and 12,000L water reserve verified operational."
+              className="w-full p-3 rounded-xl bg-[#FAF8F4] border border-[#ECE7DA] text-xs text-[#1C1B12] placeholder-[#736F4E] focus:outline-none focus:border-[#4C061D]"
             />
           </div>
 
           <div>
-            <label className="block text-[10px] font-mono text-[#94A3B8] uppercase mb-1">
+            <label className="block text-[10px] font-mono-label text-[#736F4E] font-bold uppercase mb-1">
               REJECTION REASON (IF REJECTING)
             </label>
             <input
               type="text"
               value={reason}
               onChange={(e) => setReason(e.target.value)}
-              placeholder="e.g. Invalid title deed documentation or missing generator specs"
-              className="w-full p-2.5 rounded-lg bg-[#0F172A] border border-[#334155] text-xs text-white placeholder-[#64748B] focus:outline-none"
+              placeholder="e.g. Discrepancy in title deed or unverified backup generator"
+              className="w-full p-3 rounded-xl bg-[#FAF8F4] border border-[#ECE7DA] text-xs text-[#1C1B12] placeholder-[#736F4E] focus:outline-none focus:border-[#4C061D]"
             />
           </div>
         </div>
 
         {/* Action Buttons */}
-        <div className="p-4 bg-[#0F172A] border-t border-[#334155] flex items-center justify-end gap-3">
+        <div className="p-4 bg-[#FAF8F4] border-t border-[#ECE7DA] flex items-center justify-end gap-3">
           <button
             onClick={() => {
               onAction(property.id, "REJECTED", reason, notes);
               onClose();
             }}
-            className="px-4 py-2 rounded-lg bg-rose-600/20 text-rose-400 border border-rose-600/40 text-xs font-bold hover:bg-rose-600 hover:text-white transition-colors flex items-center gap-1.5"
+            className="px-4 py-2.5 rounded-xl bg-rose-50 text-rose-700 border border-rose-200 text-xs font-mono-label font-bold hover:bg-rose-600 hover:text-white transition-colors flex items-center gap-1.5"
           >
             <XCircle className="w-4 h-4" />
             <span>Reject Listing</span>
@@ -96,9 +98,9 @@ export function ApprovalModal({
               onAction(property.id, "APPROVED", undefined, notes);
               onClose();
             }}
-            className="px-5 py-2 rounded-lg bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-500 transition-colors flex items-center gap-1.5 shadow-sm"
+            className="px-5 py-2.5 rounded-xl bg-[#4C061D] text-white text-xs font-mono-label font-bold hover:bg-[#3B0416] transition-colors flex items-center gap-1.5 shadow-md"
           >
-            <CheckCircle2 className="w-4 h-4" />
+            <CheckCircle2 className="w-4 h-4 text-[#B4C292]" />
             <span>Approve & Publish →</span>
           </button>
         </div>

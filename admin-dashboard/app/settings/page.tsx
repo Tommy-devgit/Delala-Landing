@@ -1,71 +1,76 @@
 "use client";
 
-import { Settings, ShieldCheck, Database, Key } from "lucide-react";
+import { ShieldCheck, Database, Key } from "lucide-react";
 
 export default function AdminSettingsPage() {
   return (
-    <div className="space-y-6 font-sans">
-      <div>
-        <h1 className="text-xl font-bold text-white tracking-tight">SYSTEM CONFIGURATION & AUDIT LOGS</h1>
-        <p className="text-xs text-[#94A3B8] font-mono mt-0.5">
+    <div className="space-y-8 font-sans">
+      <div className="border-b border-[#ECE7DA] pb-6">
+        <span className="text-[11px] font-mono-label font-bold text-[#736F4E] tracking-widest uppercase">
+          SYSTEM HEALTH
+        </span>
+        <h1 className="text-3xl font-serif-display font-light text-[#1C1B12] tracking-tight mt-1">
+          System Configuration & Audit Logs
+        </h1>
+        <p className="text-xs text-[#736F4E] font-mono-label mt-1">
           Backend API credentials, Supabase database status & security audit logs
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {/* Supabase Status */}
-        <div className="bg-[#1E293B] p-5 rounded-xl border border-[#334155] space-y-3">
-          <div className="flex items-center gap-2 text-white font-bold text-sm">
-            <Database className="w-4 h-4 text-[#B4C292]" />
-            <span>SUPABASE POSTGRESQL & AUTH</span>
+        <div className="bg-white p-6 rounded-2xl border border-[#ECE7DA] shadow-xs space-y-4">
+          <div className="flex items-center gap-2.5 text-[#1C1B12] font-serif-display text-lg">
+            <Database className="w-5 h-5 text-[#4C061D]" />
+            <span>Supabase PostgreSQL & Auth</span>
           </div>
-          <div className="p-3 bg-[#0F172A] rounded-lg border border-[#334155] text-xs font-mono space-y-1">
+          <div className="p-4 bg-[#FAF8F4] rounded-xl border border-[#ECE7DA] text-xs font-mono-label space-y-2">
             <div className="flex justify-between">
-              <span className="text-[#94A3B8]">Database Status:</span>
-              <span className="text-emerald-400 font-bold">CONNECTED</span>
+              <span className="text-[#736F4E]">Database Status:</span>
+              <span className="text-emerald-700 font-bold">CONNECTED</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-[#94A3B8]">JWT Provider:</span>
-              <span className="text-white">Supabase Auth (HS256)</span>
+              <span className="text-[#736F4E]">JWT Provider:</span>
+              <span className="text-[#1C1B12]">Supabase Auth (HS256)</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-[#94A3B8]">Storage Buckets:</span>
-              <span className="text-white">property-images, avatar-images</span>
+              <span className="text-[#736F4E]">Storage Buckets:</span>
+              <span className="text-[#1C1B12]">property-images, avatar-images</span>
             </div>
           </div>
         </div>
 
         {/* API Rate Limiting */}
-        <div className="bg-[#1E293B] p-5 rounded-xl border border-[#334155] space-y-3">
-          <div className="flex items-center gap-2 text-white font-bold text-sm">
-            <Key className="w-4 h-4 text-[#B4C292]" />
-            <span>NESTJS API REST V1 STATUS</span>
+        <div className="bg-white p-6 rounded-2xl border border-[#ECE7DA] shadow-xs space-y-4">
+          <div className="flex items-center gap-2.5 text-[#1C1B12] font-serif-display text-lg">
+            <Key className="w-5 h-5 text-[#4C061D]" />
+            <span>NestJS API REST V1 Status</span>
           </div>
-          <div className="p-3 bg-[#0F172A] rounded-lg border border-[#334155] text-xs font-mono space-y-1">
+          <div className="p-4 bg-[#FAF8F4] rounded-xl border border-[#ECE7DA] text-xs font-mono-label space-y-2">
             <div className="flex justify-between">
-              <span className="text-[#94A3B8]">Base URL:</span>
-              <span className="text-white">http://localhost:4000/api/v1</span>
+              <span className="text-[#736F4E]">Base URL:</span>
+              <span className="text-[#1C1B12]">http://localhost:4000/api/v1</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-[#94A3B8]">Swagger Specs:</span>
-              <span className="text-emerald-400 font-bold">http://localhost:4000/api/docs</span>
+              <span className="text-[#736F4E]">Swagger Specs:</span>
+              <span className="text-[#4C061D] font-bold">http://localhost:4000/api/docs</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-[#94A3B8]">Global Rate Limit:</span>
-              <span className="text-white">100 req / min</span>
+              <span className="text-[#736F4E]">Global Rate Limit:</span>
+              <span className="text-[#1C1B12]">100 req / min</span>
             </div>
           </div>
         </div>
       </div>
 
       {/* Security Audit Logs */}
-      <div className="bg-[#1E293B] rounded-xl border border-[#334155] overflow-hidden">
-        <div className="p-4 bg-[#0F172A] border-b border-[#334155] flex items-center justify-between">
-          <div className="flex items-center gap-2 text-white font-bold text-sm">
-            <ShieldCheck className="w-4 h-4 text-[#B4C292]" />
-            <span>SECURITY AUDIT TRAIL LOGS</span>
+      <div className="bg-white rounded-2xl border border-[#ECE7DA] overflow-hidden shadow-xs">
+        <div className="p-5 bg-[#FAF8F4] border-b border-[#ECE7DA] flex items-center justify-between">
+          <div className="flex items-center gap-2.5 text-[#1C1B12] font-serif-display text-lg">
+            <ShieldCheck className="w-5 h-5 text-[#4C061D]" />
+            <span>Security Audit Trail Logs</span>
           </div>
-          <span className="text-xs font-mono text-[#94A3B8]">Showing last 5 events</span>
+          <span className="text-xs font-mono-label text-[#736F4E]">Showing last 5 events</span>
         </div>
 
         <table>
@@ -84,10 +89,10 @@ export default function AdminSettingsPage() {
               { time: "2026-08-01 14:00:22", user: "Moderator (mod@delala.et)", action: "REPORT_RESOLVED", target: "Report #r2" },
             ].map((log, idx) => (
               <tr key={idx}>
-                <td className="font-mono text-xs text-[#94A3B8]">{log.time}</td>
-                <td className="font-mono text-xs text-white">{log.user}</td>
-                <td className="font-mono font-bold text-emerald-400">{log.action}</td>
-                <td className="text-xs text-[#E2E8F0]">{log.target}</td>
+                <td className="font-mono-label text-xs text-[#736F4E]">{log.time}</td>
+                <td className="font-mono-label text-xs text-[#1C1B12]">{log.user}</td>
+                <td className="font-mono-label font-bold text-[#4C061D]">{log.action}</td>
+                <td className="text-xs text-[#1C1B12]">{log.target}</td>
               </tr>
             ))}
           </tbody>

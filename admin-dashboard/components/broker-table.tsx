@@ -11,7 +11,7 @@ export function BrokerTable({
   onToggleVerify?: (id: string) => void;
 }) {
   return (
-    <div className="bg-[#1E293B] rounded-xl border border-[#334155] overflow-hidden shadow-xs">
+    <div className="bg-white rounded-2xl border border-[#ECE7DA] overflow-hidden shadow-xs">
       <div className="overflow-x-auto">
         <table>
           <thead>
@@ -28,34 +28,34 @@ export function BrokerTable({
             {brokers.map((broker) => (
               <tr key={broker.id}>
                 <td>
-                  <div className="font-bold text-white">{broker.name}</div>
-                  <div className="text-[10px] font-mono text-[#94A3B8]">{broker.agencyName}</div>
+                  <div className="font-bold text-[#1C1B12]">{broker.name}</div>
+                  <div className="text-[10px] font-mono-label text-[#736F4E]">{broker.agencyName}</div>
                 </td>
-                <td className="font-mono text-xs text-emerald-400">{broker.licenseNumber}</td>
+                <td className="font-mono-label text-xs font-bold text-[#4C061D]">{broker.licenseNumber}</td>
                 <td>
-                  <div className="flex items-center gap-1 font-mono text-xs text-amber-400 font-bold">
-                    <Star className="w-3.5 h-3.5 fill-amber-400" />
+                  <div className="flex items-center gap-1 font-mono-label text-xs text-amber-600 font-bold">
+                    <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-500" />
                     <span>{broker.rating}</span>
                   </div>
                 </td>
-                <td className="font-mono text-xs text-white">{broker.activeListings} Properties</td>
-                <td className="text-xs text-[#94A3B8]">{broker.specializedAreas.join(", ")}</td>
+                <td className="font-mono-label text-xs text-[#1C1B12]">{broker.activeListings} Properties</td>
+                <td className="text-xs text-[#736F4E]">{broker.specializedAreas.join(", ")}</td>
                 <td>
                   <button
                     onClick={() => onToggleVerify && onToggleVerify(broker.id)}
-                    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-mono font-bold transition-all border ${
+                    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-mono-label font-bold transition-all border ${
                       broker.verified
-                        ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30 hover:bg-rose-500/10 hover:text-rose-400 hover:border-rose-500/30"
-                        : "bg-amber-500/10 text-amber-400 border-amber-500/30 hover:bg-emerald-500/10 hover:text-emerald-400"
+                        ? "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-rose-50 hover:text-rose-700 hover:border-rose-200"
+                        : "bg-amber-50 text-amber-700 border-amber-200 hover:bg-emerald-50 hover:text-emerald-700"
                     }`}
                   >
                     {broker.verified ? (
                       <>
-                        <ShieldCheck className="w-3.5 h-3.5" /> VERIFIED BADGE
+                        <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" /> VERIFIED BADGE
                       </>
                     ) : (
                       <>
-                        <ShieldAlert className="w-3.5 h-3.5" /> UNVERIFIED
+                        <ShieldAlert className="w-3.5 h-3.5 text-amber-600" /> UNVERIFIED
                       </>
                     )}
                   </button>

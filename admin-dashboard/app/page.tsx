@@ -5,7 +5,7 @@ import { StatsCard } from "@/components/stats-card";
 import { PropertyTable } from "@/components/property-table";
 import { ApprovalModal } from "@/components/approval-modal";
 import { ADMIN_METRICS, ADMIN_PROPERTIES, AdminProperty } from "@/lib/mock-admin-data";
-import { Users, Building2, CheckSquare, ShieldCheck, Flag, Calendar, Activity } from "lucide-react";
+import { Users, Building2, CheckSquare, ShieldCheck, Activity } from "lucide-react";
 
 export default function AdminOverviewPage() {
   const [properties, setProperties] = useState<AdminProperty[]>(ADMIN_PROPERTIES);
@@ -18,25 +18,30 @@ export default function AdminOverviewPage() {
   };
 
   return (
-    <div className="space-y-6 font-sans">
+    <div className="space-y-8 font-sans">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#ECE7DA] pb-6">
         <div>
-          <h1 className="text-xl font-bold text-white tracking-tight">PLATFORM OVERVIEW</h1>
-          <p className="text-xs text-[#94A3B8] font-mono mt-0.5">
-            Real-time marketplace system health & operational metrics
+          <span className="text-[11px] font-mono-label font-bold text-[#736F4E] tracking-widest uppercase">
+            DELALA ETHIOPIA
+          </span>
+          <h1 className="text-3xl font-serif-display font-light text-[#1C1B12] tracking-tight mt-1">
+            Platform Overview
+          </h1>
+          <p className="text-xs text-[#736F4E] font-mono-label mt-1">
+            Real-time marketplace operational metrics & field agent review stream
           </p>
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="px-3 py-1 rounded-md bg-[#1E293B] border border-[#334155] text-xs font-mono text-[#B4C292]">
+          <span className="px-3.5 py-1.5 rounded-full bg-white border border-[#ECE7DA] text-xs font-mono-label font-bold text-[#4C061D] shadow-xs">
             API /api/v1 CONNECTED
           </span>
         </div>
       </div>
 
       {/* 4 Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         <StatsCard
           title="TOTAL USERS"
           value={ADMIN_METRICS.totalUsers.toLocaleString()}
@@ -68,15 +73,17 @@ export default function AdminOverviewPage() {
       </div>
 
       {/* Main Section: Pending Submissions Queue */}
-      <div className="space-y-3">
+      <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Activity className="w-4 h-4 text-[#B4C292]" />
-            <h2 className="text-sm font-bold text-white uppercase tracking-wider">
-              RECENT PROPERTY SUBMISSIONS
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-lg bg-[#FAF8F4] border border-[#ECE7DA] flex items-center justify-center text-[#4C061D]">
+              <Activity className="w-4 h-4" />
+            </div>
+            <h2 className="text-lg font-serif-display font-light text-[#1C1B12]">
+              Recent Property Submissions
             </h2>
           </div>
-          <span className="text-xs font-mono text-[#94A3B8]">Showing 5 most recent</span>
+          <span className="text-xs font-mono-label text-[#736F4E]">Showing 5 most recent</span>
         </div>
 
         <PropertyTable properties={properties} onOpenReview={(p) => setSelectedProp(p)} />

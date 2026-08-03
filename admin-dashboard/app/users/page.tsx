@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { UserTable } from "@/components/user-table";
 import { ADMIN_USERS, AdminUser } from "@/lib/mock-admin-data";
-import { Users, UserPlus } from "lucide-react";
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<AdminUser[]>(ADMIN_USERS);
@@ -19,14 +18,17 @@ export default function AdminUsersPage() {
   };
 
   return (
-    <div className="space-y-6 font-sans">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-bold text-white tracking-tight">USER ROLE & ACCESS MANAGEMENT</h1>
-          <p className="text-xs text-[#94A3B8] font-mono mt-0.5">
-            Platform accounts, permission scopes & suspension controls
-          </p>
-        </div>
+    <div className="space-y-8 font-sans">
+      <div className="border-b border-[#ECE7DA] pb-6">
+        <span className="text-[11px] font-mono-label font-bold text-[#736F4E] tracking-widest uppercase">
+          ACCESS CONTROL
+        </span>
+        <h1 className="text-3xl font-serif-display font-light text-[#1C1B12] tracking-tight mt-1">
+          User Role & Access Management
+        </h1>
+        <p className="text-xs text-[#736F4E] font-mono-label mt-1">
+          Platform user accounts, permission scope assignments & suspension controls
+        </p>
       </div>
 
       <UserTable users={users} onRoleChange={handleRoleChange} onStatusToggle={handleStatusToggle} />

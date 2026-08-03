@@ -19,17 +19,22 @@ export default function AdminApprovalsPage() {
   };
 
   return (
-    <div className="space-y-6 font-sans">
-      <div className="flex items-center justify-between">
+    <div className="space-y-8 font-sans">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#ECE7DA] pb-6">
         <div>
-          <h1 className="text-xl font-bold text-white tracking-tight">PENDING APPROVALS QUEUE</h1>
-          <p className="text-xs text-[#94A3B8] font-mono mt-0.5">
+          <span className="text-[11px] font-mono-label font-bold text-[#736F4E] tracking-widest uppercase">
+            MODERATION STREAM
+          </span>
+          <h1 className="text-3xl font-serif-display font-light text-[#1C1B12] tracking-tight mt-1">
+            Pending Approvals Queue
+          </h1>
+          <p className="text-xs text-[#736F4E] font-mono-label mt-1">
             Property listings awaiting field agent verification & title deed audit
           </p>
         </div>
 
-        <div className="flex items-center gap-2 bg-amber-500/10 border border-amber-500/30 px-3 py-1 rounded-lg text-amber-400 font-mono text-xs font-bold">
-          <ShieldAlert className="w-4 h-4" />
+        <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 px-4 py-2 rounded-full text-amber-800 font-mono-label text-xs font-bold shadow-xs">
+          <ShieldAlert className="w-4 h-4 text-amber-600" />
           <span>{pendingProps.length} LISTINGS AWAITING DECISION</span>
         </div>
       </div>
@@ -37,10 +42,10 @@ export default function AdminApprovalsPage() {
       {pendingProps.length > 0 ? (
         <PropertyTable properties={pendingProps} onOpenReview={(p) => setSelectedProp(p)} />
       ) : (
-        <div className="bg-[#1E293B] p-12 rounded-xl border border-[#334155] text-center text-[#94A3B8]">
-          <CheckSquare className="w-10 h-10 mx-auto text-emerald-400 mb-3" />
-          <div className="font-bold text-white text-base">Approval Queue Clean</div>
-          <div className="text-xs mt-1 font-mono">All pending property submissions have been moderated.</div>
+        <div className="bg-white p-12 rounded-2xl border border-[#ECE7DA] text-center text-[#736F4E] shadow-xs">
+          <CheckSquare className="w-10 h-10 mx-auto text-[#4C061D] mb-3" />
+          <div className="font-serif-display text-2xl text-[#1C1B12]">Approval Queue Clean</div>
+          <div className="text-xs mt-1 font-mono-label">All pending property submissions have been moderated.</div>
         </div>
       )}
 
