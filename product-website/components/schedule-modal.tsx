@@ -86,7 +86,7 @@ export function ScheduleModal({
           <form onSubmit={handleSubmit} className="p-6 space-y-4">
             {/* Property Summary Pill */}
             <div className="p-3.5 rounded-2xl bg-[#FAF8F4] border border-[#ECE7DA] flex items-center gap-3">
-              <img src={property.images[0]?.url} alt="" className="w-14 h-14 rounded-xl object-cover" />
+              <img src={property.heroImage || property.galleryImages[0]} alt="" className="w-14 h-14 rounded-xl object-cover" />
               <div>
                 <div className="font-bold text-sm text-[#1C1B12] line-clamp-1">{property.title}</div>
                 <div className="text-xs font-mono-label text-[#4C061D] font-bold">
