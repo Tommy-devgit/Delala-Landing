@@ -24,8 +24,8 @@ export const apiClient = {
     // Filter local fallback
     return PROPERTIES.filter((p) => {
       if (filters?.propertyType && filters.propertyType !== "all" && p.propertyType !== filters.propertyType) return false;
-      if (filters?.city && !p.location.city.toLowerCase().includes(filters.city.toLowerCase())) return false;
-      if (filters?.subCity && !p.location.subCity.toLowerCase().includes(filters.subCity.toLowerCase())) return false;
+      if (filters?.city && !p.city.toLowerCase().includes(filters.city.toLowerCase())) return false;
+      if (filters?.subCity && !p.subCity.toLowerCase().includes(filters.subCity.toLowerCase())) return false;
       return true;
     });
   },
