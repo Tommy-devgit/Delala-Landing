@@ -90,7 +90,7 @@ export function ScheduleModal({
               <div>
                 <div className="font-bold text-sm text-[#1C1B12] line-clamp-1">{property.title}</div>
                 <div className="text-xs font-mono-label text-[#4C061D] font-bold">
-                  ETB {property.rentETB.toLocaleString()}/mo • {property.location.subCity}
+                  ETB {property.rentETB.toLocaleString()}/mo • {property.subCity}
                 </div>
               </div>
             </div>
