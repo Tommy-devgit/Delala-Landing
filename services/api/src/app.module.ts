@@ -7,6 +7,8 @@ import { AdminModule } from "./admin/admin.module";
 import { CitiesModule } from "./cities/cities.module";
 import { VisitsModule } from "./visits/visits.module";
 import { FavoritesModule } from "./favorites/favorites.module";
+import { MessagesModule } from "./messages/messages.module";
+import { NotificationsModule } from "./notifications/notifications.module";
 
 @Module({
   imports: [
@@ -18,6 +20,8 @@ import { FavoritesModule } from "./favorites/favorites.module";
     CitiesModule,
     VisitsModule,
     FavoritesModule,
+    MessagesModule,
+    NotificationsModule,
   ],
 })
 export class AppModule {}
