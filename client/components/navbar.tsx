@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { NAV_ITEMS } from "@/lib/constants";
-import { Menu, X, ArrowRight } from "lucide-react";
+import { Menu, X, ArrowRight, ExternalLink } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export function Navbar() {
@@ -46,7 +46,7 @@ export function Navbar() {
             </Link>
           </div>
 
-          {/* CENTER: Navigation Links (Ghost button layout from design.md) */}
+          {/* CENTER: Navigation Links */}
           <nav
             aria-label="Main Navigation"
             className="hidden md:flex items-center justify-center gap-6 lg:gap-8 absolute left-1/2 -translate-x-1/2 text-sm text-[#2D2D2D]"
@@ -73,8 +73,18 @@ export function Navbar() {
             })}
           </nav>
 
-          {/* FAR RIGHT: Primary White-on-Burgundy Action Button (design.md 8px radius, trailing arrow) */}
-          <div className="hidden md:flex items-center gap-4 shrink-0 z-10">
+          {/* FAR RIGHT: Action Buttons */}
+          <div className="hidden md:flex items-center gap-3 shrink-0 z-10">
+            <a
+              href="https://delala-marketplacel.vercel.app/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center px-4 py-2.5 rounded-lg bg-[#FAF8F4] border border-[#ECE7DA] text-[#4C061D] font-mono-label font-bold text-xs hover:bg-[#ECE7DA] hover:border-[#4C061D] transition-all gap-1.5 shadow-xs"
+            >
+              <span>Market Place</span>
+              <ExternalLink className="w-3.5 h-3.5" />
+            </a>
+
             <Link
               href="/download"
               className="inline-flex items-center justify-center px-5 py-2.5 rounded-lg bg-[#4C061D] text-white font-medium text-xs sm:text-sm shadow-xs hover:bg-[#3B3923] transition-all duration-200 group active:scale-98"
@@ -129,7 +139,18 @@ export function Navbar() {
               })}
             </div>
 
-            <div className="pt-2 border-t border-[#ECE7DA]">
+            <div className="pt-3 border-t border-[#ECE7DA] space-y-2">
+              <a
+                href="https://delala-marketplacel.vercel.app/"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center justify-center gap-1.5 w-full text-center py-2.5 rounded-lg bg-[#FAF8F4] border border-[#ECE7DA] text-[#4C061D] font-mono-label font-bold text-xs shadow-xs"
+              >
+                <span>Market Place</span>
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+
               <Link
                 href="/download"
                 onClick={() => setMobileMenuOpen(false)}
@@ -144,4 +165,3 @@ export function Navbar() {
     </header>
   );
 }
-
