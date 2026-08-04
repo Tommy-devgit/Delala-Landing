@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
@@ -30,6 +31,30 @@ async function main() {
     },
   });
 
+  const cityAdama = await prisma.city.upsert({
+    where: { slug: "adama" },
+    update: {},
+    create: {
+      slug: "adama",
+      name: "Adama",
+      tagline: "Commercial nexus & rift valley gateway",
+      startingRentETB: 15000,
+      propertiesCount: 45,
+    },
+  });
+
+  const cityBahirDar = await prisma.city.upsert({
+    where: { slug: "bahir-dar" },
+    update: {},
+    create: {
+      slug: "bahir-dar",
+      name: "Bahir Dar",
+      tagline: "Scenic Lake Tana palm avenue city",
+      startingRentETB: 16000,
+      propertiesCount: 52,
+    },
+  });
+
   // 2. Seed Neighborhoods
   const neighBole = await prisma.neighborhood.upsert({
     where: { slug: "bole-medhanialem" },
@@ -51,7 +76,7 @@ async function main() {
     update: {},
     create: {
       slug: "kazanchis",
-      name: "Kazanchis",
+      name: "Kazanchis UN Quarter",
       subCity: "Kirkos",
       cityId: cityAddis.id,
       securityScore: 4.8,
@@ -61,7 +86,37 @@ async function main() {
     },
   });
 
-  // 3. Seed User & Broker
+  const neighOldAirport = await prisma.neighborhood.upsert({
+    where: { slug: "old-airport" },
+    update: {},
+    create: {
+      slug: "old-airport",
+      name: "Old Airport Diplomatic Zone",
+      subCity: "Nifas Silk",
+      cityId: cityAddis.id,
+      securityScore: 4.95,
+      generatorPenetration: "96%",
+      waterReliability: "99%",
+      averageRentETB: 95000,
+    },
+  });
+
+  const neighCMC = await prisma.neighborhood.upsert({
+    where: { slug: "cmc-sunshine" },
+    update: {},
+    create: {
+      slug: "cmc-sunshine",
+      name: "CMC Sunshine Real Estate",
+      subCity: "Yeka",
+      cityId: cityAddis.id,
+      securityScore: 4.7,
+      generatorPenetration: "84%",
+      waterReliability: "92%",
+      averageRentETB: 45000,
+    },
+  });
+
+  // 3. Seed Certified Brokers
   const userAbebe = await prisma.user.upsert({
     where: { email: "abebe@bolepremier.et" },
     update: {},
@@ -93,14 +148,45 @@ async function main() {
     },
   });
 
-  // 4. Seed Verified Property
+  const userBethlehem = await prisma.user.upsert({
+    where: { email: "bethlehem@capitalhomes.et" },
+    update: {},
+    create: {
+      email: "bethlehem@capitalhomes.et",
+      role: "BROKER",
+      supabaseUid: "sb-uid-bethlehem-002",
+      profile: {
+        create: {
+          fullName: "Bethlehem Worku",
+          phone: "+251 922 888 777",
+          verified: true,
+        },
+      },
+    },
+  });
+
+  const brokerBethlehem = await prisma.broker.upsert({
+    where: { userId: userBethlehem.id },
+    update: {},
+    create: {
+      slug: "bethlehem-worku",
+      userId: userBethlehem.id,
+      agencyName: "Capital Verified Homes",
+      licenseNumber: "ETH-RE-2024-0142",
+      verified: true,
+      rating: 4.85,
+      specializedAreas: ["Kazanchis", "CMC Sunshine", "Old Airport"],
+    },
+  });
+
+  // 4. Seed Verified Properties
   await prisma.property.upsert({
     where: { slug: "bole-medhanialem-luxury-residence" },
     update: {},
     create: {
       slug: "bole-medhanialem-luxury-residence",
       title: "Bole Medhanialem Modern G+1 Villa",
-      description: "Luxury 4-bedroom villa featuring automatic 45kVA standby generator and dual 12,000L water tanks.",
+      description: "Luxury 4-bedroom villa featuring automatic 45kVA standby generator, dual 12,000L water tanks, and 24/7 perimeter security guard.",
       propertyType: "Villa",
       rentETB: 65000,
       cityId: cityAddis.id,
@@ -125,7 +211,67 @@ async function main() {
     },
   });
 
-  console.log("✅ Seed completed cleanly!");
+  await prisma.property.upsert({
+    where: { slug: "kazanchis-un-serviced-studio" },
+    update: {},
+    create: {
+      slug: "kazanchis-un-serviced-studio",
+      title: "Kazanchis UN Quarter Executive Studio",
+      description: "Modern fully-serviced studio apartment 2 minutes walk from UNECA headquarters. Features continuous standby power and High-speed fiber Wi-Fi.",
+      propertyType: "Studio",
+      rentETB: 28000,
+      cityId: cityAddis.id,
+      neighborhoodId: neighKazanchis.id,
+      bedrooms: 1,
+      bathrooms: 1,
+      areaSqm: 65,
+      generator: true,
+      waterTank: true,
+      parking: true,
+      furnished: true,
+      securityGuard: true,
+      balcony: true,
+      status: "APPROVED",
+      brokerId: brokerBethlehem.id,
+      images: {
+        create: [
+          { url: "/images/hero_home_away.jpg", displayOrder: 1, isHero: true },
+        ],
+      },
+    },
+  });
+
+  await prisma.property.upsert({
+    where: { slug: "old-airport-diplomatic-compound" },
+    update: {},
+    create: {
+      slug: "old-airport-diplomatic-compound",
+      title: "Old Airport Diplomatic G+2 Compound",
+      description: "Exquisite diplomatic compound with private lush garden, swimming pool, 65kVA silent generator, and guardhouse.",
+      propertyType: "G+1 Residence",
+      rentETB: 95000,
+      cityId: cityAddis.id,
+      neighborhoodId: neighOldAirport.id,
+      bedrooms: 5,
+      bathrooms: 4.5,
+      areaSqm: 520,
+      generator: true,
+      waterTank: true,
+      parking: true,
+      furnished: true,
+      securityGuard: true,
+      balcony: true,
+      status: "APPROVED",
+      brokerId: brokerAbebe.id,
+      images: {
+        create: [
+          { url: "/images/hero_property.png", displayOrder: 1, isHero: true },
+        ],
+      },
+    },
+  });
+
+  console.log("✅ Supabase PostgreSQL Database Seeded Cleanly with Authentic Ethiopian Real Estate Data!");
 }
 
 main()
