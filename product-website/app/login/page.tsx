@@ -20,22 +20,23 @@ export default function LoginPage() {
     setLoading(true);
     setError("");
 
-    if (isRegister) {
-      const res = await authClient.signUp({ email, password, fullName });
-      if (res.success) {
-        router.push("/profile");
+    try {
+      if (isRegister) {
+        const res = await authClient.signUp({ email, password, fullName });
+        if (res.user) {
+          router.push("/profile");
+        }
       } else {
-        setError("Registration failed. Please try again.");
+        const res = await authClient.signIn({ email, password });
+        if (res.user) {
+          router.push("/profile");
+        }
       }
-    } else {
-      const res = await authClient.signIn({ email, password });
-      if (res.success) {
-        router.push("/profile");
-      } else {
-        setError("Invalid email or password.");
-      }
+    } catch (err: any) {
+      setError(err.message || "Authentication failed. Please check credentials or API server.");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (

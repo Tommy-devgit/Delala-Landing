@@ -7,13 +7,17 @@ import { CategoryBar } from "@/components/category-bar";
 import { PropertyCard } from "@/components/property-card";
 import { BrokerCard } from "@/components/broker-card";
 import { FilterModal } from "@/components/filter-modal";
+import { AuthModal } from "@/components/auth-modal";
 import { apiClient } from "@/lib/api-client";
+import { authClient, UserSession } from "@/lib/auth-client";
 import { Property, City, Broker, FilterState } from "@/lib/types";
-import { ShieldCheck, MapPin, Building2, ArrowRight, Sparkles, SlidersHorizontal, Flame } from "lucide-react";
+import { ShieldCheck, MapPin, Building2, ArrowRight, Sparkles, SlidersHorizontal, Flame, Info, UserPlus } from "lucide-react";
 
 export default function HomePage() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [session, setSession] = useState<{ user: UserSession; token: string } | null>(null);
   const [properties, setProperties] = useState<Property[]>([]);
   const [cities, setCities] = useState<City[]>([]);
   const [brokers, setBrokers] = useState<Broker[]>([]);
@@ -35,9 +39,9 @@ export default function HomePage() {
     sortBy: "newest",
   });
 
-  // Fetch live properties, cities, and brokers from NestJS REST API + Supabase PostgreSQL
   useEffect(() => {
     async function loadData() {
+      setSession(authClient.getSession());
       setLoading(true);
       const [fetchedProperties, fetchedCities, fetchedBrokers] = await Promise.all([
         apiClient.getProperties(),
@@ -50,9 +54,10 @@ export default function HomePage() {
       setLoading(false);
     }
     loadData();
+
+    window.addEventListener("delala_auth_change", () => setSession(authClient.getSession()));
   }, []);
 
-  // Filter listings based on category pill
   const filteredListings = properties.filter((item) => {
     if (selectedCategory === "all") return true;
     if (selectedCategory === "diplomatic") return item.subCity.includes("Bole") || item.neighborhood.includes("Airport");
@@ -62,6 +67,25 @@ export default function HomePage() {
   return (
     <div className="space-y-12 pb-16">
       
+      {/* 0. ONBOARDING WELCOME BANNER FOR FIRST VISITORS */}
+      {!session?.user && (
+        <div className="bg-[#4C061D] text-white py-3 px-4 sm:px-8 border-b border-[#3B0416]">
+          <div className="max-w-[1440px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-xs font-mono-label">
+            <div className="flex items-center gap-2">
+              <Info className="w-4 h-4 text-[#B4C292] shrink-0" />
+              <span>Looking for a home? Explore freely with zero account required. Want to list your property? Create an account.</span>
+            </div>
+            <button
+              onClick={() => setIsAuthModalOpen(true)}
+              className="px-4 py-1.5 rounded-full bg-[#B4C292] text-[#4C061D] font-bold hover:bg-white transition-colors shrink-0 flex items-center gap-1.5"
+            >
+              <UserPlus className="w-3.5 h-3.5" />
+              <span>Create Account / Sign In</span>
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* 1. HERO DISCOVERY SECTION */}
       <section className="bg-[#FAF8F4] pt-8 pb-12 px-4 sm:px-8 border-b border-[#ECE7DA] relative overflow-hidden">
         <div className="max-w-[1440px] mx-auto">
@@ -234,6 +258,12 @@ export default function HomePage() {
         onClose={() => setIsFilterModalOpen(false)}
         initialFilters={filters}
         onApply={(newFilters) => setFilters(newFilters)}
+      />
+
+      {/* Auth Modal Component */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
       />
 
     </div>
