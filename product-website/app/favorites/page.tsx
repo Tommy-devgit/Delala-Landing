@@ -7,7 +7,7 @@ import { authClient, UserSession } from "@/lib/auth-client";
 import { AuthModal } from "@/components/auth-modal";
 import { Property } from "@/lib/types";
 import { PropertyCard } from "@/components/property-card";
-import { Heart, Search, User } from "lucide-react";
+import { Heart, Search, Lock } from "lucide-react";
 
 export default function FavoritesPage() {
   const [session, setSession] = useState<{ user: UserSession; token: string } | null>(null);
@@ -32,7 +32,7 @@ export default function FavoritesPage() {
   const savedListings = properties.filter((p) => savedIds.includes(p.id));
 
   const handleToggle = (id: string) => {
-    if (!session?.user || session.user.role === "GUEST") {
+    if (!session?.user) {
       setIsAuthModalOpen(true);
       return;
     }
@@ -64,18 +64,18 @@ export default function FavoritesPage() {
 
         {!session?.user ? (
           <div className="py-20 text-center bg-white rounded-3xl border border-[#ECE7DA] p-8 max-w-xl mx-auto space-y-4 shadow-sm">
-            <Heart className="w-12 h-12 text-[#4C061D] mx-auto opacity-70" />
+            <Lock className="w-12 h-12 text-[#4C061D] mx-auto opacity-70" />
             <h2 className="font-serif-display text-2xl font-light text-[#1c1b12]">
               Sign in to save properties
             </h2>
             <p className="text-xs text-[#736F4E]">
-              Authenticate as a Home Seeker or Certified Broker to save listings across devices.
+              Sign in with your account to save listings across devices.
             </p>
             <button
               onClick={() => setIsAuthModalOpen(true)}
               className="px-8 py-3.5 rounded-full bg-[#4C061D] text-white font-mono-label text-xs font-bold shadow-md hover:bg-[#3B0416] transition-colors"
             >
-              Sign In / Choose Persona →
+              Sign In →
             </button>
           </div>
         ) : loading ? (

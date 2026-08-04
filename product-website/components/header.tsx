@@ -196,7 +196,7 @@ export function Header({ onOpenFilters }: { onOpenFilters?: () => void }) {
                 onClick={() => setIsAuthModalOpen(true)}
                 className="px-4 py-2.5 rounded-full bg-[#FAF8F4] border border-[#ECE7DA] text-xs font-mono-label font-bold text-[#4C061D] hover:bg-[#ECE7DA] transition-colors"
               >
-                SIGN IN / PERSONA
+                SIGN IN / SIGN UP
               </button>
             )}
 

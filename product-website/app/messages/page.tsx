@@ -1,64 +1,60 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { MessageSquare, Send, CheckCircle2, Building2, User, Phone, Lock } from "lucide-react";
+import { MessageSquare, Send, Lock } from "lucide-react";
 import { apiClient } from "@/lib/api-client";
 import { authClient, UserSession } from "@/lib/auth-client";
 import { AuthModal } from "@/components/auth-modal";
 import { Property } from "@/lib/types";
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1";
+
 export default function MessagesPage() {
   const [session, setSession] = useState<{ user: UserSession; token: string } | null>(null);
-  const [messages, setMessages] = useState([
-    {
-      id: "1",
-      sender: "Abebe Tesfaye",
-      avatar: "/images/hero_home_away.jpg",
-      text: "Greetings! Is the 45kVA generator automatically switched on during power outages?",
-      time: "10:14 AM",
-      isMe: false,
-    },
-    {
-      id: "2",
-      sender: "You",
-      text: "Yes, it features an automatic transfer switch (ATS) with 5-second takeover.",
-      time: "10:16 AM",
-      isMe: true,
-    },
-  ]);
+  const [messages, setMessages] = useState<any[]>([]);
   const [input, setInput] = useState("");
   const [property, setProperty] = useState<Property | null>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function loadData() {
       const activeSession = authClient.getSession();
       setSession(activeSession);
 
-      const data = await apiClient.getProperties();
-      if (data.length > 0) setProperty(data[0]);
+      if (activeSession?.user?.id) {
+        try {
+          const res = await fetch(`${API_BASE}/messages/user/${activeSession.user.id}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (Array.isArray(data)) setMessages(data);
+          }
+        } catch (err) {
+          console.warn("Messages API fetch offline.");
+        }
+      }
+      setLoading(false);
     }
     loadData();
   }, []);
 
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!session?.user || session.user.role === "GUEST") {
+    if (!session?.user) {
       setIsAuthModalOpen(true);
       return;
     }
     if (!input.trim()) return;
 
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: Date.now().toString(),
-        sender: "You",
-        text: input,
-        time: "Just now",
-        isMe: true,
-      },
-    ]);
+    const newMsg = {
+      id: Date.now().toString(),
+      sender: session.user.fullName || "You",
+      text: input,
+      time: "Just now",
+      isMe: true,
+    };
+
+    setMessages((prev) => [...prev, newMsg]);
     setInput("");
   };
 
@@ -73,14 +69,20 @@ export default function MessagesPage() {
               Sign in to view messages
             </h2>
             <p className="text-xs text-[#736F4E]">
-              Authenticate as a Home Seeker or Certified Broker to chat directly about rental terms and walkthrough appointments.
+              Sign in with your account to chat directly about rental terms and walkthrough appointments.
             </p>
             <button
               onClick={() => setIsAuthModalOpen(true)}
               className="px-8 py-3.5 rounded-full bg-[#4C061D] text-white font-mono-label text-xs font-bold shadow-md hover:bg-[#3B0416] transition-colors"
             >
-              Sign In / Choose Persona →
+              Sign In →
             </button>
+          </div>
+        ) : messages.length === 0 ? (
+          <div className="py-20 text-center bg-white rounded-3xl border border-[#ECE7DA] p-8 max-w-xl mx-auto space-y-3 shadow-xs">
+            <MessageSquare className="w-12 h-12 text-[#736F4E] mx-auto opacity-50" />
+            <h3 className="font-serif-display text-xl text-[#1C1B12]">No Conversations Yet</h3>
+            <p className="text-xs text-[#736F4E]">When you contact brokers or inquiries are submitted for your property, messages will appear here.</p>
           </div>
         ) : (
           <div className="bg-white rounded-3xl border border-[#ECE7DA] shadow-xl overflow-hidden grid grid-cols-1 md:grid-cols-3 min-h-[640px]">
@@ -94,12 +96,12 @@ export default function MessagesPage() {
                 <div className="p-3.5 rounded-2xl bg-white border border-[#4C061D] shadow-xs cursor-pointer">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-[#4C061D] text-white flex items-center justify-center font-bold text-xs">
-                      AT
+                      {session.user.fullName.slice(0, 2).toUpperCase()}
                     </div>
                     <div>
-                      <div className="font-bold text-xs text-[#1C1B12]">Abebe Tesfaye</div>
+                      <div className="font-bold text-xs text-[#1C1B12]">{session.user.fullName}</div>
                       <div className="text-[11px] text-[#736F4E] truncate max-w-[160px]">
-                        {property?.title || "Bole Medhanialem Property"}
+                        Active Chat Thread
                       </div>
                     </div>
                   </div>
@@ -114,22 +116,13 @@ export default function MessagesPage() {
               <div className="pb-4 border-b border-[#ECE7DA] flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-[#4C061D] text-white flex items-center justify-center font-bold text-xs">
-                    AT
+                    {session.user.fullName.slice(0, 2).toUpperCase()}
                   </div>
                   <div>
-                    <h3 className="font-bold text-sm text-[#1C1B12]">Abebe Tesfaye</h3>
-                    <span className="font-mono-label text-[10px] text-emerald-700">VERIFIED BROKER</span>
+                    <h3 className="font-bold text-sm text-[#1C1B12]">{session.user.fullName}</h3>
+                    <span className="font-mono-label text-[10px] text-emerald-700">VERIFIED MEMBER</span>
                   </div>
                 </div>
-
-                {property && (
-                  <div className="text-right hidden sm:block">
-                    <div className="font-mono-label text-xs font-bold text-[#4C061D]">
-                      ETB {property.rentETB.toLocaleString()}/mo
-                    </div>
-                    <div className="text-[10px] text-[#736F4E]">{property.subCity}, {property.city}</div>
-                  </div>
-                )}
               </div>
 
               {/* Message Thread */}
@@ -158,7 +151,7 @@ export default function MessagesPage() {
                   type="text"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  placeholder="Type your inquiry about walkthrough or rental terms..."
+                  placeholder="Type your message..."
                   className="flex-1 p-4 rounded-2xl bg-[#FAF8F4] border border-[#ECE7DA] text-xs text-[#1C1B12] focus:outline-none focus:border-[#4C061D]"
                 />
                 <button

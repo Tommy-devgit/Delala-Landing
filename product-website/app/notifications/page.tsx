@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Bell, CheckCircle2, Calendar, ShieldCheck, Tag, User } from "lucide-react";
+import { Bell, CheckCircle2, Calendar, ShieldCheck, Tag, Lock } from "lucide-react";
 import { authClient, UserSession } from "@/lib/auth-client";
 import { AuthModal } from "@/components/auth-modal";
 
@@ -50,18 +50,18 @@ export default function NotificationsPage() {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 mt-8 space-y-4">
         {!session?.user ? (
           <div className="py-16 text-center bg-white rounded-3xl border border-[#ECE7DA] p-8 max-w-md mx-auto space-y-4 shadow-sm">
-            <Bell className="w-12 h-12 text-[#4C061D] mx-auto opacity-70" />
+            <Lock className="w-12 h-12 text-[#4C061D] mx-auto opacity-70" />
             <h2 className="font-serif-display text-2xl text-[#1C1B12]">
               Sign in to view alerts
             </h2>
             <p className="text-xs text-[#736F4E]">
-              Authenticate or select your user persona to view walkthrough confirmations and property updates.
+              Authenticate with your account to view walkthrough confirmations and property updates.
             </p>
             <button
               onClick={() => setIsAuthModalOpen(true)}
               className="px-6 py-3 rounded-full bg-[#4C061D] text-white font-mono-label text-xs font-bold shadow-md hover:bg-[#3B0416] transition-colors"
             >
-              Select User Persona →
+              Sign In →
             </button>
           </div>
         ) : loading ? (

@@ -77,16 +77,16 @@ export default function ProfilePage() {
           <div className="py-20 text-center bg-white rounded-3xl border border-[#ECE7DA] p-8 max-w-xl mx-auto mb-12 shadow-sm space-y-4">
             <User className="w-12 h-12 text-[#4C061D] mx-auto opacity-70" />
             <h2 className="font-serif-display text-2xl text-[#1C1B12]">
-              Authentication & Role Gateway
+              Account Authentication
             </h2>
             <p className="text-xs text-[#736F4E] max-w-md mx-auto">
-              Please sign in or select your user persona (Guest, Home Seeker, or Verified Broker) to access your profile dashboard.
+              Please sign in with your email and password or create a new account to access your user dashboard.
             </p>
             <button
               onClick={() => setIsAuthModalOpen(true)}
               className="px-8 py-3.5 rounded-full bg-[#4C061D] text-white font-mono-label text-xs font-bold shadow-md hover:bg-[#3B0416] transition-colors"
             >
-              Sign In / Choose Persona →
+              Sign In / Sign Up →
             </button>
           </div>
         )}

@@ -63,7 +63,7 @@ export function AuthModal({
         <div className="text-center max-w-sm mx-auto space-y-2 mb-6">
           <span className="font-mono-label text-[10px] text-[#4C061D] bg-[#FAF8F4] border border-[#ECE7DA] px-3.5 py-1 rounded-full inline-flex items-center gap-1.5 shadow-xs">
             <ShieldCheck className="w-3.5 h-3.5 text-[#4C061D]" />
-            <span>REAL BETTER AUTHENTICATION</span>
+            <span>AUTHENTICATION</span>
           </span>
           <h2 className="font-serif-display text-3xl text-[#1C1B12]">
             {isSignUp ? "Create Your Account" : "Sign In to Delala"}
@@ -141,7 +141,7 @@ export function AuthModal({
             className="w-full py-4 rounded-full bg-[#4C061D] text-white font-mono-label text-xs font-bold hover:bg-[#3B0416] transition-colors shadow-md flex items-center justify-center gap-2 mt-2"
           >
             <CheckCircle2 className="w-4 h-4 text-[#B4C292]" />
-            <span>{loading ? "Authenticating..." : isSignUp ? "Create Real Account →" : "Sign In →"}</span>
+            <span>{loading ? "Authenticating..." : isSignUp ? "Create Account →" : "Sign In →"}</span>
           </button>
         </form>
 
