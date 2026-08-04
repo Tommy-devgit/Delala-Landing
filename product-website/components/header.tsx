@@ -91,6 +91,12 @@ export function Header({ onOpenFilters }: { onOpenFilters?: () => void }) {
             {/* List Property CTA Button */}
             <Link
               href="/publish"
+              onClick={(e) => {
+                if (!user) {
+                  e.preventDefault();
+                  setIsAuthModalOpen(true);
+                }
+              }}
               className="flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-[#4C061D] text-white font-mono-label text-xs font-bold hover:bg-[#3B0416] transition-colors shadow-sm"
             >
               <Plus className="w-3.5 h-3.5 text-[#B4C292]" />
