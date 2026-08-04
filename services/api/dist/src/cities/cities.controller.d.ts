@@ -6,11 +6,11 @@ export declare class CitiesController {
         neighborhoods: {
             id: string;
             slug: string;
-            cityId: string;
+            name: string;
             createdAt: Date;
             updatedAt: Date;
-            name: string;
             subCity: string;
+            cityId: string;
             securityScore: number;
             generatorPenetration: string;
             waterReliability: string;
@@ -19,22 +19,22 @@ export declare class CitiesController {
     } & {
         id: string;
         slug: string;
-        createdAt: Date;
-        updatedAt: Date;
         name: string;
         tagline: string;
         startingRentETB: number;
         propertiesCount: number;
+        createdAt: Date;
+        updatedAt: Date;
     })[]>;
     findOne(slug: string): import(".prisma/client").Prisma.Prisma__CityClient<{
         neighborhoods: {
             id: string;
             slug: string;
-            cityId: string;
+            name: string;
             createdAt: Date;
             updatedAt: Date;
-            name: string;
             subCity: string;
+            cityId: string;
             securityScore: number;
             generatorPenetration: string;
             waterReliability: string;
@@ -43,11 +43,14 @@ export declare class CitiesController {
         properties: {
             id: string;
             slug: string;
+            createdAt: Date;
+            updatedAt: Date;
+            cityId: string;
+            status: import(".prisma/client").$Enums.PropertyStatus;
             title: string;
             description: string;
             propertyType: string;
             rentETB: number;
-            cityId: string;
             neighborhoodId: string;
             bedrooms: number;
             bathrooms: number;
@@ -58,22 +61,19 @@ export declare class CitiesController {
             furnished: boolean;
             securityGuard: boolean;
             balcony: boolean;
-            status: import(".prisma/client").$Enums.PropertyStatus;
             rejectionReason: string | null;
             fieldAgentNotes: string | null;
             brokerId: string;
             ownerId: string | null;
-            createdAt: Date;
-            updatedAt: Date;
         }[];
     } & {
         id: string;
         slug: string;
-        createdAt: Date;
-        updatedAt: Date;
         name: string;
         tagline: string;
         startingRentETB: number;
         propertiesCount: number;
+        createdAt: Date;
+        updatedAt: Date;
     }, null, import("@prisma/client/runtime/library").DefaultArgs, import(".prisma/client").Prisma.PrismaClientOptions>;
 }

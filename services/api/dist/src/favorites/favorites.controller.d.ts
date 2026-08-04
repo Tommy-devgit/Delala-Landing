@@ -13,21 +13,21 @@ export declare class FavoritesController {
             city: {
                 id: string;
                 slug: string;
-                createdAt: Date;
-                updatedAt: Date;
                 name: string;
                 tagline: string;
                 startingRentETB: number;
                 propertiesCount: number;
+                createdAt: Date;
+                updatedAt: Date;
             };
             neighborhood: {
                 id: string;
                 slug: string;
-                cityId: string;
+                name: string;
                 createdAt: Date;
                 updatedAt: Date;
-                name: string;
                 subCity: string;
+                cityId: string;
                 securityScore: number;
                 generatorPenetration: string;
                 waterReliability: string;
@@ -38,10 +38,10 @@ export declare class FavoritesController {
                 slug: string;
                 createdAt: Date;
                 updatedAt: Date;
-                userId: string;
-                agencyName: string;
-                licenseNumber: string;
                 verified: boolean;
+                userId: string;
+                licenseNumber: string;
+                agencyName: string;
                 rating: number;
                 reviewsCount: number;
                 responseTime: string;
@@ -49,19 +49,22 @@ export declare class FavoritesController {
             };
             images: {
                 id: string;
-                propertyId: string;
                 url: string;
                 displayOrder: number;
                 isHero: boolean;
+                propertyId: string;
             }[];
         } & {
             id: string;
             slug: string;
+            createdAt: Date;
+            updatedAt: Date;
+            cityId: string;
+            status: import(".prisma/client").$Enums.PropertyStatus;
             title: string;
             description: string;
             propertyType: string;
             rentETB: number;
-            cityId: string;
             neighborhoodId: string;
             bedrooms: number;
             bathrooms: number;
@@ -72,13 +75,10 @@ export declare class FavoritesController {
             furnished: boolean;
             securityGuard: boolean;
             balcony: boolean;
-            status: import(".prisma/client").$Enums.PropertyStatus;
             rejectionReason: string | null;
             fieldAgentNotes: string | null;
             brokerId: string;
             ownerId: string | null;
-            createdAt: Date;
-            updatedAt: Date;
         };
     } & {
         id: string;
