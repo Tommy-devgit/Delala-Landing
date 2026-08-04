@@ -97,7 +97,7 @@ export default function NotificationsPage() {
       <AuthModal
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
-        onSelectRole={(u) => setSession({ user: u, token: "active" })}
+        onSuccess={(u) => setSession({ user: u, token: "active" })}
       />
     </div>
   );

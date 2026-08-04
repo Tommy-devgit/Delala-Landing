@@ -208,7 +208,7 @@ export function Header({ onOpenFilters }: { onOpenFilters?: () => void }) {
       <AuthModal
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
-        onSelectRole={(u) => setSession({ user: u, token: "active" })}
+        onSuccess={(u) => setSession({ user: u, token: "active" })}
       />
     </header>
   );
