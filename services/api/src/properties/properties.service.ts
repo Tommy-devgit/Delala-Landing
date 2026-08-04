@@ -43,7 +43,7 @@ export class PropertiesService {
     return property;
   }
 
-  async create(createDto: CreatePropertyDto) {
+  async create(createDto: CreatePropertyDto, uploadedImageUrls: string[] = []) {
     const slug = createDto.title.toLowerCase().replace(/[^a-z0-9]+/g, "-") + "-" + Date.now().toString().slice(-4);
 
     // Resolve or fallback default City & Neighborhood if needed
@@ -59,12 +59,30 @@ export class PropertiesService {
     if (firstNeighborhood && (!neighborhoodId || neighborhoodId === "n1" || neighborhoodId.length < 10)) neighborhoodId = firstNeighborhood.id;
     if (firstBroker && (!brokerId || brokerId === "b1" || brokerId.length < 10)) brokerId = firstBroker.id;
 
+    // Combine any uploaded images passed directly or in DTO
+    const finalImageUrls = Array.from(
+      new Set([...uploadedImageUrls, ...(createDto.imageUrls || [])])
+    );
+
+    const imageRecords = finalImageUrls.length > 0
+      ? finalImageUrls.map((url, index) => ({
+          url,
+          displayOrder: index + 1,
+          isHero: index === 0,
+        }))
+      : [
+          { url: "/images/hero_property.png", displayOrder: 1, isHero: true },
+          { url: "/images/hero_home_away.jpg", displayOrder: 2, isHero: false },
+        ];
+
+    const priceAmount = Number(createDto.price || createDto.rentETB || 65000);
+
     return this.prisma.property.create({
       data: {
         title: createDto.title,
         description: createDto.description || "Newly published verified property submission.",
         propertyType: createDto.propertyType || "Villa",
-        rentETB: Number(createDto.rentETB),
+        rentETB: priceAmount,
         cityId,
         neighborhoodId,
         bedrooms: Number(createDto.bedrooms || 3),
@@ -79,10 +97,7 @@ export class PropertiesService {
         slug,
         status: "PENDING_APPROVAL",
         images: {
-          create: [
-            { url: "/images/hero_property.png", displayOrder: 1, isHero: true },
-            { url: "/images/hero_home_away.jpg", displayOrder: 2, isHero: false },
-          ],
+          create: imageRecords,
         },
       },
       include: {

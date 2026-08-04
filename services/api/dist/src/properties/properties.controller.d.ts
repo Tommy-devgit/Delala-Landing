@@ -1,31 +1,33 @@
 import { PropertiesService } from "./properties.service";
 import { CreatePropertyDto, ModeratePropertyDto } from "./dto/create-property.dto";
+import { R2StorageService } from "../storage/r2-storage.service";
 export declare class PropertiesController {
     private readonly propertiesService;
-    constructor(propertiesService: PropertiesService);
+    private readonly r2StorageService;
+    constructor(propertiesService: PropertiesService, r2StorageService: R2StorageService);
     findAll(query: {
         city?: string;
         subCity?: string;
         propertyType?: string;
     }): Promise<({
         city: {
+            name: string;
             id: string;
             slug: string;
-            name: string;
+            createdAt: Date;
+            updatedAt: Date;
             tagline: string;
             startingRentETB: number;
             propertiesCount: number;
-            createdAt: Date;
-            updatedAt: Date;
         };
         neighborhood: {
+            name: string;
             id: string;
             slug: string;
-            name: string;
+            cityId: string;
             createdAt: Date;
             updatedAt: Date;
             subCity: string;
-            cityId: string;
             securityScore: number;
             generatorPenetration: string;
             waterReliability: string;
@@ -37,32 +39,32 @@ export declare class PropertiesController {
                     id: string;
                     createdAt: Date;
                     updatedAt: Date;
+                    userId: string;
+                    verified: boolean;
                     fullName: string;
                     avatarUrl: string | null;
                     phone: string | null;
                     bio: string | null;
                     languages: string[];
-                    verified: boolean;
-                    userId: string;
                 };
             } & {
                 id: string;
+                status: import(".prisma/client").$Enums.UserStatus;
                 createdAt: Date;
                 updatedAt: Date;
                 email: string;
-                supabaseUid: string;
                 role: import(".prisma/client").$Enums.UserRole;
-                status: import(".prisma/client").$Enums.UserStatus;
+                supabaseUid: string;
             };
         } & {
             id: string;
             slug: string;
             createdAt: Date;
             updatedAt: Date;
-            verified: boolean;
             userId: string;
-            licenseNumber: string;
             agencyName: string;
+            licenseNumber: string;
+            verified: boolean;
             rating: number;
             reviewsCount: number;
             responseTime: string;
@@ -76,16 +78,13 @@ export declare class PropertiesController {
             propertyId: string;
         }[];
     } & {
+        description: string;
         id: string;
         slug: string;
-        createdAt: Date;
-        updatedAt: Date;
-        cityId: string;
-        status: import(".prisma/client").$Enums.PropertyStatus;
         title: string;
-        description: string;
         propertyType: string;
         rentETB: number;
+        cityId: string;
         neighborhoodId: string;
         bedrooms: number;
         bathrooms: number;
@@ -96,30 +95,33 @@ export declare class PropertiesController {
         furnished: boolean;
         securityGuard: boolean;
         balcony: boolean;
+        status: import(".prisma/client").$Enums.PropertyStatus;
         rejectionReason: string | null;
         fieldAgentNotes: string | null;
         brokerId: string;
         ownerId: string | null;
+        createdAt: Date;
+        updatedAt: Date;
     })[]>;
     findOne(slug: string): Promise<{
         city: {
+            name: string;
             id: string;
             slug: string;
-            name: string;
+            createdAt: Date;
+            updatedAt: Date;
             tagline: string;
             startingRentETB: number;
             propertiesCount: number;
-            createdAt: Date;
-            updatedAt: Date;
         };
         neighborhood: {
+            name: string;
             id: string;
             slug: string;
-            name: string;
+            cityId: string;
             createdAt: Date;
             updatedAt: Date;
             subCity: string;
-            cityId: string;
             securityScore: number;
             generatorPenetration: string;
             waterReliability: string;
@@ -131,32 +133,32 @@ export declare class PropertiesController {
                     id: string;
                     createdAt: Date;
                     updatedAt: Date;
+                    userId: string;
+                    verified: boolean;
                     fullName: string;
                     avatarUrl: string | null;
                     phone: string | null;
                     bio: string | null;
                     languages: string[];
-                    verified: boolean;
-                    userId: string;
                 };
             } & {
                 id: string;
+                status: import(".prisma/client").$Enums.UserStatus;
                 createdAt: Date;
                 updatedAt: Date;
                 email: string;
-                supabaseUid: string;
                 role: import(".prisma/client").$Enums.UserRole;
-                status: import(".prisma/client").$Enums.UserStatus;
+                supabaseUid: string;
             };
         } & {
             id: string;
             slug: string;
             createdAt: Date;
             updatedAt: Date;
-            verified: boolean;
             userId: string;
-            licenseNumber: string;
             agencyName: string;
+            licenseNumber: string;
+            verified: boolean;
             rating: number;
             reviewsCount: number;
             responseTime: string;
@@ -170,16 +172,13 @@ export declare class PropertiesController {
             propertyId: string;
         }[];
     } & {
+        description: string;
         id: string;
         slug: string;
-        createdAt: Date;
-        updatedAt: Date;
-        cityId: string;
-        status: import(".prisma/client").$Enums.PropertyStatus;
         title: string;
-        description: string;
         propertyType: string;
         rentETB: number;
+        cityId: string;
         neighborhoodId: string;
         bedrooms: number;
         bathrooms: number;
@@ -190,30 +189,36 @@ export declare class PropertiesController {
         furnished: boolean;
         securityGuard: boolean;
         balcony: boolean;
+        status: import(".prisma/client").$Enums.PropertyStatus;
         rejectionReason: string | null;
         fieldAgentNotes: string | null;
         brokerId: string;
         ownerId: string | null;
+        createdAt: Date;
+        updatedAt: Date;
     }>;
-    create(createDto: CreatePropertyDto): Promise<{
+    uploadImage(file: Express.Multer.File): Promise<{
+        url: string;
+    }>;
+    create(createDto: CreatePropertyDto, files?: Express.Multer.File[]): Promise<{
         city: {
+            name: string;
             id: string;
             slug: string;
-            name: string;
+            createdAt: Date;
+            updatedAt: Date;
             tagline: string;
             startingRentETB: number;
             propertiesCount: number;
-            createdAt: Date;
-            updatedAt: Date;
         };
         neighborhood: {
+            name: string;
             id: string;
             slug: string;
-            name: string;
+            cityId: string;
             createdAt: Date;
             updatedAt: Date;
             subCity: string;
-            cityId: string;
             securityScore: number;
             generatorPenetration: string;
             waterReliability: string;
@@ -224,10 +229,10 @@ export declare class PropertiesController {
             slug: string;
             createdAt: Date;
             updatedAt: Date;
-            verified: boolean;
             userId: string;
-            licenseNumber: string;
             agencyName: string;
+            licenseNumber: string;
+            verified: boolean;
             rating: number;
             reviewsCount: number;
             responseTime: string;
@@ -241,16 +246,13 @@ export declare class PropertiesController {
             propertyId: string;
         }[];
     } & {
+        description: string;
         id: string;
         slug: string;
-        createdAt: Date;
-        updatedAt: Date;
-        cityId: string;
-        status: import(".prisma/client").$Enums.PropertyStatus;
         title: string;
-        description: string;
         propertyType: string;
         rentETB: number;
+        cityId: string;
         neighborhoodId: string;
         bedrooms: number;
         bathrooms: number;
@@ -261,22 +263,22 @@ export declare class PropertiesController {
         furnished: boolean;
         securityGuard: boolean;
         balcony: boolean;
+        status: import(".prisma/client").$Enums.PropertyStatus;
         rejectionReason: string | null;
         fieldAgentNotes: string | null;
         brokerId: string;
         ownerId: string | null;
+        createdAt: Date;
+        updatedAt: Date;
     }>;
     moderate(id: string, moderateDto: ModeratePropertyDto): Promise<{
+        description: string;
         id: string;
         slug: string;
-        createdAt: Date;
-        updatedAt: Date;
-        cityId: string;
-        status: import(".prisma/client").$Enums.PropertyStatus;
         title: string;
-        description: string;
         propertyType: string;
         rentETB: number;
+        cityId: string;
         neighborhoodId: string;
         bedrooms: number;
         bathrooms: number;
@@ -287,9 +289,12 @@ export declare class PropertiesController {
         furnished: boolean;
         securityGuard: boolean;
         balcony: boolean;
+        status: import(".prisma/client").$Enums.PropertyStatus;
         rejectionReason: string | null;
         fieldAgentNotes: string | null;
         brokerId: string;
         ownerId: string | null;
+        createdAt: Date;
+        updatedAt: Date;
     }>;
 }

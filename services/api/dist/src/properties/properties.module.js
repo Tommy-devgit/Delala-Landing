@@ -10,14 +10,15 @@ exports.PropertiesModule = void 0;
 const common_1 = require("@nestjs/common");
 const properties_controller_1 = require("./properties.controller");
 const properties_service_1 = require("./properties.service");
+const r2_storage_service_1 = require("../storage/r2-storage.service");
 let PropertiesModule = class PropertiesModule {
 };
 exports.PropertiesModule = PropertiesModule;
 exports.PropertiesModule = PropertiesModule = __decorate([
     (0, common_1.Module)({
         controllers: [properties_controller_1.PropertiesController],
-        providers: [properties_service_1.PropertiesService],
-        exports: [properties_service_1.PropertiesService],
+        providers: [properties_service_1.PropertiesService, r2_storage_service_1.R2StorageService],
+        exports: [properties_service_1.PropertiesService, r2_storage_service_1.R2StorageService],
     })
 ], PropertiesModule);
 //# sourceMappingURL=properties.module.js.map

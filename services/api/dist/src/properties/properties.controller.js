@@ -14,14 +14,17 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PropertiesController = void 0;
 const common_1 = require("@nestjs/common");
+const platform_express_1 = require("@nestjs/platform-express");
 const swagger_1 = require("@nestjs/swagger");
 const properties_service_1 = require("./properties.service");
 const create_property_dto_1 = require("./dto/create-property.dto");
+const r2_storage_service_1 = require("../storage/r2-storage.service");
 const roles_decorator_1 = require("../common/decorators/roles.decorator");
 const roles_guard_1 = require("../common/guards/roles.guard");
 let PropertiesController = class PropertiesController {
-    constructor(propertiesService) {
+    constructor(propertiesService, r2StorageService) {
         this.propertiesService = propertiesService;
+        this.r2StorageService = r2StorageService;
     }
     findAll(query) {
         return this.propertiesService.findAll(query);
@@ -29,8 +32,21 @@ let PropertiesController = class PropertiesController {
     findOne(slug) {
         return this.propertiesService.findOneBySlug(slug);
     }
-    create(createDto) {
-        return this.propertiesService.create(createDto);
+    async uploadImage(file) {
+        if (!file)
+            return { url: "/images/hero_property.png" };
+        const url = await this.r2StorageService.uploadImage(file);
+        return { url };
+    }
+    async create(createDto, files) {
+        const uploadedUrls = [];
+        if (files && files.length > 0) {
+            for (const file of files) {
+                const url = await this.r2StorageService.uploadImage(file);
+                uploadedUrls.push(url);
+            }
+        }
+        return this.propertiesService.create(createDto, uploadedUrls);
     }
     moderate(id, moderateDto) {
         return this.propertiesService.moderate(id, moderateDto);
@@ -55,12 +71,24 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], PropertiesController.prototype, "findOne", null);
 __decorate([
-    (0, common_1.Post)(),
-    (0, swagger_1.ApiOperation)({ summary: "Submit a new property listing for approval" }),
-    __param(0, (0, common_1.Body)()),
+    (0, common_1.Post)("upload"),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)("file")),
+    (0, swagger_1.ApiConsumes)("multipart/form-data"),
+    (0, swagger_1.ApiOperation)({ summary: "Upload single image to Cloudflare R2 bucket" }),
+    __param(0, (0, common_1.UploadedFile)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [create_property_dto_1.CreatePropertyDto]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], PropertiesController.prototype, "uploadImage", null);
+__decorate([
+    (0, common_1.Post)(),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FilesInterceptor)("images")),
+    (0, swagger_1.ApiOperation)({ summary: "Submit a new property listing with optional Cloudflare R2 images" }),
+    __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.UploadedFiles)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [create_property_dto_1.CreatePropertyDto, Array]),
+    __metadata("design:returntype", Promise)
 ], PropertiesController.prototype, "create", null);
 __decorate([
     (0, common_1.Patch)(":id/moderate"),
@@ -77,6 +105,7 @@ __decorate([
 exports.PropertiesController = PropertiesController = __decorate([
     (0, swagger_1.ApiTags)("properties"),
     (0, common_1.Controller)("properties"),
-    __metadata("design:paramtypes", [properties_service_1.PropertiesService])
+    __metadata("design:paramtypes", [properties_service_1.PropertiesService,
+        r2_storage_service_1.R2StorageService])
 ], PropertiesController);
 //# sourceMappingURL=properties.controller.js.map

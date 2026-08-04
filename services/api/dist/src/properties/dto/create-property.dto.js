@@ -31,52 +31,104 @@ __decorate([
     __metadata("design:type", String)
 ], CreatePropertyDto.prototype, "propertyType", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: 65000 }),
+    (0, swagger_1.ApiProperty)({ example: "Rent", required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreatePropertyDto.prototype, "listingType", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 65000, required: false }),
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
 ], CreatePropertyDto.prototype, "rentETB", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: "c1" }),
+    (0, swagger_1.ApiProperty)({ example: 65000, required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], CreatePropertyDto.prototype, "price", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: "Addis Ababa", required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreatePropertyDto.prototype, "city", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: "Bole", required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreatePropertyDto.prototype, "subCity", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: "Bole Medhanialem", required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreatePropertyDto.prototype, "neighborhood", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: "c1", required: false }),
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreatePropertyDto.prototype, "cityId", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: "n1" }),
+    (0, swagger_1.ApiProperty)({ example: "n1", required: false }),
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreatePropertyDto.prototype, "neighborhoodId", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: 4 }),
+    (0, swagger_1.ApiProperty)({ example: "loc_123", required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreatePropertyDto.prototype, "location_id", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: "Atlas Hotel area, Bole Ring Road", required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreatePropertyDto.prototype, "address", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 4, required: false }),
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
 ], CreatePropertyDto.prototype, "bedrooms", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: 3.5 }),
+    (0, swagger_1.ApiProperty)({ example: 3.5, required: false }),
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
 ], CreatePropertyDto.prototype, "bathrooms", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: 320 }),
+    (0, swagger_1.ApiProperty)({ example: 320, required: false }),
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
 ], CreatePropertyDto.prototype, "areaSqm", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: true }),
+    (0, swagger_1.ApiProperty)({ example: true, required: false }),
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsBoolean)(),
     __metadata("design:type", Boolean)
 ], CreatePropertyDto.prototype, "generator", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: true }),
+    (0, swagger_1.ApiProperty)({ example: true, required: false }),
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsBoolean)(),
     __metadata("design:type", Boolean)
 ], CreatePropertyDto.prototype, "waterTank", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: true }),
+    (0, swagger_1.ApiProperty)({ example: true, required: false }),
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsBoolean)(),
     __metadata("design:type", Boolean)
 ], CreatePropertyDto.prototype, "parking", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: true }),
+    (0, swagger_1.ApiProperty)({ example: true, required: false }),
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsBoolean)(),
     __metadata("design:type", Boolean)
 ], CreatePropertyDto.prototype, "furnished", void 0);
@@ -93,10 +145,17 @@ __decorate([
     __metadata("design:type", Boolean)
 ], CreatePropertyDto.prototype, "balcony", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: "b1" }),
+    (0, swagger_1.ApiProperty)({ example: "b1", required: false }),
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreatePropertyDto.prototype, "brokerId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: ["https://r2.delala.et/properties/1.jpg"], required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)(),
+    __metadata("design:type", Array)
+], CreatePropertyDto.prototype, "imageUrls", void 0);
 class ModeratePropertyDto {
 }
 exports.ModeratePropertyDto = ModeratePropertyDto;

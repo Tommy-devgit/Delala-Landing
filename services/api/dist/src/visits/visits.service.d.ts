@@ -5,63 +5,23 @@ export declare class VisitsService {
     constructor(prisma: PrismaService);
     create(dto: CreateVisitDto): Promise<{
         id: string;
-        createdAt: Date;
         status: import(".prisma/client").$Enums.VisitStatus;
         brokerId: string;
+        createdAt: Date;
         propertyId: string;
         seekerId: string;
         scheduledDate: string;
         timeSlot: string;
     }>;
     findAll(): Promise<({
-        broker: {
-            user: {
-                profile: {
-                    id: string;
-                    createdAt: Date;
-                    updatedAt: Date;
-                    fullName: string;
-                    avatarUrl: string | null;
-                    phone: string | null;
-                    bio: string | null;
-                    languages: string[];
-                    verified: boolean;
-                    userId: string;
-                };
-            } & {
-                id: string;
-                createdAt: Date;
-                updatedAt: Date;
-                email: string;
-                supabaseUid: string;
-                role: import(".prisma/client").$Enums.UserRole;
-                status: import(".prisma/client").$Enums.UserStatus;
-            };
-        } & {
-            id: string;
-            slug: string;
-            createdAt: Date;
-            updatedAt: Date;
-            verified: boolean;
-            userId: string;
-            licenseNumber: string;
-            agencyName: string;
-            rating: number;
-            reviewsCount: number;
-            responseTime: string;
-            specializedAreas: string[];
-        };
         property: {
             id: string;
             slug: string;
-            createdAt: Date;
-            updatedAt: Date;
-            cityId: string;
-            status: import(".prisma/client").$Enums.PropertyStatus;
             title: string;
             description: string;
             propertyType: string;
             rentETB: number;
+            cityId: string;
             neighborhoodId: string;
             bedrooms: number;
             bathrooms: number;
@@ -72,38 +32,78 @@ export declare class VisitsService {
             furnished: boolean;
             securityGuard: boolean;
             balcony: boolean;
+            status: import(".prisma/client").$Enums.PropertyStatus;
             rejectionReason: string | null;
             fieldAgentNotes: string | null;
             brokerId: string;
             ownerId: string | null;
+            createdAt: Date;
+            updatedAt: Date;
+        };
+        broker: {
+            user: {
+                profile: {
+                    id: string;
+                    createdAt: Date;
+                    updatedAt: Date;
+                    userId: string;
+                    verified: boolean;
+                    fullName: string;
+                    avatarUrl: string | null;
+                    phone: string | null;
+                    bio: string | null;
+                    languages: string[];
+                };
+            } & {
+                id: string;
+                status: import(".prisma/client").$Enums.UserStatus;
+                createdAt: Date;
+                updatedAt: Date;
+                email: string;
+                role: import(".prisma/client").$Enums.UserRole;
+                supabaseUid: string;
+            };
+        } & {
+            id: string;
+            slug: string;
+            createdAt: Date;
+            updatedAt: Date;
+            userId: string;
+            agencyName: string;
+            licenseNumber: string;
+            verified: boolean;
+            rating: number;
+            reviewsCount: number;
+            responseTime: string;
+            specializedAreas: string[];
         };
         seeker: {
             profile: {
                 id: string;
                 createdAt: Date;
                 updatedAt: Date;
+                userId: string;
+                verified: boolean;
                 fullName: string;
                 avatarUrl: string | null;
                 phone: string | null;
                 bio: string | null;
                 languages: string[];
-                verified: boolean;
-                userId: string;
             };
         } & {
             id: string;
+            status: import(".prisma/client").$Enums.UserStatus;
             createdAt: Date;
             updatedAt: Date;
             email: string;
-            supabaseUid: string;
             role: import(".prisma/client").$Enums.UserRole;
-            status: import(".prisma/client").$Enums.UserStatus;
+            supabaseUid: string;
         };
     } & {
         id: string;
-        createdAt: Date;
         status: import(".prisma/client").$Enums.VisitStatus;
         brokerId: string;
+        createdAt: Date;
         propertyId: string;
         seekerId: string;
         scheduledDate: string;
