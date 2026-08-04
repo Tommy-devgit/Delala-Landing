@@ -17,8 +17,8 @@ let FavoritesService = class FavoritesService {
         this.prisma = prisma;
     }
     async toggle(userId, propertyId) {
-        const existing = await this.prisma.favorite.findUnique({
-            where: { userId_propertyId: { userId, propertyId } },
+        const existing = await this.prisma.favorite.findFirst({
+            where: { userId, propertyId },
         });
         if (existing) {
             await this.prisma.favorite.delete({ where: { id: existing.id } });
@@ -36,7 +36,7 @@ let FavoritesService = class FavoritesService {
             where: { userId },
             include: {
                 property: {
-                    include: { city: true, neighborhood: true, broker: true, images: true },
+                    include: { location: true, images: true },
                 },
             },
         });

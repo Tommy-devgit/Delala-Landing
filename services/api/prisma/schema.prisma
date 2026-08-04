@@ -2,260 +2,171 @@ datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
+  schemas   = ["public", "auth"]
 }
 
 generator client {
-  provider = "prisma-client-js"
-}
-
-enum UserRole {
-  GUEST
-  USER
-  OWNER
-  BROKER
-  MODERATOR
-  ADMIN
-}
-
-enum UserStatus {
-  ACTIVE
-  SUSPENDED
-}
-
-enum PropertyStatus {
-  PENDING_APPROVAL
-  APPROVED
-  REJECTED
-  ARCHIVED
-}
-
-enum VisitStatus {
-  PENDING
-  CONFIRMED
-  COMPLETED
-  CANCELLED
-}
-
-enum ReportStatus {
-  PENDING
-  RESOLVED
-  DISMISSED
+  provider        = "prisma-client-js"
+  previewFeatures = ["multiSchema"]
 }
 
 model User {
-  id          String     @id @default(uuid())
-  email       String     @unique
-  role        UserRole   @default(USER)
-  status      UserStatus @default(ACTIVE)
-  supabaseUid String     @unique
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-
-  profile     Profile?
-  broker      Broker?
-  favorites   Favorite[]
-  reviews     Review[]
-  visits      Visit[]     @relation("SeekerVisits")
-  reports     Report[]    @relation("ReporterReports")
-  auditLogs   AuditLog[]
+  id         String       @id @db.Uuid
+  email      String?
+  createdAt  DateTime?    @default(now()) @map("created_at") @db.Timestamp(6)
+  profile    Profile?
+  properties Property[]
+  favorites  Favorite[]
+  reviews    Review[]
+  visits     Visit[]
+  reports    Report[]
+  auditLogs  AuditLog[]
 
   @@map("users")
+  @@schema("auth")
 }
 
 model Profile {
-  id          String   @id @default(uuid())
-  userId      String   @unique
-  fullName    String
-  avatarUrl   String?
-  phone       String?
-  bio         String?
-  languages   String[] @default(["Amharic", "English"])
-  verified    Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        String    @id @db.Uuid
+  firstName String?   @map("first_name") @db.VarChar(100)
+  lastName  String?   @map("last_name") @db.VarChar(100)
+  phone     String?   @db.VarChar(20)
+  avatarUrl String?   @map("avatar_url")
+  role      String?   @default("user") @db.VarChar(20)
+  createdAt DateTime? @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt DateTime? @default(now()) @map("updated_at") @db.Timestamp(6)
 
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [id], references: [id], onDelete: Cascade)
 
   @@map("profiles")
+  @@schema("public")
 }
 
-model City {
-  id               String         @id @default(uuid())
-  slug             String         @unique
-  name             String
-  tagline          String
-  startingRentETB  Int
-  propertiesCount  Int            @default(0)
-  createdAt        DateTime       @default(now())
-  updatedAt        DateTime       @updatedAt
+model Location {
+  id        String     @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name      String     @db.VarChar(150)
+  type      String     @db.VarChar(30)
+  parentId  String?    @map("parent_id") @db.Uuid
+  createdAt DateTime?  @default(now()) @map("created_at") @db.Timestamp(6)
 
-  neighborhoods    Neighborhood[]
-  properties       Property[]
+  parent     Location?  @relation("LocationHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  children   Location[] @relation("LocationHierarchy")
+  properties Property[]
 
-  @@map("cities")
-}
-
-model Neighborhood {
-  id                   String     @id @default(uuid())
-  slug                 String     @unique
-  name                 String
-  subCity              String
-  cityId               String
-  securityScore        Float
-  generatorPenetration String
-  waterReliability     String
-  averageRentETB       Int
-  createdAt            DateTime   @default(now())
-  updatedAt            DateTime   @updatedAt
-
-  city                 City       @relation(fields: [cityId], references: [id], onDelete: Cascade)
-  properties           Property[]
-
-  @@map("neighborhoods")
-}
-
-model Broker {
-  id               String     @id @default(uuid())
-  slug             String     @unique
-  userId           String     @unique
-  agencyName       String
-  licenseNumber    String     @unique
-  verified         Boolean    @default(false)
-  rating           Float      @default(5.0)
-  reviewsCount     Int        @default(0)
-  responseTime     String     @default("Under 15 minutes")
-  specializedAreas String[]
-  createdAt        DateTime   @default(now())
-  updatedAt        DateTime   @updatedAt
-
-  user             User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  properties       Property[]
-  reviews          Review[]
-  visits           Visit[]
-
-  @@map("brokers")
+  @@map("locations")
+  @@schema("public")
 }
 
 model Property {
-  id              String         @id @default(uuid())
-  slug            String         @unique
-  title           String
-  description     String
-  propertyType    String
-  rentETB         Int
-  cityId          String
-  neighborhoodId  String
-  bedrooms        Int
-  bathrooms       Float
-  areaSqm         Int
-  generator       Boolean        @default(false)
-  waterTank       Boolean        @default(false)
-  parking         Boolean        @default(false)
-  furnished       Boolean        @default(false)
-  securityGuard   Boolean        @default(false)
-  balcony         Boolean        @default(false)
-  status          PropertyStatus @default(PENDING_APPROVAL)
-  rejectionReason String?
-  fieldAgentNotes String?
-  brokerId        String
-  ownerId         String?
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
+  id           String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  ownerId      String          @map("owner_id") @db.Uuid
+  locationId   String          @map("location_id") @db.Uuid
+  title        String          @db.VarChar(200)
+  description  String?
+  propertyType String?         @map("property_type") @db.VarChar(50)
+  listingType  String?         @map("listing_type") @db.VarChar(20)
+  price        Decimal?        @db.Decimal(12, 2)
+  bedrooms     Int?            @default(0)
+  bathrooms    Int?            @default(0)
+  area         Decimal?        @db.Decimal(10, 2)
+  address      String?
+  status       String?         @default("pending") @db.VarChar(30)
+  createdAt    DateTime?       @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt    DateTime?       @default(now()) @map("updated_at") @db.Timestamp(6)
 
-  city            City           @relation(fields: [cityId], references: [id])
-  neighborhood    Neighborhood   @relation(fields: [neighborhoodId], references: [id])
-  broker          Broker         @relation(fields: [brokerId], references: [id])
-  images          PropertyImage[]
-  favorites       Favorite[]
-  reviews         Review[]
-  visits          Visit[]
-  reports         Report[]
+  owner        User            @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  location     Location        @relation(fields: [locationId], references: [id])
+  images       PropertyImage[]
+  favorites    Favorite[]
+  reviews      Review[]
+  visits       Visit[]
+  reports      Report[]
 
   @@map("properties")
+  @@schema("public")
 }
 
 model PropertyImage {
-  id           String   @id @default(uuid())
-  propertyId   String
-  url          String
-  displayOrder Int      @default(0)
-  isHero       Boolean  @default(false)
+  id         String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  propertyId String?   @map("property_id") @db.Uuid
+  imageUrl   String    @map("image_url")
+  createdAt  DateTime? @default(now()) @map("created_at") @db.Timestamp(6)
 
-  property     Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  property   Property? @relation(fields: [propertyId], references: [id], onDelete: Cascade)
 
   @@map("property_images")
+  @@schema("public")
 }
 
 model Favorite {
-  id         String   @id @default(uuid())
-  userId     String
-  propertyId String
-  createdAt  DateTime @default(now())
+  id         String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  userId     String?   @map("user_id") @db.Uuid
+  propertyId String?   @map("property_id") @db.Uuid
+  createdAt  DateTime? @default(now()) @map("created_at") @db.Timestamp(6)
 
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  user       User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  property   Property? @relation(fields: [propertyId], references: [id], onDelete: Cascade)
 
   @@unique([userId, propertyId])
   @@map("favorites")
+  @@schema("public")
 }
 
 model Review {
-  id         String   @id @default(uuid())
-  userId     String
-  brokerId   String?
-  propertyId String?
-  rating     Float
-  comment    String
-  createdAt  DateTime @default(now())
+  id         String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  userId     String?   @map("user_id") @db.Uuid
+  propertyId String?   @map("property_id") @db.Uuid
+  rating     Int?
+  comment    String?
+  createdAt  DateTime? @default(now()) @map("created_at") @db.Timestamp(6)
 
-  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  broker     Broker?   @relation(fields: [brokerId], references: [id])
-  property   Property? @relation(fields: [propertyId], references: [id])
+  user       User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  property   Property? @relation(fields: [propertyId], references: [id], onDelete: Cascade)
 
   @@map("reviews")
+  @@schema("public")
 }
 
 model Visit {
-  id            String      @id @default(uuid())
-  propertyId    String
-  seekerId      String
-  brokerId      String
-  scheduledDate String
-  timeSlot      String
-  status        VisitStatus @default(PENDING)
-  createdAt     DateTime    @default(now())
+  id         String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  userId     String?   @map("user_id") @db.Uuid
+  propertyId String?   @map("property_id") @db.Uuid
+  visitDate  DateTime? @map("visit_date") @db.Timestamp(6)
+  status     String?   @default("requested") @db.VarChar(30)
+  createdAt  DateTime? @default(now()) @map("created_at") @db.Timestamp(6)
 
-  property      Property    @relation(fields: [propertyId], references: [id])
-  seeker        User        @relation("SeekerVisits", fields: [seekerId], references: [id])
-  broker        Broker      @relation(fields: [brokerId], references: [id])
+  user       User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  property   Property? @relation(fields: [propertyId], references: [id], onDelete: Cascade)
 
   @@map("visits")
+  @@schema("public")
 }
 
 model Report {
-  id          String       @id @default(uuid())
-  reporterId  String
-  propertyId  String?
-  reason      String
-  status      ReportStatus @default(PENDING)
-  createdAt   DateTime     @default(now())
+  id         String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  userId     String?   @map("user_id") @db.Uuid
+  propertyId String?   @map("property_id") @db.Uuid
+  reason     String
+  status     String?   @default("open") @db.VarChar(30)
+  createdAt  DateTime? @default(now()) @map("created_at") @db.Timestamp(6)
 
-  reporter    User         @relation("ReporterReports", fields: [reporterId], references: [id])
-  property    Property?    @relation(fields: [propertyId], references: [id])
+  user       User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  property   Property? @relation(fields: [propertyId], references: [id], onDelete: Cascade)
 
   @@map("reports")
+  @@schema("public")
 }
 
 model AuditLog {
-  id           String   @id @default(uuid())
-  userId       String
-  action       String
-  targetEntity String
-  entityId     String
-  details      String
-  createdAt    DateTime @default(now())
+  id        String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  userId    String?   @map("user_id") @db.Uuid
+  action    String
+  tableName String?   @map("table_name")
+  recordId  String?   @map("record_id") @db.Uuid
+  createdAt DateTime? @default(now()) @map("created_at") @db.Timestamp(6)
 
-  user         User     @relation(fields: [userId], references: [id])
+  user      User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@map("audit_logs")
+  @@schema("public")
 }

@@ -13,7 +13,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
-const client_1 = require("@prisma/client");
+const crypto_1 = require("crypto");
 let AuthService = AuthService_1 = class AuthService {
     constructor(prisma) {
         this.prisma = prisma;
@@ -21,38 +21,39 @@ let AuthService = AuthService_1 = class AuthService {
     }
     async register(dto) {
         try {
-            const existing = await this.prisma.user.findUnique({
+            const existing = await this.prisma.user.findFirst({
                 where: { email: dto.email },
             });
             if (existing) {
                 throw new common_1.BadRequestException("User email already exists");
             }
-            let validRole = client_1.UserRole.USER;
-            if (dto.role && Object.values(client_1.UserRole).includes(dto.role)) {
-                validRole = dto.role;
-            }
+            const userId = (0, crypto_1.randomUUID)();
+            const names = (dto.fullName || "User").trim().split(" ");
+            const firstName = names[0] || "User";
+            const lastName = names.slice(1).join(" ") || "";
             const user = await this.prisma.user.create({
                 data: {
+                    id: userId,
                     email: dto.email,
-                    role: validRole,
-                    supabaseUid: `sb-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
                     profile: {
                         create: {
-                            fullName: dto.fullName || dto.email.split("@")[0],
-                            verified: true,
+                            firstName,
+                            lastName,
+                            role: (dto.role || "user").toLowerCase(),
                         },
                     },
                 },
                 include: { profile: true },
             });
             const token = `betterauth-session-${user.id}-${Date.now()}`;
+            const fullName = [user.profile?.firstName, user.profile?.lastName].filter(Boolean).join(" ") || dto.email;
             return {
                 token,
                 user: {
                     id: user.id,
                     email: user.email,
-                    role: user.role,
-                    fullName: user.profile?.fullName || dto.fullName,
+                    role: user.profile?.role || "user",
+                    fullName,
                 },
             };
         }
@@ -65,7 +66,7 @@ let AuthService = AuthService_1 = class AuthService {
     }
     async login(dto) {
         try {
-            const user = await this.prisma.user.findUnique({
+            const user = await this.prisma.user.findFirst({
                 where: { email: dto.email },
                 include: { profile: true },
             });
@@ -77,13 +78,14 @@ let AuthService = AuthService_1 = class AuthService {
                 });
             }
             const token = `betterauth-session-${user.id}-${Date.now()}`;
+            const fullName = [user.profile?.firstName, user.profile?.lastName].filter(Boolean).join(" ") || user.email;
             return {
                 token,
                 user: {
                     id: user.id,
                     email: user.email,
-                    role: user.role,
-                    fullName: user.profile?.fullName || user.email,
+                    role: user.profile?.role || "user",
+                    fullName,
                 },
             };
         }
@@ -97,17 +99,18 @@ let AuthService = AuthService_1 = class AuthService {
         const userId = parts[2];
         if (!userId)
             throw new common_1.UnauthorizedException("Invalid auth token");
-        const user = await this.prisma.user.findUnique({
+        const user = await this.prisma.user.findFirst({
             where: { id: userId },
             include: { profile: true },
         });
         if (!user)
             throw new common_1.UnauthorizedException("User not found");
+        const fullName = [user.profile?.firstName, user.profile?.lastName].filter(Boolean).join(" ") || user.email;
         return {
             id: user.id,
             email: user.email,
-            role: user.role,
-            fullName: user.profile?.fullName,
+            role: user.profile?.role || "user",
+            fullName,
         };
     }
 };

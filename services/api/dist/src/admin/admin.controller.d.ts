@@ -15,11 +15,10 @@ export declare class AdminController {
     }>;
     getAuditLogs(): import(".prisma/client").Prisma.PrismaPromise<{
         id: string;
-        createdAt: Date;
-        userId: string;
+        createdAt: Date | null;
+        userId: string | null;
         action: string;
-        targetEntity: string;
-        entityId: string;
-        details: string;
+        tableName: string | null;
+        recordId: string | null;
     }[]>;
 }

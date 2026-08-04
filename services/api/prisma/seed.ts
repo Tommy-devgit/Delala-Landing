@@ -1,277 +1,173 @@
 import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
+import { randomUUID } from "crypto";
 
 const prisma = new PrismaClient();
 
 async function main() {
   console.log("🌱 Starting Delala Platform Supabase Database Seed...");
 
-  // 1. Seed Cities
-  const cityAddis = await prisma.city.upsert({
-    where: { slug: "addis-ababa" },
-    update: {},
-    create: {
-      slug: "addis-ababa",
+  // 1. Seed Locations (Country -> City -> Neighborhood)
+  const locEthiopia = await prisma.location.create({
+    data: {
+      id: randomUUID(),
+      name: "Ethiopia",
+      type: "country",
+    },
+  });
+
+  const locAddis = await prisma.location.create({
+    data: {
+      id: randomUUID(),
       name: "Addis Ababa",
-      tagline: "Diplomatic capital & modern urban core of Ethiopia",
-      startingRentETB: 28000,
-      propertiesCount: 412,
+      type: "city",
+      parentId: locEthiopia.id,
     },
   });
 
-  const cityHawassa = await prisma.city.upsert({
-    where: { slug: "hawassa" },
-    update: {},
-    create: {
-      slug: "hawassa",
+  const locHawassa = await prisma.location.create({
+    data: {
+      id: randomUUID(),
       name: "Hawassa",
-      tagline: "Lakeside resort city & industrial hub",
-      startingRentETB: 18000,
-      propertiesCount: 68,
+      type: "city",
+      parentId: locEthiopia.id,
     },
   });
 
-  const cityAdama = await prisma.city.upsert({
-    where: { slug: "adama" },
-    update: {},
-    create: {
-      slug: "adama",
-      name: "Adama",
-      tagline: "Commercial nexus & rift valley gateway",
-      startingRentETB: 15000,
-      propertiesCount: 45,
-    },
-  });
-
-  const cityBahirDar = await prisma.city.upsert({
-    where: { slug: "bahir-dar" },
-    update: {},
-    create: {
-      slug: "bahir-dar",
-      name: "Bahir Dar",
-      tagline: "Scenic Lake Tana palm avenue city",
-      startingRentETB: 16000,
-      propertiesCount: 52,
-    },
-  });
-
-  // 2. Seed Neighborhoods
-  const neighBole = await prisma.neighborhood.upsert({
-    where: { slug: "bole-medhanialem" },
-    update: {},
-    create: {
-      slug: "bole-medhanialem",
+  const locBole = await prisma.location.create({
+    data: {
+      id: randomUUID(),
       name: "Bole Medhanialem",
-      subCity: "Bole",
-      cityId: cityAddis.id,
-      securityScore: 4.9,
-      generatorPenetration: "92%",
-      waterReliability: "98%",
-      averageRentETB: 65000,
+      type: "neighborhood",
+      parentId: locAddis.id,
     },
   });
 
-  const neighKazanchis = await prisma.neighborhood.upsert({
-    where: { slug: "kazanchis" },
-    update: {},
-    create: {
-      slug: "kazanchis",
+  const locKazanchis = await prisma.location.create({
+    data: {
+      id: randomUUID(),
       name: "Kazanchis UN Quarter",
-      subCity: "Kirkos",
-      cityId: cityAddis.id,
-      securityScore: 4.8,
-      generatorPenetration: "88%",
-      waterReliability: "95%",
-      averageRentETB: 38000,
+      type: "neighborhood",
+      parentId: locAddis.id,
     },
   });
 
-  const neighOldAirport = await prisma.neighborhood.upsert({
-    where: { slug: "old-airport" },
-    update: {},
-    create: {
-      slug: "old-airport",
-      name: "Old Airport Diplomatic Zone",
-      subCity: "Nifas Silk",
-      cityId: cityAddis.id,
-      securityScore: 4.95,
-      generatorPenetration: "96%",
-      waterReliability: "99%",
-      averageRentETB: 95000,
+  const locOldAirport = await prisma.location.create({
+    data: {
+      id: randomUUID(),
+      name: "Old Airport",
+      type: "neighborhood",
+      parentId: locAddis.id,
     },
   });
 
-  const neighCMC = await prisma.neighborhood.upsert({
-    where: { slug: "cmc-sunshine" },
-    update: {},
-    create: {
-      slug: "cmc-sunshine",
-      name: "CMC Sunshine Real Estate",
-      subCity: "Yeka",
-      cityId: cityAddis.id,
-      securityScore: 4.7,
-      generatorPenetration: "84%",
-      waterReliability: "92%",
-      averageRentETB: 45000,
-    },
-  });
-
-  // 3. Seed Certified Brokers
-  const userAbebe = await prisma.user.upsert({
-    where: { email: "abebe@bolepremier.et" },
-    update: {},
-    create: {
+  // 2. Seed Users & Profiles
+  const userAbebeId = randomUUID();
+  const userAbebe = await prisma.user.create({
+    data: {
+      id: userAbebeId,
       email: "abebe@bolepremier.et",
-      role: "BROKER",
-      supabaseUid: "sb-uid-abebe-001",
       profile: {
         create: {
-          fullName: "Abebe Tesfaye",
+          id: userAbebeId,
+          firstName: "Abebe",
+          lastName: "Tesfaye",
           phone: "+251 911 234 567",
-          verified: true,
+          role: "broker",
         },
       },
     },
   });
 
-  const brokerAbebe = await prisma.broker.upsert({
-    where: { userId: userAbebe.id },
-    update: {},
-    create: {
-      slug: "abebe-tesfaye",
-      userId: userAbebe.id,
-      agencyName: "Bole Premier Real Estate",
-      licenseNumber: "ETH-RE-2024-0091",
-      verified: true,
-      rating: 4.9,
-      specializedAreas: ["Bole Medhanialem", "Kazanchis", "Old Airport"],
-    },
-  });
-
-  const userBethlehem = await prisma.user.upsert({
-    where: { email: "bethlehem@capitalhomes.et" },
-    update: {},
-    create: {
+  const userBethlehemId = randomUUID();
+  const userBethlehem = await prisma.user.create({
+    data: {
+      id: userBethlehemId,
       email: "bethlehem@capitalhomes.et",
-      role: "BROKER",
-      supabaseUid: "sb-uid-bethlehem-002",
       profile: {
         create: {
-          fullName: "Bethlehem Worku",
+          id: userBethlehemId,
+          firstName: "Bethlehem",
+          lastName: "Worku",
           phone: "+251 922 888 777",
-          verified: true,
+          role: "broker",
         },
       },
     },
   });
 
-  const brokerBethlehem = await prisma.broker.upsert({
-    where: { userId: userBethlehem.id },
-    update: {},
-    create: {
-      slug: "bethlehem-worku",
-      userId: userBethlehem.id,
-      agencyName: "Capital Verified Homes",
-      licenseNumber: "ETH-RE-2024-0142",
-      verified: true,
-      rating: 4.85,
-      specializedAreas: ["Kazanchis", "CMC Sunshine", "Old Airport"],
-    },
-  });
-
-  // 4. Seed Verified Properties
-  await prisma.property.upsert({
-    where: { slug: "bole-medhanialem-luxury-residence" },
-    update: {},
-    create: {
-      slug: "bole-medhanialem-luxury-residence",
-      title: "Bole Medhanialem Modern G+1 Villa",
-      description: "Luxury 4-bedroom villa featuring automatic 45kVA standby generator, dual 12,000L water tanks, and 24/7 perimeter security guard.",
-      propertyType: "Villa",
-      rentETB: 65000,
-      cityId: cityAddis.id,
-      neighborhoodId: neighBole.id,
+  // 3. Seed Properties & Property Images
+  await prisma.property.create({
+    data: {
+      id: randomUUID(),
+      ownerId: userAbebe.id,
+      locationId: locBole.id,
+      title: "Bole Medhanialem Luxury Villa Compound",
+      description: "Exquisite 4-bedroom executive villa compound in Bole Medhanialem. Features automatic 45kVA standby generator and water tanks.",
+      propertyType: "villa",
+      listingType: "rent",
+      price: 65000 as any,
       bedrooms: 4,
-      bathrooms: 3.5,
-      areaSqm: 320,
-      generator: true,
-      waterTank: true,
-      parking: true,
-      furnished: true,
-      securityGuard: true,
-      balcony: true,
-      status: "APPROVED",
-      brokerId: brokerAbebe.id,
+      bathrooms: 3.5 as any,
+      area: 320 as any,
+      address: "Bole Medhanialem, Addis Ababa",
+      status: "approved",
       images: {
         create: [
-          { url: "/images/hero_property.png", displayOrder: 1, isHero: true },
-          { url: "/images/hero_home_away.jpg", displayOrder: 2, isHero: false },
+          { imageUrl: "/images/hero_property.png" },
+          { imageUrl: "/images/hero_home_away.jpg" },
         ],
       },
     },
   });
 
-  await prisma.property.upsert({
-    where: { slug: "kazanchis-un-serviced-studio" },
-    update: {},
-    create: {
-      slug: "kazanchis-un-serviced-studio",
+  await prisma.property.create({
+    data: {
+      id: randomUUID(),
+      ownerId: userBethlehem.id,
+      locationId: locKazanchis.id,
       title: "Kazanchis UN Quarter Executive Studio",
-      description: "Modern fully-serviced studio apartment 2 minutes walk from UNECA headquarters. Features continuous standby power and High-speed fiber Wi-Fi.",
-      propertyType: "Studio",
-      rentETB: 28000,
-      cityId: cityAddis.id,
-      neighborhoodId: neighKazanchis.id,
+      description: "Modern fully-serviced studio apartment 2 minutes walk from UNECA headquarters.",
+      propertyType: "apartment",
+      listingType: "rent",
+      price: 28000 as any,
       bedrooms: 1,
-      bathrooms: 1,
-      areaSqm: 65,
-      generator: true,
-      waterTank: true,
-      parking: true,
-      furnished: true,
-      securityGuard: true,
-      balcony: true,
-      status: "APPROVED",
-      brokerId: brokerBethlehem.id,
+      bathrooms: 1 as any,
+      area: 65 as any,
+      address: "Kazanchis, Addis Ababa",
+      status: "approved",
       images: {
         create: [
-          { url: "/images/hero_home_away.jpg", displayOrder: 1, isHero: true },
+          { imageUrl: "/images/hero_home_away.jpg" },
         ],
       },
     },
   });
 
-  await prisma.property.upsert({
-    where: { slug: "old-airport-diplomatic-compound" },
-    update: {},
-    create: {
-      slug: "old-airport-diplomatic-compound",
+  await prisma.property.create({
+    data: {
+      id: randomUUID(),
+      ownerId: userAbebe.id,
+      locationId: locOldAirport.id,
       title: "Old Airport Diplomatic G+2 Compound",
-      description: "Exquisite diplomatic compound with private lush garden, swimming pool, 65kVA silent generator, and guardhouse.",
-      propertyType: "G+1 Residence",
-      rentETB: 95000,
-      cityId: cityAddis.id,
-      neighborhoodId: neighOldAirport.id,
+      description: "Exquisite diplomatic compound with private lush garden, 65kVA silent generator, and guardhouse.",
+      propertyType: "house",
+      listingType: "sale",
+      price: 18500000 as any,
       bedrooms: 5,
-      bathrooms: 4.5,
-      areaSqm: 520,
-      generator: true,
-      waterTank: true,
-      parking: true,
-      furnished: true,
-      securityGuard: true,
-      balcony: true,
-      status: "APPROVED",
-      brokerId: brokerAbebe.id,
+      bathrooms: 4.5 as any,
+      area: 520 as any,
+      address: "Old Airport, Addis Ababa",
+      status: "approved",
       images: {
         create: [
-          { url: "/images/hero_property.png", displayOrder: 1, isHero: true },
+          { imageUrl: "/images/hero_property.png" },
         ],
       },
     },
   });
 
-  console.log("✅ Supabase PostgreSQL Database Seeded Cleanly with Authentic Ethiopian Real Estate Data!");
+  console.log("✅ Supabase PostgreSQL Database Seeded Cleanly into Custom SQL Schema!");
 }
 
 main()

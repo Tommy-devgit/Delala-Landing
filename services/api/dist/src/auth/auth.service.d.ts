@@ -10,7 +10,7 @@ export declare class AuthService {
         user: {
             id: string;
             email: string;
-            role: import(".prisma/client").$Enums.UserRole;
+            role: string;
             fullName: string;
         };
     }>;
@@ -19,14 +19,14 @@ export declare class AuthService {
         user: {
             id: string;
             email: string;
-            role: import(".prisma/client").$Enums.UserRole;
+            role: string;
             fullName: string;
         };
     }>;
     validateSession(token: string): Promise<{
         id: string;
         email: string;
-        role: import(".prisma/client").$Enums.UserRole;
+        role: string;
         fullName: string;
     }>;
 }

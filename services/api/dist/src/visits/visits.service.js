@@ -20,11 +20,8 @@ let VisitsService = class VisitsService {
         return this.prisma.visit.create({
             data: {
                 propertyId: dto.propertyId,
-                seekerId: dto.seekerId,
-                brokerId: dto.brokerId,
-                scheduledDate: dto.scheduledDate,
-                timeSlot: dto.timeSlot,
-                status: "PENDING",
+                userId: dto.seekerId,
+                status: "requested",
             },
         });
     }
@@ -32,8 +29,7 @@ let VisitsService = class VisitsService {
         return this.prisma.visit.findMany({
             include: {
                 property: true,
-                seeker: { include: { profile: true } },
-                broker: { include: { user: { include: { profile: true } } } },
+                user: { include: { profile: true } },
             },
             orderBy: { createdAt: "desc" },
         });

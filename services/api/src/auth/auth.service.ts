@@ -2,7 +2,7 @@ import { Injectable, UnauthorizedException, BadRequestException, Logger } from "
 import { PrismaService } from "../prisma/prisma.service";
 import { RegisterDto } from "./dto/register.dto";
 import { LoginDto } from "./dto/login.dto";
-import { UserRole } from "@prisma/client";
+import { randomUUID } from "crypto";
 
 @Injectable()
 export class AuthService {
@@ -12,7 +12,7 @@ export class AuthService {
 
   async register(dto: RegisterDto) {
     try {
-      const existing = await this.prisma.user.findUnique({
+      const existing = await this.prisma.user.findFirst({
         where: { email: dto.email },
       });
 
@@ -20,20 +20,20 @@ export class AuthService {
         throw new BadRequestException("User email already exists");
       }
 
-      let validRole: UserRole = UserRole.USER;
-      if (dto.role && Object.values(UserRole).includes(dto.role as UserRole)) {
-        validRole = dto.role as UserRole;
-      }
+      const userId = randomUUID();
+      const names = (dto.fullName || "User").trim().split(" ");
+      const firstName = names[0] || "User";
+      const lastName = names.slice(1).join(" ") || "";
 
       const user = await this.prisma.user.create({
         data: {
+          id: userId,
           email: dto.email,
-          role: validRole,
-          supabaseUid: `sb-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
           profile: {
             create: {
-              fullName: dto.fullName || dto.email.split("@")[0],
-              verified: true,
+              firstName,
+              lastName,
+              role: (dto.role || "user").toLowerCase(),
             },
           },
         },
@@ -41,14 +41,15 @@ export class AuthService {
       });
 
       const token = `betterauth-session-${user.id}-${Date.now()}`;
+      const fullName = [user.profile?.firstName, user.profile?.lastName].filter(Boolean).join(" ") || dto.email;
 
       return {
         token,
         user: {
           id: user.id,
           email: user.email,
-          role: user.role,
-          fullName: user.profile?.fullName || dto.fullName,
+          role: user.profile?.role || "user",
+          fullName,
         },
       };
     } catch (err: any) {
@@ -60,7 +61,7 @@ export class AuthService {
 
   async login(dto: LoginDto) {
     try {
-      const user = await this.prisma.user.findUnique({
+      const user = await this.prisma.user.findFirst({
         where: { email: dto.email },
         include: { profile: true },
       });
@@ -74,14 +75,15 @@ export class AuthService {
       }
 
       const token = `betterauth-session-${user.id}-${Date.now()}`;
+      const fullName = [user.profile?.firstName, user.profile?.lastName].filter(Boolean).join(" ") || user.email;
 
       return {
         token,
         user: {
           id: user.id,
           email: user.email,
-          role: user.role,
-          fullName: user.profile?.fullName || user.email,
+          role: user.profile?.role || "user",
+          fullName,
         },
       };
     } catch (err: any) {
@@ -95,18 +97,19 @@ export class AuthService {
     const userId = parts[2];
     if (!userId) throw new UnauthorizedException("Invalid auth token");
 
-    const user = await this.prisma.user.findUnique({
+    const user = await this.prisma.user.findFirst({
       where: { id: userId },
       include: { profile: true },
     });
 
     if (!user) throw new UnauthorizedException("User not found");
+    const fullName = [user.profile?.firstName, user.profile?.lastName].filter(Boolean).join(" ") || user.email;
 
     return {
       id: user.id,
       email: user.email,
-      role: user.role,
-      fullName: user.profile?.fullName,
+      role: user.profile?.role || "user",
+      fullName,
     };
   }
 }

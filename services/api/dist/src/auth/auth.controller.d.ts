@@ -9,7 +9,7 @@ export declare class AuthController {
         user: {
             id: string;
             email: string;
-            role: import(".prisma/client").$Enums.UserRole;
+            role: string;
             fullName: string;
         };
     }>;
@@ -18,14 +18,14 @@ export declare class AuthController {
         user: {
             id: string;
             email: string;
-            role: import(".prisma/client").$Enums.UserRole;
+            role: string;
             fullName: string;
         };
     }>;
     getProfile(authHeader?: string): Promise<{
         id: string;
         email: string;
-        role: import(".prisma/client").$Enums.UserRole;
+        role: string;
         fullName: string;
     }>;
 }

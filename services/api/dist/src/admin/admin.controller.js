@@ -13,8 +13,6 @@ exports.AdminController = void 0;
 const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
 const prisma_service_1 = require("../prisma/prisma.service");
-const roles_decorator_1 = require("../common/decorators/roles.decorator");
-const roles_guard_1 = require("../common/guards/roles.guard");
 let AdminController = class AdminController {
     constructor(prisma) {
         this.prisma = prisma;
@@ -22,10 +20,10 @@ let AdminController = class AdminController {
     async getOverview() {
         const [totalUsers, totalProperties, pendingApprovals, totalBrokers, pendingReports] = await Promise.all([
             this.prisma.user.count(),
-            this.prisma.property.count({ where: { status: "APPROVED" } }),
-            this.prisma.property.count({ where: { status: "PENDING_APPROVAL" } }),
-            this.prisma.broker.count({ where: { verified: true } }),
-            this.prisma.report.count({ where: { status: "PENDING" } }),
+            this.prisma.property.count({ where: { status: "approved" } }),
+            this.prisma.property.count({ where: { status: "pending" } }),
+            this.prisma.profile.count({ where: { role: "broker" } }),
+            this.prisma.report.count({ where: { status: "open" } }),
         ]);
         return {
             metrics: {
@@ -64,8 +62,6 @@ __decorate([
 exports.AdminController = AdminController = __decorate([
     (0, swagger_1.ApiTags)("admin"),
     (0, common_1.Controller)("admin"),
-    (0, common_1.UseGuards)(roles_guard_1.RolesGuard),
-    (0, roles_decorator_1.Roles)("ADMIN", "MODERATOR"),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService])
 ], AdminController);
 //# sourceMappingURL=admin.controller.js.map

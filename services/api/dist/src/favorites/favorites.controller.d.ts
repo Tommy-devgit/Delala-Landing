@@ -10,80 +10,40 @@ export declare class FavoritesController {
     }>;
     findByUser(userId: string): Promise<({
         property: {
-            city: {
+            location: {
                 id: string;
-                slug: string;
+                createdAt: Date | null;
                 name: string;
-                tagline: string;
-                startingRentETB: number;
-                propertiesCount: number;
-                createdAt: Date;
-                updatedAt: Date;
-            };
-            neighborhood: {
-                id: string;
-                slug: string;
-                name: string;
-                createdAt: Date;
-                updatedAt: Date;
-                subCity: string;
-                cityId: string;
-                securityScore: number;
-                generatorPenetration: string;
-                waterReliability: string;
-                averageRentETB: number;
-            };
-            broker: {
-                id: string;
-                slug: string;
-                createdAt: Date;
-                updatedAt: Date;
-                verified: boolean;
-                userId: string;
-                licenseNumber: string;
-                agencyName: string;
-                rating: number;
-                reviewsCount: number;
-                responseTime: string;
-                specializedAreas: string[];
+                type: string;
+                parentId: string | null;
             };
             images: {
                 id: string;
-                url: string;
-                displayOrder: number;
-                isHero: boolean;
-                propertyId: string;
+                createdAt: Date | null;
+                propertyId: string | null;
+                imageUrl: string;
             }[];
         } & {
             id: string;
-            slug: string;
-            createdAt: Date;
-            updatedAt: Date;
-            cityId: string;
-            status: import(".prisma/client").$Enums.PropertyStatus;
+            ownerId: string;
+            locationId: string;
             title: string;
-            description: string;
-            propertyType: string;
-            rentETB: number;
-            neighborhoodId: string;
-            bedrooms: number;
-            bathrooms: number;
-            areaSqm: number;
-            generator: boolean;
-            waterTank: boolean;
-            parking: boolean;
-            furnished: boolean;
-            securityGuard: boolean;
-            balcony: boolean;
-            rejectionReason: string | null;
-            fieldAgentNotes: string | null;
-            brokerId: string;
-            ownerId: string | null;
+            description: string | null;
+            propertyType: string | null;
+            listingType: string | null;
+            price: import("@prisma/client/runtime/library").Decimal | null;
+            bedrooms: number | null;
+            bathrooms: number | null;
+            area: import("@prisma/client/runtime/library").Decimal | null;
+            address: string | null;
+            status: string | null;
+            createdAt: Date | null;
+            updatedAt: Date | null;
         };
     } & {
         id: string;
-        createdAt: Date;
-        userId: string;
-        propertyId: string;
+        createdAt: Date | null;
+        propertyId: string | null;
+        userId: string | null;
     })[]>;
 }

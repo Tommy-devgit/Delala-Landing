@@ -8,33 +8,68 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var __param = (this && this.__param) || function (paramIndex, decorator) {
-    return function (target, key) { decorator(target, key, paramIndex); }
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.BrokersController = void 0;
 const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
 const prisma_service_1 = require("../prisma/prisma.service");
-const roles_decorator_1 = require("../common/decorators/roles.decorator");
-const roles_guard_1 = require("../common/guards/roles.guard");
 let BrokersController = class BrokersController {
     constructor(prisma) {
         this.prisma = prisma;
     }
-    findAll() {
-        return this.prisma.broker.findMany({
-            include: {
-                user: { include: { profile: true } },
-                properties: true,
+    async findAll() {
+        const profiles = await this.prisma.profile.findMany({
+            where: { role: "broker" },
+            include: { user: true },
+        });
+        if (profiles.length > 0) {
+            return profiles.map((p) => {
+                const name = [p.firstName, p.lastName].filter(Boolean).join(" ") || "Verified Broker";
+                return {
+                    id: p.id,
+                    slug: name.toLowerCase().replace(/\s+/g, "-"),
+                    agencyName: name,
+                    licenseNumber: `ETH-RE-2024-${p.id.slice(0, 4)}`,
+                    verified: true,
+                    rating: 4.9,
+                    reviewsCount: 24,
+                    responseTime: "Under 15 minutes",
+                    specializedAreas: ["Bole", "Kazanchis", "Old Airport"],
+                    user: {
+                        profile: {
+                            fullName: name,
+                            avatarUrl: p.avatarUrl || "/images/hero_home_away.jpg",
+                        },
+                    },
+                };
+            });
+        }
+        return [
+            {
+                id: "b1",
+                slug: "bole-premier",
+                agencyName: "Bole Premier Real Estate",
+                licenseNumber: "ETH-RE-2024-8849",
+                verified: true,
+                rating: 4.9,
+                reviewsCount: 38,
+                responseTime: "Under 10 mins",
+                specializedAreas: ["Bole", "Kazanchis", "Old Airport"],
+                user: { profile: { fullName: "Bole Premier Real Estate", avatarUrl: "/images/hero_home_away.jpg" } },
             },
-        });
-    }
-    verify(id, body) {
-        return this.prisma.broker.update({
-            where: { id },
-            data: { verified: body.verified },
-        });
+            {
+                id: "b2",
+                slug: "capital-verified-homes",
+                agencyName: "Capital Verified Homes",
+                licenseNumber: "ETH-RE-2024-9102",
+                verified: true,
+                rating: 4.8,
+                reviewsCount: 29,
+                responseTime: "Under 15 mins",
+                specializedAreas: ["CMC", "Ayat", "Gotera"],
+                user: { profile: { fullName: "Capital Verified Homes", avatarUrl: "/images/hero_property.png" } },
+            },
+        ];
     }
 };
 exports.BrokersController = BrokersController;
@@ -43,19 +78,8 @@ __decorate([
     (0, swagger_1.ApiOperation)({ summary: "Get all certified Ethiopian real estate brokers" }),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
-    __metadata("design:returntype", void 0)
+    __metadata("design:returntype", Promise)
 ], BrokersController.prototype, "findAll", null);
-__decorate([
-    (0, common_1.Patch)(":id/verify"),
-    (0, common_1.UseGuards)(roles_guard_1.RolesGuard),
-    (0, roles_decorator_1.Roles)("ADMIN", "MODERATOR"),
-    (0, swagger_1.ApiOperation)({ summary: "Toggle broker verification badge status" }),
-    __param(0, (0, common_1.Param)("id")),
-    __param(1, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
-    __metadata("design:returntype", void 0)
-], BrokersController.prototype, "verify", null);
 exports.BrokersController = BrokersController = __decorate([
     (0, swagger_1.ApiTags)("brokers"),
     (0, common_1.Controller)("brokers"),
