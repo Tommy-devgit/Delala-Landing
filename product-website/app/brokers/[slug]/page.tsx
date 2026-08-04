@@ -2,17 +2,60 @@
 
 export const dynamic = "force-dynamic";
 
+import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
-import { BROKERS, PROPERTIES } from "@/lib/data";
+import { apiClient } from "@/lib/api-client";
+import { Broker, Property } from "@/lib/types";
 import { PropertyCard } from "@/components/property-card";
-import { ShieldCheck, Star, Phone, Mail, Clock, MapPin } from "lucide-react";
+import { ShieldCheck, Star, Phone, Mail, Clock, MapPin, Building2 } from "lucide-react";
 
 export default function BrokerProfilePage() {
   const params = useParams();
   const slug = params?.slug as string;
 
-  const broker = BROKERS.find((b) => b.slug === slug) || BROKERS[0];
-  const brokerListings = PROPERTIES.filter((p) => p.broker.id === broker.id);
+  const [broker, setBroker] = useState<Broker | null>(null);
+  const [brokerListings, setBrokerListings] = useState<Property[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadData() {
+      if (!slug) return;
+      setLoading(true);
+      const brokers = await apiClient.getBrokers();
+      const foundBroker = brokers.find((b) => b.slug === slug) || brokers[0] || null;
+      setBroker(foundBroker);
+      if (foundBroker) {
+        const allProps = await apiClient.getProperties();
+        setBrokerListings(allProps.filter((p) => p.broker.id === foundBroker.id));
+      }
+      setLoading(false);
+    }
+    loadData();
+  }, [slug]);
+
+  if (loading) {
+    return (
+      <div className="bg-[#FAF8F4] min-h-screen py-16 px-8">
+        <div className="max-w-[1440px] mx-auto h-80 rounded-3xl bg-white border border-[#ECE7DA] animate-pulse" />
+      </div>
+    );
+  }
+
+  if (!broker) {
+    return (
+      <div className="bg-[#FAF8F4] min-h-screen py-24 text-center space-y-4 max-w-md mx-auto">
+        <div className="w-16 h-16 rounded-full bg-[#4C061D]/10 text-[#4C061D] flex items-center justify-center mx-auto">
+          <Building2 className="w-8 h-8" />
+        </div>
+        <h2 className="font-serif-display text-2xl text-[#1C1B12]">
+          Broker Profile Not Found
+        </h2>
+        <p className="text-xs text-[#736F4E]">
+          The specified broker profile does not exist in your database.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-[#FAF8F4] min-h-screen py-8">
@@ -23,7 +66,7 @@ export default function BrokerProfilePage() {
           <div className="flex items-start gap-6">
             <div className="relative">
               <img
-                src={broker.avatar}
+                src={broker.avatar || "/images/hero_home_away.jpg"}
                 alt={broker.name}
                 className="w-24 h-24 rounded-full object-cover border-4 border-[#ECE7DA]"
               />
@@ -62,41 +105,33 @@ export default function BrokerProfilePage() {
               </div>
             </div>
           </div>
+        </div>
 
-          <div className="w-full md:w-auto bg-[#FAF8F4] p-5 rounded-2xl border border-[#ECE7DA] space-y-3 shrink-0">
-            <a
-              href={`tel:${broker.phone}`}
-              className="w-full px-6 py-3 rounded-xl bg-[#4C061D] text-white font-mono-label text-xs font-bold shadow-xs hover:bg-[#3B3923] transition-colors flex items-center justify-center gap-2"
-            >
-              <Phone className="w-4 h-4" />
-              <span>CALL {broker.phone}</span>
-            </a>
-
-            <a
-              href={`mailto:${broker.email}`}
-              className="w-full px-6 py-2.5 rounded-xl bg-white border border-[#ECE7DA] text-[#4C061D] font-mono-label text-xs font-bold hover:border-[#4C061D] transition-colors flex items-center justify-center gap-2"
-            >
-              <Mail className="w-4 h-4" />
-              <span>SEND EMAIL</span>
-            </a>
+        {/* Broker Listings */}
+        <div className="mb-8 flex items-center justify-between border-b border-[#ECE7DA] pb-4">
+          <div>
+            <span className="font-mono-label text-[10px] text-[#4C061D] block mb-1">
+              FIELD VERIFIED INVENTORY
+            </span>
+            <h2 className="font-serif-display text-3xl font-light text-[#1c1b12]">
+              Active Listings by {broker.name} ({brokerListings.length})
+            </h2>
           </div>
         </div>
 
-        {/* Active Listings by Broker */}
-        <div className="mb-8 flex items-center justify-between border-b border-[#ECE7DA] pb-4">
-          <h2 className="font-serif-display text-3xl font-light text-[#1c1b12]">
-            Active Listings by {broker.name}
-          </h2>
-          <span className="font-mono-label text-[10px] text-[#4C061D] font-bold">
-            {brokerListings.length} HOMES
-          </span>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {brokerListings.map((property) => (
-            <PropertyCard key={property.id} property={property} />
-          ))}
-        </div>
+        {brokerListings.length === 0 ? (
+          <div className="py-16 text-center space-y-3 bg-white rounded-3xl border border-[#ECE7DA] p-8 max-w-md mx-auto">
+            <Building2 className="w-12 h-12 text-[#736F4E] mx-auto opacity-50" />
+            <h3 className="font-serif-display text-xl text-[#1C1B12]">No Active Listings</h3>
+            <p className="text-xs text-[#736F4E]">This broker currently has no approved active listings in the database.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {brokerListings.map((property) => (
+              <PropertyCard key={property.id} property={property} />
+            ))}
+          </div>
+        )}
 
       </div>
     </div>

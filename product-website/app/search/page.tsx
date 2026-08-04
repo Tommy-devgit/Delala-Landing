@@ -1,19 +1,21 @@
 "use client";
 
-import { useState, useMemo, Suspense } from "react";
+import { useState, useEffect, useMemo, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { PropertyCard } from "@/components/property-card";
 import { FilterModal } from "@/components/filter-modal";
 import { MapView } from "@/components/map-view";
-import { PROPERTIES } from "@/lib/data";
-import { FilterState } from "@/lib/types";
-import { SlidersHorizontal, Map, Grid, ShieldCheck, ArrowUpDown } from "lucide-react";
+import { apiClient } from "@/lib/api-client";
+import { Property, FilterState } from "@/lib/types";
+import { SlidersHorizontal, Map, Grid, ShieldCheck, ArrowUpDown, Building2 } from "lucide-react";
 
 function SearchContent() {
   const searchParams = useSearchParams();
 
   const [viewMode, setViewMode] = useState<"grid" | "split" | "map">("split");
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const [filters, setFilters] = useState<FilterState>({
     city: searchParams.get("city") || "",
@@ -31,9 +33,24 @@ function SearchContent() {
     sortBy: "newest",
   });
 
-  // Filter listings
+  // Fetch live properties from NestJS REST API connected to Supabase PostgreSQL
+  useEffect(() => {
+    async function loadProperties() {
+      setLoading(true);
+      const data = await apiClient.getProperties({
+        city: filters.city,
+        subCity: filters.subCity,
+        propertyType: filters.propertyType,
+      });
+      setProperties(data);
+      setLoading(false);
+    }
+    loadProperties();
+  }, [filters.city, filters.subCity, filters.propertyType]);
+
+  // Client-side filtering & sorting
   const filteredListings = useMemo(() => {
-    return PROPERTIES.filter((p) => {
+    return properties.filter((p) => {
       if (filters.city && p.city.toLowerCase() !== filters.city.toLowerCase()) return false;
       if (filters.subCity && !p.subCity.toLowerCase().includes(filters.subCity.toLowerCase())) return false;
       if (filters.propertyType && p.propertyType !== filters.propertyType) return false;
@@ -49,9 +66,9 @@ function SearchContent() {
     }).sort((a, b) => {
       if (filters.sortBy === "price-asc") return a.rentETB - b.rentETB;
       if (filters.sortBy === "price-desc") return b.rentETB - a.rentETB;
-      return 0; // default newest
+      return 0;
     });
-  }, [filters]);
+  }, [properties, filters]);
 
   return (
     <div className="min-h-screen bg-[#FAF8F4] flex flex-col">
@@ -94,12 +111,12 @@ function SearchContent() {
             </div>
           </div>
 
-          {/* Right View Mode Toggle (Grid / Split / Map) */}
+          {/* Right View Mode Toggle */}
           <div className="flex items-center gap-1 bg-[#FAF8F4] p-1 rounded-full border border-[#ECE7DA]">
             <button
               onClick={() => setViewMode("grid")}
-              className={`p-2 rounded-full text-xs transition-all ${
-                viewMode === "grid" ? "bg-[#4C061D] text-white shadow-xs" : "text-[#736F4E]"
+              className={`p-2 rounded-full transition-colors ${
+                viewMode === "grid" ? "bg-white text-[#4C061D] shadow-xs" : "text-[#736F4E] hover:text-[#1c1b12]"
               }`}
               title="Grid View"
             >
@@ -108,18 +125,17 @@ function SearchContent() {
 
             <button
               onClick={() => setViewMode("split")}
-              className={`hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-mono-label transition-all ${
-                viewMode === "split" ? "bg-[#4C061D] text-white shadow-xs" : "text-[#736F4E]"
+              className={`hidden lg:flex items-center gap-1 px-3 py-1 rounded-full text-xs font-mono-label font-bold transition-colors ${
+                viewMode === "split" ? "bg-white text-[#4C061D] shadow-xs" : "text-[#736F4E] hover:text-[#1c1b12]"
               }`}
             >
-              <Grid className="w-3.5 h-3.5" />
               <span>SPLIT MAP</span>
             </button>
 
             <button
               onClick={() => setViewMode("map")}
-              className={`p-2 rounded-full text-xs transition-all ${
-                viewMode === "map" ? "bg-[#4C061D] text-white shadow-xs" : "text-[#736F4E]"
+              className={`p-2 rounded-full transition-colors ${
+                viewMode === "map" ? "bg-white text-[#4C061D] shadow-xs" : "text-[#736F4E] hover:text-[#1c1b12]"
               }`}
               title="Full Map View"
             >
@@ -130,75 +146,64 @@ function SearchContent() {
         </div>
       </div>
 
-      {/* Main Content Area */}
+      {/* Main View Area */}
       <div className="flex-1 max-w-[1440px] w-full mx-auto p-4 sm:p-8">
         
-        {viewMode === "map" ? (
-          <div className="h-[calc(100vh-180px)]">
-            <MapView properties={filteredListings} />
+        {loading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="h-80 rounded-3xl bg-white border border-[#ECE7DA] animate-pulse" />
+            ))}
           </div>
-        ) : viewMode === "split" ? (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            
-            {/* Listing Cards Column (7 cols) */}
-            <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-6">
-              {filteredListings.map((property) => (
-                <PropertyCard key={property.id} property={property} />
-              ))}
-
-              {filteredListings.length === 0 && (
-                <div className="col-span-full py-16 text-center bg-white rounded-2xl border border-[#ECE7DA] p-8">
-                  <ShieldCheck className="w-10 h-10 text-[#4C061D] mx-auto mb-3" />
-                  <h3 className="font-serif-display text-2xl font-light text-[#1c1b12] mb-2">
-                    No matching listings found
-                  </h3>
-                  <p className="text-xs text-[#736F4E] max-w-sm mx-auto mb-6">
-                    Try relaxing your budget, sub-city, or infrastructure filters to explore more verified Ethiopian homes.
-                  </p>
-                  <button
-                    onClick={() =>
-                      setFilters({
-                        city: "",
-                        subCity: "",
-                        propertyType: "",
-                        minPrice: 0,
-                        maxPrice: 150000,
-                        bedrooms: "",
-                        bathrooms: "",
-                        generator: false,
-                        waterTank: false,
-                        parking: false,
-                        furnished: false,
-                        verifiedOnly: false,
-                        sortBy: "newest",
-                      })
-                    }
-                    className="px-6 py-2.5 rounded-lg bg-[#4C061D] text-white font-medium text-xs shadow-xs"
-                  >
-                    Reset Filters
-                  </button>
-                </div>
-              )}
+        ) : filteredListings.length === 0 ? (
+          <div className="py-20 text-center space-y-4 max-w-md mx-auto">
+            <div className="w-16 h-16 rounded-full bg-[#4C061D]/10 text-[#4C061D] flex items-center justify-center mx-auto">
+              <Building2 className="w-8 h-8" />
             </div>
-
-            {/* Sticky Interactive Map Column (5 cols) */}
-            <div className="hidden lg:block lg:col-span-5 sticky top-36 h-[calc(100vh-180px)]">
-              <MapView properties={filteredListings} />
-            </div>
-
+            <h2 className="font-serif-display text-2xl text-[#1C1B12]">
+              No Properties Found
+            </h2>
+            <p className="text-xs text-[#736F4E]">
+              There are no property listings currently in the database matching your criteria.
+            </p>
           </div>
         ) : (
-          /* Pure Grid View */
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredListings.map((property) => (
-              <PropertyCard key={property.id} property={property} />
-            ))}
+          <div>
+            {/* GRID VIEW */}
+            {viewMode === "grid" && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {filteredListings.map((property) => (
+                  <PropertyCard key={property.id} property={property} />
+                ))}
+              </div>
+            )}
+
+            {/* SPLIT VIEW (List + Map) */}
+            {viewMode === "split" && (
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-180px)]">
+                <div className="lg:col-span-7 overflow-y-auto pr-2 grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  {filteredListings.map((property) => (
+                    <PropertyCard key={property.id} property={property} />
+                  ))}
+                </div>
+                <div className="hidden lg:block lg:col-span-5 rounded-3xl overflow-hidden border border-[#ECE7DA] shadow-sm sticky top-0 h-full">
+                  <MapView properties={filteredListings} />
+                </div>
+              </div>
+            )}
+
+            {/* FULL MAP VIEW */}
+            {viewMode === "map" && (
+              <div className="h-[calc(100vh-180px)] rounded-3xl overflow-hidden border border-[#ECE7DA] shadow-sm">
+                <MapView properties={filteredListings} />
+              </div>
+            )}
           </div>
         )}
 
       </div>
 
-      {/* Filter Modal */}
+      {/* Filter Modal Component */}
       <FilterModal
         isOpen={isFilterModalOpen}
         onClose={() => setIsFilterModalOpen(false)}
@@ -212,15 +217,8 @@ function SearchContent() {
 
 export default function SearchPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-[#FAF8F4] flex items-center justify-center p-8">
-        <div className="font-mono-label text-xs text-[#4C061D] animate-pulse">
-          LOADING MARKETPLACE SEARCH...
-        </div>
-      </div>
-    }>
+    <Suspense fallback={<div className="p-12 text-center text-xs font-mono-label">Loading search...</div>}>
       <SearchContent />
     </Suspense>
   );
 }
-

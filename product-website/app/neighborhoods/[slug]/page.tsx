@@ -2,80 +2,87 @@
 
 export const dynamic = "force-dynamic";
 
+import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { NEIGHBORHOODS, PROPERTIES } from "@/lib/data";
+import { apiClient } from "@/lib/api-client";
+import { Property } from "@/lib/types";
 import { PropertyCard } from "@/components/property-card";
-import { ShieldCheck, Zap, Droplets, ArrowRight } from "lucide-react";
+import { ShieldCheck, Zap, Droplets, ArrowRight, Building2 } from "lucide-react";
 
 export default function NeighborhoodDetailPage() {
   const params = useParams();
   const slug = params?.slug as string;
 
-  const nh = NEIGHBORHOODS.find((n) => n.slug === slug) || NEIGHBORHOODS[0];
-  const nhProperties = PROPERTIES.filter((p) => p.neighborhood.toLowerCase() === nh.name.toLowerCase());
+  const [nhProperties, setNhProperties] = useState<Property[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const nhName = slug ? slug.replace(/-/g, " ") : "Bole Medhanialem";
+
+  useEffect(() => {
+    async function loadData() {
+      setLoading(true);
+      const data = await apiClient.getProperties();
+      setNhProperties(data.filter((p) => p.subCity.toLowerCase().includes(nhName.toLowerCase()) || p.neighborhood.toLowerCase().includes(nhName.toLowerCase())));
+      setLoading(false);
+    }
+    loadData();
+  }, [nhName]);
 
   return (
     <div className="bg-[#FAF8F4] min-h-screen py-8">
       <div className="max-w-[1440px] mx-auto px-4 sm:px-8">
         
         {/* Neighborhood Guide Banner */}
-        <div className="bg-white p-8 rounded-3xl border border-[#ECE7DA] shadow-xs mb-12 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-          <div className="lg:col-span-8">
-            <span className="font-mono-label text-[10px] text-[#4C061D] bg-[#FAF8F4] border border-[#ECE7DA] px-3.5 py-1 rounded-full inline-block mb-3">
-              {nh.subCity.toUpperCase()} • {nh.city.toUpperCase()}
-            </span>
-            <h1 className="font-serif-display text-4xl sm:text-5xl font-light text-[#1c1b12] mb-3">
-              {nh.name} Neighborhood Guide
-            </h1>
-            <p className="text-sm text-[#736F4E] leading-relaxed mb-6 font-normal">
-              {nh.description}
-            </p>
-
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-              <div className="p-4 rounded-xl bg-[#FAF8F4] border border-[#ECE7DA]">
-                <span className="font-mono-label text-[9px] text-[#736F4E] block">SECURITY SCORE</span>
-                <span className="text-xl font-bold text-[#4C061D] flex items-center gap-1">
-                  <ShieldCheck className="w-4 h-4 text-[#4C061D]" /> {nh.securityScore} / 10
-                </span>
-              </div>
-
-              <div className="p-4 rounded-xl bg-[#FAF8F4] border border-[#ECE7DA]">
-                <span className="font-mono-label text-[9px] text-[#736F4E] block">GENERATOR COVERAGE</span>
-                <span className="text-xs font-bold text-[#1c1b12] flex items-center gap-1 mt-1">
-                  <Zap className="w-3.5 h-3.5 text-[#B4C292]" /> {nh.generatorPenetration}
-                </span>
-              </div>
-
-              <div className="p-4 rounded-xl bg-[#FAF8F4] border border-[#ECE7DA]">
-                <span className="font-mono-label text-[9px] text-[#736F4E] block">WATER RELIABILITY</span>
-                <span className="text-xs font-bold text-[#1c1b12] flex items-center gap-1 mt-1">
-                  <Droplets className="w-3.5 h-3.5 text-cyan-600" /> {nh.waterReliability}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div className="lg:col-span-4 aspect-[4/3] rounded-2xl overflow-hidden bg-[#1c1b12] border border-[#ECE7DA]">
-            <img src={nh.heroImage} alt={nh.name} className="w-full h-full object-cover" />
-          </div>
-        </div>
-
-        {/* Listings */}
-        <div className="mb-8 flex items-center justify-between border-b border-[#ECE7DA] pb-4">
-          <h2 className="font-serif-display text-3xl font-light text-[#1c1b12]">
-            Homes in {nh.name}
-          </h2>
-          <span className="font-mono-label text-[10px] text-[#4C061D] font-bold">
-            {nhProperties.length} ACTIVE HOMES
+        <div className="bg-white p-8 rounded-3xl border border-[#ECE7DA] shadow-xs mb-12">
+          <span className="font-mono-label text-[10px] text-[#4C061D] bg-[#FAF8F4] border border-[#ECE7DA] px-3.5 py-1 rounded-full inline-block mb-3 uppercase">
+            NEIGHBORHOOD DIRECTORY
           </span>
+          <h1 className="font-serif-display text-4xl sm:text-5xl font-light text-[#1c1b12] mb-3 capitalize">
+            {nhName} Neighborhood Guide
+          </h1>
+          <p className="text-sm text-[#736F4E] leading-relaxed mb-6 font-normal">
+            Verified residential compounds, serviced apartments, and diplomatic residences in {nhName}.
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {nhProperties.map((property) => (
-            <PropertyCard key={property.id} property={property} />
-          ))}
+        {/* Verified Neighborhood Listings */}
+        <div className="mb-8 flex items-center justify-between border-b border-[#ECE7DA] pb-4">
+          <div>
+            <span className="font-mono-label text-[10px] text-[#4C061D] block mb-1">
+              FIELD VERIFIED MARKETPLACE
+            </span>
+            <h2 className="font-serif-display text-3xl font-light text-[#1c1b12] capitalize">
+              Available Homes in {nhName} ({nhProperties.length})
+            </h2>
+          </div>
         </div>
+
+        {loading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="h-80 rounded-3xl bg-white border border-[#ECE7DA] animate-pulse" />
+            ))}
+          </div>
+        ) : nhProperties.length === 0 ? (
+          <div className="py-16 text-center space-y-4 max-w-md mx-auto">
+            <div className="w-16 h-16 rounded-full bg-[#4C061D]/10 text-[#4C061D] flex items-center justify-center mx-auto">
+              <Building2 className="w-8 h-8" />
+            </div>
+            <h2 className="font-serif-display text-2xl text-[#1C1B12] capitalize">
+              No Homes Listed in {nhName}
+            </h2>
+            <p className="text-xs text-[#736F4E]">
+              There are currently no active properties listed in {nhName} in your database.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {nhProperties.map((property) => (
+              <PropertyCard key={property.id} property={property} />
+            ))}
+          </div>
+        )}
 
       </div>
     </div>

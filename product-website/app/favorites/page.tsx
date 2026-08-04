@@ -1,16 +1,28 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { PROPERTIES } from "@/lib/data";
+import { apiClient } from "@/lib/api-client";
+import { Property } from "@/lib/types";
 import { PropertyCard } from "@/components/property-card";
-import { Heart, Search, ShieldCheck } from "lucide-react";
+import { Heart, Search } from "lucide-react";
 
 export default function FavoritesPage() {
-  // Mock saved properties (first 3 properties)
-  const [savedIds, setSavedIds] = useState<string[]>(["p1", "p2", "p5"]);
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [savedIds, setSavedIds] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const savedListings = PROPERTIES.filter((p) => savedIds.includes(p.id));
+  useEffect(() => {
+    async function loadProperties() {
+      setLoading(true);
+      const data = await apiClient.getProperties();
+      setProperties(data);
+      setLoading(false);
+    }
+    loadProperties();
+  }, []);
+
+  const savedListings = properties.filter((p) => savedIds.includes(p.id));
 
   const handleToggle = (id: string) => {
     if (savedIds.includes(id)) {
@@ -39,7 +51,13 @@ export default function FavoritesPage() {
           </p>
         </div>
 
-        {savedListings.length > 0 ? (
+        {loading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="h-80 rounded-3xl bg-white border border-[#ECE7DA] animate-pulse" />
+            ))}
+          </div>
+        ) : savedListings.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {savedListings.map((property) => (
               <PropertyCard

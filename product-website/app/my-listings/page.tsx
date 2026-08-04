@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { apiClient } from "@/lib/api-client";
+import { Property } from "@/lib/types";
 import {
   Building2,
   Plus,
@@ -13,12 +15,23 @@ import {
   Trash2,
   Filter,
 } from "lucide-react";
-import { PROPERTIES } from "@/lib/data";
 
 export default function MyListingsPage() {
   const [activeTab, setActiveTab] = useState<"all" | "approved" | "pending" | "archived">("all");
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const filteredProperties = PROPERTIES.filter((p) => {
+  useEffect(() => {
+    async function loadProperties() {
+      setLoading(true);
+      const data = await apiClient.getProperties();
+      setProperties(data);
+      setLoading(false);
+    }
+    loadProperties();
+  }, []);
+
+  const filteredProperties = properties.filter((p) => {
     if (activeTab === "approved") return p.verified;
     if (activeTab === "pending") return !p.verified;
     return true;
@@ -54,81 +67,85 @@ export default function MyListingsPage() {
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
           <div className="p-6 rounded-3xl bg-white border border-[#ECE7DA] shadow-xs">
             <div className="text-xs font-mono-label text-[#736F4E]">TOTAL PROPERTIES</div>
-            <div className="font-serif-display text-3xl text-[#1C1B12] mt-1">{PROPERTIES.length}</div>
+            <div className="font-serif-display text-3xl text-[#1C1B12] mt-1">{properties.length}</div>
           </div>
           <div className="p-6 rounded-3xl bg-white border border-[#ECE7DA] shadow-xs">
             <div className="text-xs font-mono-label text-emerald-700">APPROVED & LIVE</div>
-            <div className="font-serif-display text-3xl text-emerald-800 mt-1">
-              {PROPERTIES.filter((p) => p.verified).length}
+            <div className="font-serif-display text-3xl text-[#1C1B12] mt-1">
+              {properties.filter((p) => p.verified).length}
             </div>
           </div>
           <div className="p-6 rounded-3xl bg-white border border-[#ECE7DA] shadow-xs">
             <div className="text-xs font-mono-label text-amber-700">PENDING FIELD AUDIT</div>
-            <div className="font-serif-display text-3xl text-amber-800 mt-1">1</div>
+            <div className="font-serif-display text-3xl text-[#1C1B12] mt-1">
+              {properties.filter((p) => !p.verified).length}
+            </div>
           </div>
           <div className="p-6 rounded-3xl bg-white border border-[#ECE7DA] shadow-xs">
-            <div className="text-xs font-mono-label text-[#4C061D]">WALKTHROUGH VISITS</div>
-            <div className="font-serif-display text-3xl text-[#4C061D] mt-1">12</div>
+            <div className="text-xs font-mono-label text-[#4C061D]">WALKTHROUGH REQUESTS</div>
+            <div className="font-serif-display text-3xl text-[#1C1B12] mt-1">12</div>
           </div>
         </div>
 
-        {/* Tab Filters */}
-        <div className="flex items-center gap-2 border-b border-[#ECE7DA] pb-3">
-          {(["all", "approved", "pending", "archived"] as const).map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`px-5 py-2 rounded-full font-mono-label text-xs capitalize transition-colors ${
-                activeTab === tab
-                  ? "bg-[#4C061D] text-white font-bold"
-                  : "bg-white text-[#736F4E] border border-[#ECE7DA] hover:text-[#1C1B12]"
-              }`}
-            >
-              {tab}
-            </button>
-          ))}
-        </div>
-
-        {/* Listings Table / Cards */}
-        <div className="bg-white rounded-3xl border border-[#ECE7DA] shadow-sm overflow-hidden">
-          <div className="divide-y divide-[#ECE7DA]">
-            {filteredProperties.map((property) => (
-              <div key={property.id} className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-[#FAF8F4]/50 transition-colors">
-                <div className="flex items-start md:items-center gap-4">
-                  <img src={property.heroImage} alt="" className="w-20 h-20 rounded-2xl object-cover border border-[#ECE7DA]" />
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-bold text-base text-[#1C1B12]">{property.title}</h3>
-                      {property.verified ? (
-                        <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-mono-label text-[10px] font-bold flex items-center gap-1">
-                          <CheckCircle2 className="w-3 h-3" /> LIVE
-                        </span>
-                      ) : (
-                        <span className="px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 font-mono-label text-[10px] font-bold flex items-center gap-1">
-                          <Clock className="w-3 h-3" /> PENDING AUDIT
-                        </span>
-                      )}
-                    </div>
-                    <div className="text-xs text-[#736F4E] mt-1 font-mono-label">
-                      ETB {property.rentETB.toLocaleString()}/mo • {property.subCity}, {property.city} • {property.bedrooms} Beds
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 pt-2 md:pt-0 border-t md:border-t-0 border-[#ECE7DA]">
-                  <Link
-                    href={`/property/${property.slug}`}
-                    className="px-4 py-2 rounded-xl bg-[#FAF8F4] border border-[#ECE7DA] text-xs font-mono-label text-[#1C1B12] hover:bg-[#ECE7DA] transition-colors flex items-center gap-1.5"
-                  >
-                    <Eye className="w-3.5 h-3.5" /> View
-                  </Link>
-                  <button className="px-4 py-2 rounded-xl bg-[#FAF8F4] border border-[#ECE7DA] text-xs font-mono-label text-[#1C1B12] hover:bg-[#ECE7DA] transition-colors flex items-center gap-1.5">
-                    <Edit className="w-3.5 h-3.5" /> Edit
-                  </button>
-                </div>
-              </div>
+        {/* Listings List */}
+        <div className="bg-white rounded-3xl border border-[#ECE7DA] shadow-sm p-6 sm:p-8">
+          
+          <div className="flex items-center gap-2 mb-6 border-b border-[#ECE7DA] pb-4">
+            {(["all", "approved", "pending"] as const).map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`px-4 py-2 rounded-full font-mono-label text-xs font-bold uppercase transition-colors ${
+                  activeTab === tab ? "bg-[#4C061D] text-white" : "bg-[#FAF8F4] text-[#736F4E] hover:bg-[#ECE7DA]"
+                }`}
+              >
+                {tab}
+              </button>
             ))}
           </div>
+
+          {loading ? (
+            <div className="space-y-4">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="h-24 rounded-2xl bg-[#FAF8F4] animate-pulse" />
+              ))}
+            </div>
+          ) : filteredProperties.length === 0 ? (
+            <div className="py-16 text-center space-y-3">
+              <Building2 className="w-12 h-12 text-[#736F4E] mx-auto opacity-50" />
+              <h3 className="font-serif-display text-xl text-[#1C1B12]">No Property Listings Found</h3>
+              <p className="text-xs text-[#736F4E]">You haven't submitted any properties yet. Click "Publish New Listing" above to get started.</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {filteredProperties.map((property) => (
+                <div
+                  key={property.id}
+                  className="p-5 rounded-2xl bg-[#FAF8F4] border border-[#ECE7DA] flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                >
+                  <div className="flex items-center gap-4">
+                    <img src={property.heroImage} alt="" className="w-16 h-16 rounded-xl object-cover" />
+                    <div>
+                      <h4 className="font-serif-display text-lg text-[#1C1B12]">{property.title}</h4>
+                      <p className="text-xs text-[#736F4E] font-mono-label">
+                        {property.subCity}, {property.city} • ETB {property.rentETB.toLocaleString()}/mo
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <Link
+                      href={`/property/${property.slug}`}
+                      className="px-4 py-2 rounded-full bg-white border border-[#ECE7DA] text-xs font-mono-label text-[#1C1B12]"
+                    >
+                      View
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
         </div>
 
       </div>

@@ -2,18 +2,32 @@
 
 export const dynamic = "force-dynamic";
 
+import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { CITIES, PROPERTIES } from "@/lib/data";
+import { apiClient } from "@/lib/api-client";
+import { Property, City } from "@/lib/types";
 import { PropertyCard } from "@/components/property-card";
-import { MapPin, ShieldCheck, ArrowRight } from "lucide-react";
+import { MapPin, ShieldCheck, ArrowRight, Building2 } from "lucide-react";
 
 export default function CityDetailPage() {
   const params = useParams();
   const slug = params?.city as string;
 
-  const city = CITIES.find((c) => c.slug === slug) || CITIES[0];
-  const cityProperties = PROPERTIES.filter((p) => p.city.toLowerCase() === city.name.toLowerCase());
+  const [cityProperties, setCityProperties] = useState<Property[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const cityName = slug ? slug.replace(/-/g, " ") : "Addis Ababa";
+
+  useEffect(() => {
+    async function loadData() {
+      setLoading(true);
+      const data = await apiClient.getProperties({ city: cityName });
+      setCityProperties(data);
+      setLoading(false);
+    }
+    loadData();
+  }, [cityName]);
 
   return (
     <div className="bg-[#FAF8F4] min-h-screen py-8">
@@ -22,55 +36,64 @@ export default function CityDetailPage() {
         {/* City Hero */}
         <div className="relative rounded-3xl overflow-hidden bg-[#1c1b12] p-8 sm:p-12 mb-12 border border-[#ECE7DA] shadow-xl text-white">
           <img
-            src={city.image}
-            alt={city.name}
+            src="/images/hero_property.png"
+            alt={cityName}
             className="absolute inset-0 w-full h-full object-cover opacity-50"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
 
           <div className="relative z-10 max-w-2xl">
             <span className="font-mono-label text-[10px] text-[#B4C292] bg-black/60 border border-white/20 px-3 py-1 rounded-full inline-block mb-4">
-              {city.propertiesCount} VERIFIED MARKET LISTINGS
+              {cityProperties.length} VERIFIED MARKET LISTINGS
             </span>
 
-            <h1 className="font-serif-display text-4xl sm:text-6xl font-light mb-2">
-              {city.name} Real Estate
+            <h1 className="font-serif-display text-4xl sm:text-6xl font-light mb-2 capitalize">
+              {cityName} Real Estate
             </h1>
 
             <p className="text-base text-white/80 font-normal mb-6">
-              {city.description}
+              Verified residential compounds, serviced apartments, and diplomatic residences in {cityName}.
             </p>
-
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="font-mono-label text-[10px] text-white/70">SUB-CITIES:</span>
-              {city.subCities.map((sub) => (
-                <Link
-                  key={sub}
-                  href={`/search?city=${encodeURIComponent(city.name)}&subCity=${encodeURIComponent(sub)}`}
-                  className="px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-mono-label hover:bg-white hover:text-[#4C061D] transition-colors"
-                >
-                  {sub}
-                </Link>
-              ))}
-            </div>
           </div>
         </div>
 
         {/* Verified City Listings */}
         <div className="mb-8 flex items-center justify-between border-b border-[#ECE7DA] pb-4">
-          <h2 className="font-serif-display text-3xl font-light text-[#1c1b12]">
-            Verified Listings in {city.name}
-          </h2>
-          <span className="font-mono-label text-[10px] text-[#4C061D] font-bold">
-            SHOWING {cityProperties.length} HOMES
-          </span>
+          <div>
+            <span className="font-mono-label text-[10px] text-[#4C061D] block mb-1">
+              FIELD VERIFIED MARKETPLACE
+            </span>
+            <h2 className="font-serif-display text-3xl font-light text-[#1c1b12]">
+              Available Homes in {cityName}
+            </h2>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {cityProperties.map((property) => (
-            <PropertyCard key={property.id} property={property} />
-          ))}
-        </div>
+        {loading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="h-80 rounded-3xl bg-white border border-[#ECE7DA] animate-pulse" />
+            ))}
+          </div>
+        ) : cityProperties.length === 0 ? (
+          <div className="py-16 text-center space-y-4 max-w-md mx-auto">
+            <div className="w-16 h-16 rounded-full bg-[#4C061D]/10 text-[#4C061D] flex items-center justify-center mx-auto">
+              <Building2 className="w-8 h-8" />
+            </div>
+            <h2 className="font-serif-display text-2xl text-[#1C1B12]">
+              No Homes Listed in {cityName}
+            </h2>
+            <p className="text-xs text-[#736F4E]">
+              There are currently no active properties listed in {cityName} in your database.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {cityProperties.map((property) => (
+              <PropertyCard key={property.id} property={property} />
+            ))}
+          </div>
+        )}
 
       </div>
     </div>
