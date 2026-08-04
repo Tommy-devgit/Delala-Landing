@@ -3,6 +3,7 @@ import { RegisterDto } from "./dto/register.dto";
 import { LoginDto } from "./dto/login.dto";
 export declare class AuthService {
     private prisma;
+    private readonly logger;
     constructor(prisma: PrismaService);
     register(dto: RegisterDto): Promise<{
         token: string;
