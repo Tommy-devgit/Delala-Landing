@@ -1,0 +1,295 @@
+import { PropertiesService } from "./properties.service";
+import { CreatePropertyDto, ModeratePropertyDto } from "./dto/create-property.dto";
+export declare class PropertiesController {
+    private readonly propertiesService;
+    constructor(propertiesService: PropertiesService);
+    findAll(query: {
+        city?: string;
+        subCity?: string;
+        propertyType?: string;
+    }): Promise<({
+        city: {
+            id: string;
+            slug: string;
+            createdAt: Date;
+            updatedAt: Date;
+            name: string;
+            tagline: string;
+            startingRentETB: number;
+            propertiesCount: number;
+        };
+        neighborhood: {
+            id: string;
+            slug: string;
+            cityId: string;
+            createdAt: Date;
+            updatedAt: Date;
+            name: string;
+            subCity: string;
+            securityScore: number;
+            generatorPenetration: string;
+            waterReliability: string;
+            averageRentETB: number;
+        };
+        broker: {
+            user: {
+                profile: {
+                    id: string;
+                    createdAt: Date;
+                    updatedAt: Date;
+                    userId: string;
+                    verified: boolean;
+                    fullName: string;
+                    avatarUrl: string | null;
+                    phone: string | null;
+                    bio: string | null;
+                    languages: string[];
+                };
+            } & {
+                id: string;
+                status: import(".prisma/client").$Enums.UserStatus;
+                createdAt: Date;
+                updatedAt: Date;
+                email: string;
+                role: import(".prisma/client").$Enums.UserRole;
+                supabaseUid: string;
+            };
+        } & {
+            id: string;
+            slug: string;
+            createdAt: Date;
+            updatedAt: Date;
+            userId: string;
+            agencyName: string;
+            licenseNumber: string;
+            verified: boolean;
+            rating: number;
+            reviewsCount: number;
+            responseTime: string;
+            specializedAreas: string[];
+        };
+        images: {
+            id: string;
+            propertyId: string;
+            url: string;
+            displayOrder: number;
+            isHero: boolean;
+        }[];
+    } & {
+        id: string;
+        slug: string;
+        title: string;
+        description: string;
+        propertyType: string;
+        rentETB: number;
+        cityId: string;
+        neighborhoodId: string;
+        bedrooms: number;
+        bathrooms: number;
+        areaSqm: number;
+        generator: boolean;
+        waterTank: boolean;
+        parking: boolean;
+        furnished: boolean;
+        securityGuard: boolean;
+        balcony: boolean;
+        status: import(".prisma/client").$Enums.PropertyStatus;
+        rejectionReason: string | null;
+        fieldAgentNotes: string | null;
+        brokerId: string;
+        ownerId: string | null;
+        createdAt: Date;
+        updatedAt: Date;
+    })[]>;
+    findOne(slug: string): Promise<{
+        city: {
+            id: string;
+            slug: string;
+            createdAt: Date;
+            updatedAt: Date;
+            name: string;
+            tagline: string;
+            startingRentETB: number;
+            propertiesCount: number;
+        };
+        neighborhood: {
+            id: string;
+            slug: string;
+            cityId: string;
+            createdAt: Date;
+            updatedAt: Date;
+            name: string;
+            subCity: string;
+            securityScore: number;
+            generatorPenetration: string;
+            waterReliability: string;
+            averageRentETB: number;
+        };
+        broker: {
+            user: {
+                profile: {
+                    id: string;
+                    createdAt: Date;
+                    updatedAt: Date;
+                    userId: string;
+                    verified: boolean;
+                    fullName: string;
+                    avatarUrl: string | null;
+                    phone: string | null;
+                    bio: string | null;
+                    languages: string[];
+                };
+            } & {
+                id: string;
+                status: import(".prisma/client").$Enums.UserStatus;
+                createdAt: Date;
+                updatedAt: Date;
+                email: string;
+                role: import(".prisma/client").$Enums.UserRole;
+                supabaseUid: string;
+            };
+        } & {
+            id: string;
+            slug: string;
+            createdAt: Date;
+            updatedAt: Date;
+            userId: string;
+            agencyName: string;
+            licenseNumber: string;
+            verified: boolean;
+            rating: number;
+            reviewsCount: number;
+            responseTime: string;
+            specializedAreas: string[];
+        };
+        images: {
+            id: string;
+            propertyId: string;
+            url: string;
+            displayOrder: number;
+            isHero: boolean;
+        }[];
+    } & {
+        id: string;
+        slug: string;
+        title: string;
+        description: string;
+        propertyType: string;
+        rentETB: number;
+        cityId: string;
+        neighborhoodId: string;
+        bedrooms: number;
+        bathrooms: number;
+        areaSqm: number;
+        generator: boolean;
+        waterTank: boolean;
+        parking: boolean;
+        furnished: boolean;
+        securityGuard: boolean;
+        balcony: boolean;
+        status: import(".prisma/client").$Enums.PropertyStatus;
+        rejectionReason: string | null;
+        fieldAgentNotes: string | null;
+        brokerId: string;
+        ownerId: string | null;
+        createdAt: Date;
+        updatedAt: Date;
+    }>;
+    create(createDto: CreatePropertyDto): Promise<{
+        city: {
+            id: string;
+            slug: string;
+            createdAt: Date;
+            updatedAt: Date;
+            name: string;
+            tagline: string;
+            startingRentETB: number;
+            propertiesCount: number;
+        };
+        neighborhood: {
+            id: string;
+            slug: string;
+            cityId: string;
+            createdAt: Date;
+            updatedAt: Date;
+            name: string;
+            subCity: string;
+            securityScore: number;
+            generatorPenetration: string;
+            waterReliability: string;
+            averageRentETB: number;
+        };
+        broker: {
+            id: string;
+            slug: string;
+            createdAt: Date;
+            updatedAt: Date;
+            userId: string;
+            agencyName: string;
+            licenseNumber: string;
+            verified: boolean;
+            rating: number;
+            reviewsCount: number;
+            responseTime: string;
+            specializedAreas: string[];
+        };
+        images: {
+            id: string;
+            propertyId: string;
+            url: string;
+            displayOrder: number;
+            isHero: boolean;
+        }[];
+    } & {
+        id: string;
+        slug: string;
+        title: string;
+        description: string;
+        propertyType: string;
+        rentETB: number;
+        cityId: string;
+        neighborhoodId: string;
+        bedrooms: number;
+        bathrooms: number;
+        areaSqm: number;
+        generator: boolean;
+        waterTank: boolean;
+        parking: boolean;
+        furnished: boolean;
+        securityGuard: boolean;
+        balcony: boolean;
+        status: import(".prisma/client").$Enums.PropertyStatus;
+        rejectionReason: string | null;
+        fieldAgentNotes: string | null;
+        brokerId: string;
+        ownerId: string | null;
+        createdAt: Date;
+        updatedAt: Date;
+    }>;
+    moderate(id: string, moderateDto: ModeratePropertyDto): Promise<{
+        id: string;
+        slug: string;
+        title: string;
+        description: string;
+        propertyType: string;
+        rentETB: number;
+        cityId: string;
+        neighborhoodId: string;
+        bedrooms: number;
+        bathrooms: number;
+        areaSqm: number;
+        generator: boolean;
+        waterTank: boolean;
+        parking: boolean;
+        furnished: boolean;
+        securityGuard: boolean;
+        balcony: boolean;
+        status: import(".prisma/client").$Enums.PropertyStatus;
+        rejectionReason: string | null;
+        fieldAgentNotes: string | null;
+        brokerId: string;
+        ownerId: string | null;
+        createdAt: Date;
+        updatedAt: Date;
+    }>;
+}

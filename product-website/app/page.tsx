@@ -1,19 +1,24 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { SearchBarCapsule } from "@/components/search-bar-capsule";
 import { CategoryBar } from "@/components/category-bar";
 import { PropertyCard } from "@/components/property-card";
 import { BrokerCard } from "@/components/broker-card";
 import { FilterModal } from "@/components/filter-modal";
-import { PROPERTIES, CITIES, NEIGHBORHOODS, BROKERS } from "@/lib/data";
-import { FilterState } from "@/lib/types";
+import { apiClient } from "@/lib/api-client";
+import { Property, City, Broker, FilterState } from "@/lib/types";
 import { ShieldCheck, MapPin, Building2, ArrowRight, Sparkles, SlidersHorizontal, Flame } from "lucide-react";
 
 export default function HomePage() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [cities, setCities] = useState<City[]>([]);
+  const [brokers, setBrokers] = useState<Broker[]>([]);
+  const [loading, setLoading] = useState(true);
+
   const [filters, setFilters] = useState<FilterState>({
     city: "",
     subCity: "",
@@ -30,8 +35,25 @@ export default function HomePage() {
     sortBy: "newest",
   });
 
+  // Fetch live properties, cities, and brokers from NestJS REST API + Supabase PostgreSQL
+  useEffect(() => {
+    async function loadData() {
+      setLoading(true);
+      const [fetchedProperties, fetchedCities, fetchedBrokers] = await Promise.all([
+        apiClient.getProperties(),
+        apiClient.getCities(),
+        apiClient.getBrokers(),
+      ]);
+      setProperties(fetchedProperties);
+      setCities(fetchedCities);
+      setBrokers(fetchedBrokers);
+      setLoading(false);
+    }
+    loadData();
+  }, []);
+
   // Filter listings based on category pill
-  const filteredListings = PROPERTIES.filter((item) => {
+  const filteredListings = properties.filter((item) => {
     if (selectedCategory === "all") return true;
     if (selectedCategory === "diplomatic") return item.subCity.includes("Bole") || item.neighborhood.includes("Airport");
     return item.propertyType === selectedCategory;
@@ -40,7 +62,7 @@ export default function HomePage() {
   return (
     <div className="space-y-12 pb-16">
       
-      {/* 1. HERO DISCOVERY SECTION (No Marketing — Pure Utility Search) */}
+      {/* 1. HERO DISCOVERY SECTION */}
       <section className="bg-[#FAF8F4] pt-8 pb-12 px-4 sm:px-8 border-b border-[#ECE7DA] relative overflow-hidden">
         <div className="max-w-[1440px] mx-auto">
           
@@ -103,16 +125,24 @@ export default function HomePage() {
             href="/search"
             className="font-mono-label text-[11px] text-[#4C061D] font-bold hover:underline flex items-center gap-1"
           >
-            <span>VIEW ALL LISTINGS ({PROPERTIES.length})</span>
+            <span>VIEW ALL LISTINGS ({properties.length})</span>
             <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredListings.map((property) => (
-            <PropertyCard key={property.id} property={property} />
-          ))}
-        </div>
+        {loading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="h-80 rounded-3xl bg-white border border-[#ECE7DA] animate-pulse" />
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {filteredListings.map((property) => (
+              <PropertyCard key={property.id} property={property} />
+            ))}
+          </div>
+        )}
       </section>
 
       {/* 4. POPULAR CITIES CAROUSEL */}
@@ -137,14 +167,14 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {CITIES.map((city) => (
+            {cities.map((city) => (
               <Link
                 key={city.id}
                 href={`/cities/${city.slug}`}
                 className="group relative rounded-2xl overflow-hidden aspect-[4/3] border border-[#ECE7DA] shadow-xs flex flex-col justify-end p-5 bg-[#1c1b12]"
               >
                 <img
-                  src={city.image}
+                  src={city.image || "/images/hero_property.png"}
                   alt={city.name}
                   className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-80"
                 />
@@ -167,100 +197,36 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 5. TRENDING NEIGHBORHOODS BENTO GRID */}
-      <section className="max-w-[1440px] mx-auto px-4 sm:px-8">
-        <div className="flex items-end justify-between mb-8 border-b border-[#ECE7DA] pb-4">
-          <div>
-            <span className="font-mono-label text-[10px] text-[#4C061D] block mb-1">
-              ADDIS ABABA SUB-CITIES
-            </span>
-            <h2 className="font-serif-display text-3xl font-light text-[#1c1b12]">
-              Trending Neighborhoods
-            </h2>
-          </div>
-
-          <Link
-            href="/search"
-            className="font-mono-label text-[11px] text-[#4C061D] font-bold hover:underline"
-          >
-            EXPLORE MAP →
-          </Link>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {NEIGHBORHOODS.map((nh) => (
-            <Link
-              key={nh.id}
-              href={`/neighborhoods/${nh.slug}`}
-              className="bg-white p-6 rounded-2xl border border-[#ECE7DA] shadow-xs hover:border-[#4C061D] hover:shadow-md transition-all flex flex-col justify-between group"
-            >
+      {/* 5. VERIFIED BROKERS ROW */}
+      {brokers.length > 0 && (
+        <section className="bg-white py-12 border-t border-[#ECE7DA]">
+          <div className="max-w-[1440px] mx-auto px-4 sm:px-8">
+            <div className="flex items-end justify-between mb-8">
               <div>
-                <div className="flex items-center justify-between mb-4">
-                  <span className="font-mono-label text-[10px] text-[#4C061D] bg-[#FAF8F4] px-2.5 py-1 rounded-full border border-[#ECE7DA]">
-                    {nh.subCity.toUpperCase()}
-                  </span>
-                  <span className="text-xs font-bold text-[#4C061D] flex items-center gap-1">
-                    <ShieldCheck className="w-3.5 h-3.5 text-[#4C061D]" /> {nh.securityScore} Security
-                  </span>
-                </div>
-
-                <h3 className="font-serif-display text-xl font-light text-[#1c1b12] group-hover:text-[#4C061D] transition-colors mb-2">
-                  {nh.name}
-                </h3>
-
-                <p className="text-xs text-[#736F4E] leading-relaxed line-clamp-2 mb-4">
-                  {nh.description}
-                </p>
-
-                <div className="space-y-1 text-[11px] text-[#2D2D2D] font-medium mb-4 bg-[#FAF8F4] p-3 rounded-xl border border-[#ECE7DA]">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[#736F4E]">Generator:</span>
-                    <span className="font-bold text-[#4C061D]">{nh.generatorPenetration}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-[#736F4E]">Water Tank:</span>
-                    <span className="font-bold text-[#4C061D]">{nh.waterReliability}</span>
-                  </div>
-                </div>
+                <span className="font-mono-label text-[10px] text-[#4C061D] block mb-1">
+                  LICENSED & ID-CHECKED AGENTS
+                </span>
+                <h2 className="font-serif-display text-3xl font-light text-[#1c1b12]">
+                  Verified Real Estate Brokers
+                </h2>
               </div>
 
-              <div className="pt-4 border-t border-[#ECE7DA] flex items-center justify-between font-mono-label text-[10px] text-[#4C061D]">
-                <span>AVG ETB {nh.averageRentETB.toLocaleString()}/MO</span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </div>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      {/* 6. VERIFIED BROKERS ROW */}
-      <section className="bg-white py-12 border-t border-[#ECE7DA]">
-        <div className="max-w-[1440px] mx-auto px-4 sm:px-8">
-          <div className="flex items-end justify-between mb-8">
-            <div>
-              <span className="font-mono-label text-[10px] text-[#4C061D] block mb-1">
-                LICENSED & ID-CHECKED AGENTS
-              </span>
-              <h2 className="font-serif-display text-3xl font-light text-[#1c1b12]">
-                Verified Real Estate Brokers
-              </h2>
+              <Link
+                href="/brokers"
+                className="font-mono-label text-[11px] text-[#4C061D] font-bold hover:underline"
+              >
+                DIRECTORY ({brokers.length}) →
+              </Link>
             </div>
 
-            <Link
-              href="/brokers"
-              className="font-mono-label text-[11px] text-[#4C061D] font-bold hover:underline"
-            >
-              DIRECTORY ({BROKERS.length}) →
-            </Link>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {brokers.map((broker) => (
+                <BrokerCard key={broker.id} broker={broker} />
+              ))}
+            </div>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {BROKERS.map((broker) => (
-              <BrokerCard key={broker.id} broker={broker} />
-            ))}
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Filter Modal Component */}
       <FilterModal

@@ -54,6 +54,16 @@ export class CreatePropertyDto {
   @IsBoolean()
   furnished: boolean;
 
+  @ApiProperty({ example: true, required: false })
+  @IsOptional()
+  @IsBoolean()
+  securityGuard?: boolean;
+
+  @ApiProperty({ example: true, required: false })
+  @IsOptional()
+  @IsBoolean()
+  balcony?: boolean;
+
   @ApiProperty({ example: "b1" })
   @IsString()
   brokerId: string;

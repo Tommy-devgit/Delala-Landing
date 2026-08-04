@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { apiClient } from "@/lib/api-client";
 import {
   Building2,
   MapPin,
@@ -55,8 +56,28 @@ export default function PublishListingPage() {
     if (currentStep > 1) setCurrentStep((prev) => prev - 1);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
+
+    await apiClient.createProperty({
+      title: title || "Bole Medhanialem Property",
+      description: description || "Newly published residential property in Bole sub-city.",
+      propertyType,
+      rentETB: Number(rentETB || 65000),
+      bedrooms: Number(bedrooms || 3),
+      bathrooms: Number(bathrooms || 2),
+      areaSqm: Number(areaSqm || 250),
+      generator,
+      waterTank,
+      parking,
+      furnished,
+      securityGuard,
+    });
+
+    setIsSubmitting(false);
     setSubmitted(true);
   };
 
