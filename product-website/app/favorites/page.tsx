@@ -3,28 +3,39 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { apiClient } from "@/lib/api-client";
+import { authClient, UserSession } from "@/lib/auth-client";
+import { AuthModal } from "@/components/auth-modal";
 import { Property } from "@/lib/types";
 import { PropertyCard } from "@/components/property-card";
-import { Heart, Search } from "lucide-react";
+import { Heart, Search, User } from "lucide-react";
 
 export default function FavoritesPage() {
+  const [session, setSession] = useState<{ user: UserSession; token: string } | null>(null);
   const [properties, setProperties] = useState<Property[]>([]);
   const [savedIds, setSavedIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
   useEffect(() => {
-    async function loadProperties() {
+    async function loadData() {
+      const activeSession = authClient.getSession();
+      setSession(activeSession);
+
       setLoading(true);
       const data = await apiClient.getProperties();
       setProperties(data);
       setLoading(false);
     }
-    loadProperties();
+    loadData();
   }, []);
 
   const savedListings = properties.filter((p) => savedIds.includes(p.id));
 
   const handleToggle = (id: string) => {
+    if (!session?.user || session.user.role === "GUEST") {
+      setIsAuthModalOpen(true);
+      return;
+    }
     if (savedIds.includes(id)) {
       setSavedIds(savedIds.filter((item) => item !== id));
     } else {
@@ -51,7 +62,23 @@ export default function FavoritesPage() {
           </p>
         </div>
 
-        {loading ? (
+        {!session?.user ? (
+          <div className="py-20 text-center bg-white rounded-3xl border border-[#ECE7DA] p-8 max-w-xl mx-auto space-y-4 shadow-sm">
+            <Heart className="w-12 h-12 text-[#4C061D] mx-auto opacity-70" />
+            <h2 className="font-serif-display text-2xl font-light text-[#1c1b12]">
+              Sign in to save properties
+            </h2>
+            <p className="text-xs text-[#736F4E]">
+              Authenticate as a Home Seeker or Certified Broker to save listings across devices.
+            </p>
+            <button
+              onClick={() => setIsAuthModalOpen(true)}
+              className="px-8 py-3.5 rounded-full bg-[#4C061D] text-white font-mono-label text-xs font-bold shadow-md hover:bg-[#3B0416] transition-colors"
+            >
+              Sign In / Choose Persona →
+            </button>
+          </div>
+        ) : loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[1, 2, 3, 4].map((i) => (
               <div key={i} className="h-80 rounded-3xl bg-white border border-[#ECE7DA] animate-pulse" />
@@ -88,6 +115,12 @@ export default function FavoritesPage() {
         )}
 
       </div>
+
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        onSelectRole={(u) => setSession({ user: u, token: "active" })}
+      />
     </div>
   );
 }
