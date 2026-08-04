@@ -19,13 +19,13 @@ export const authClient = {
         email: credentials.email,
         password: credentials.password,
         fullName: credentials.fullName,
-        role: "BROKER",
       }),
     });
 
     const data = await res.json();
     if (!res.ok) {
-      throw new Error(data.message || "Failed to create account.");
+      const errorMessage = Array.isArray(data.message) ? data.message.join(", ") : data.message || "Failed to create account.";
+      throw new Error(errorMessage);
     }
 
     if (typeof window !== "undefined") {
@@ -49,7 +49,8 @@ export const authClient = {
 
     const data = await res.json();
     if (!res.ok) {
-      throw new Error(data.message || "Invalid credentials.");
+      const errorMessage = Array.isArray(data.message) ? data.message.join(", ") : data.message || "Invalid credentials.";
+      throw new Error(errorMessage);
     }
 
     if (typeof window !== "undefined") {

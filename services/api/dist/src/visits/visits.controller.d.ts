@@ -9,9 +9,9 @@ export declare class VisitsController {
         status: import(".prisma/client").$Enums.VisitStatus;
         brokerId: string;
         propertyId: string;
+        seekerId: string;
         scheduledDate: string;
         timeSlot: string;
-        seekerId: string;
     }>;
     findAll(): Promise<({
         broker: {
@@ -105,8 +105,8 @@ export declare class VisitsController {
         status: import(".prisma/client").$Enums.VisitStatus;
         brokerId: string;
         propertyId: string;
+        seekerId: string;
         scheduledDate: string;
         timeSlot: string;
-        seekerId: string;
     })[]>;
 }
