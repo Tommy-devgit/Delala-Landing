@@ -179,15 +179,6 @@ export const apiClient = {
 
   // Fetch brokers
   async getBrokers(): Promise<Broker[]> {
-    try {
-      const res = await fetch(`${API_BASE}/brokers`, { cache: "no-store" });
-      if (res.ok) {
-        const data = await res.json();
-        if (Array.isArray(data) && data.length > 0) return data;
-      }
-    } catch (err) {
-      console.warn("NestJS API fetch error:", err);
-    }
     return [];
   },
 

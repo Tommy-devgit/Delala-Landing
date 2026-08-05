@@ -10,7 +10,6 @@ exports.AppModule = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_module_1 = require("./prisma/prisma.module");
 const properties_module_1 = require("./properties/properties.module");
-const brokers_module_1 = require("./brokers/brokers.module");
 const users_module_1 = require("./users/users.module");
 const admin_module_1 = require("./admin/admin.module");
 const cities_module_1 = require("./cities/cities.module");
@@ -26,7 +25,6 @@ exports.AppModule = AppModule = __decorate([
         imports: [
             prisma_module_1.PrismaModule,
             properties_module_1.PropertiesModule,
-            brokers_module_1.BrokersModule,
             users_module_1.UsersModule,
             admin_module_1.AdminModule,
             cities_module_1.CitiesModule,

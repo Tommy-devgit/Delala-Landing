@@ -32,7 +32,7 @@ export function ScheduleModal({
       seekerPhone,
       scheduledDate: selectedDate,
       timeSlot: "Morning Slot",
-      brokerId: property.broker.id,
+      brokerId: property.broker?.id || "u1",
     });
 
     setIsSubmitting(false);
@@ -54,7 +54,7 @@ export function ScheduleModal({
                 Schedule Walkthrough Visit
               </h3>
               <p className="text-xs text-[#736F4E] font-mono-label">
-                Verified Broker Appointment • Zero Commission Scam Protection
+                Physical Property Walkthrough Appointment
               </p>
             </div>
           </div>
@@ -70,7 +70,7 @@ export function ScheduleModal({
             </div>
             <h4 className="font-serif-display text-2xl text-[#1C1B12]">Appointment Requested!</h4>
             <p className="text-sm text-[#736F4E] max-w-xs mx-auto">
-              Your walkthrough request for <strong className="text-[#1C1B12]">{property.title}</strong> has been transmitted to certified broker <strong className="text-[#4C061D]">{property.broker.name}</strong>.
+              Your walkthrough request for <strong className="text-[#1C1B12]">{property.title}</strong> has been sent to property lister <strong className="text-[#4C061D]">{property.broker?.name || "Verified Owner"}</strong>.
             </p>
             <button
               onClick={() => {
@@ -126,7 +126,7 @@ export function ScheduleModal({
 
             <div>
               <label className="block text-[10px] font-mono-label text-[#736F4E] font-bold uppercase mb-1">
-                PHONE NUMBER FOR BROKER CONFIRMATION
+                PHONE NUMBER FOR CONFIRMATION
               </label>
               <input
                 type="tel"

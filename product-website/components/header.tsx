@@ -36,10 +36,9 @@ export function Header({ onOpenFilters }: { onOpenFilters?: () => void }) {
   }, []);
 
   const navLinks = [
-    { label: "EXPLORE HOMES", href: "/search", icon: Compass },
+    { label: "EXPLORE", href: "/search", icon: Compass },
     { label: "CITIES", href: "/cities", icon: MapPin },
-    { label: "VERIFIED BROKERS", href: "/brokers", icon: ShieldCheck },
-    { label: "HELP & SUPPORT", href: "/help", icon: HelpCircle },
+    { label: "SUPPORT", href: "/help", icon: HelpCircle },
   ];
 
   const user = session?.user;
@@ -48,14 +47,11 @@ export function Header({ onOpenFilters }: { onOpenFilters?: () => void }) {
     <header className="sticky top-0 z-40 glass-nav transition-all duration-300 border-b border-[#ECE7DA]/80">
       <div className="max-w-[1440px] mx-auto px-4 sm:px-8">
         <div className="flex items-center justify-between h-20 gap-6">
-          
+
           {/* LEFT: Brand Logomark */}
           <Link href="/" className="flex items-center gap-2.5 shrink-0 group">
             <span className="font-serif-display font-light text-2xl tracking-tight text-[#4C061D] group-hover:text-[#3B3923] transition-colors">
               DELALA
-            </span>
-            <span className="font-mono-label text-[9px] text-[#4C061D] bg-[#B4C292]/30 border border-[#B4C292]/50 px-2.5 py-0.5 rounded-full font-bold">
-              MARKETPLACE
             </span>
           </Link>
 
@@ -68,11 +64,10 @@ export function Header({ onOpenFilters }: { onOpenFilters?: () => void }) {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-mono-label tracking-wide transition-all ${
-                    isActive
-                      ? "bg-[#4C061D] text-white font-bold shadow-xs"
-                      : "text-[#736F4E] hover:text-[#4C061D] hover:bg-[#FAF8F4]"
-                  }`}
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-mono-label tracking-wide transition-all ${isActive
+                    ? "bg-[#4C061D] text-white font-bold shadow-xs"
+                    : "text-[#736F4E] hover:text-[#4C061D] hover:bg-[#FAF8F4]"
+                    }`}
                 >
                   <Icon className="w-3.5 h-3.5" />
                   <span>{item.label}</span>
@@ -83,7 +78,7 @@ export function Header({ onOpenFilters }: { onOpenFilters?: () => void }) {
 
           {/* RIGHT: List Property Button & Utility Icons */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-            
+
             {/* List Property CTA Button */}
             <Link
               href={user ? "/publish" : "/auth/signin?callbackUrl=/publish"}
@@ -106,11 +101,10 @@ export function Header({ onOpenFilters }: { onOpenFilters?: () => void }) {
             {/* Saved Wishlist */}
             <Link
               href="/favorites"
-              className={`p-2.5 rounded-full border border-[#ECE7DA] transition-colors ${
-                pathname === "/favorites"
-                  ? "bg-[#4C061D] text-white border-[#4C061D]"
-                  : "bg-white text-[#736F4E] hover:border-[#4C061D]"
-              }`}
+              className={`p-2.5 rounded-full border border-[#ECE7DA] transition-colors ${pathname === "/favorites"
+                ? "bg-[#4C061D] text-white border-[#4C061D]"
+                : "bg-white text-[#736F4E] hover:border-[#4C061D]"
+                }`}
               title="Saved Wishlist"
             >
               <Heart className="w-4 h-4 fill-rose-500 text-rose-500" />

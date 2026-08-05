@@ -5,12 +5,11 @@ import Link from "next/link";
 import { SearchBarCapsule } from "@/components/search-bar-capsule";
 import { CategoryBar } from "@/components/category-bar";
 import { PropertyCard } from "@/components/property-card";
-import { BrokerCard } from "@/components/broker-card";
 import { FilterModal } from "@/components/filter-modal";
 import { apiClient } from "@/lib/api-client";
 import { authClient, UserSession } from "@/lib/auth-client";
-import { Property, City, Broker, FilterState } from "@/lib/types";
-import { ShieldCheck, MapPin, Building2, ArrowRight, Sparkles, SlidersHorizontal, Flame } from "lucide-react";
+import { Property, City, FilterState } from "@/lib/types";
+import { ShieldCheck, MapPin, Building2, ArrowRight } from "lucide-react";
 
 export default function HomePage() {
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -18,7 +17,6 @@ export default function HomePage() {
   const [session, setSession] = useState<{ user: UserSession; token: string } | null>(null);
   const [properties, setProperties] = useState<Property[]>([]);
   const [cities, setCities] = useState<City[]>([]);
-  const [brokers, setBrokers] = useState<Broker[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [filters, setFilters] = useState<FilterState>({
@@ -41,14 +39,12 @@ export default function HomePage() {
     async function loadData() {
       setSession(authClient.getSession());
       setLoading(true);
-      const [fetchedProperties, fetchedCities, fetchedBrokers] = await Promise.all([
+      const [fetchedProperties, fetchedCities] = await Promise.all([
         apiClient.getProperties(),
         apiClient.getCities(),
-        apiClient.getBrokers(),
       ]);
       setProperties(fetchedProperties);
       setCities(fetchedCities);
-      setBrokers(fetchedBrokers);
       setLoading(false);
     }
     loadData();
@@ -64,20 +60,29 @@ export default function HomePage() {
 
   return (
     <div className="space-y-12 pb-16">
-
+      
+      {/* 1. HERO DISCOVERY SECTION (Full 100vh Height Covering Down to Screen Bottom) */}
       <section className="relative w-full h-[calc(100vh-80px)] min-h-[580px] flex flex-col justify-center overflow-hidden border-b border-[#ECE7DA]">
+        {/* Background Image Container */}
         <div className="absolute inset-0 w-full h-full z-0">
           <img
             src="/images/hero-img.jpg"
             alt="Delala Ethiopia Real Estate"
             className="w-full h-full object-cover object-center"
           />
+          {/* Dual Overlay Gradient for High Contrast & Text Legibility */}
           <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/65 to-black/40" />
           <div className="absolute inset-0 bg-gradient-to-t from-[#1C1B12] via-transparent to-black/30" />
         </div>
 
+        {/* Hero Content Container */}
         <div className="relative z-10 max-w-[1440px] w-full mx-auto px-4 sm:px-8 py-8">
           <div className="max-w-3xl mb-8 space-y-4">
+            <span className="font-mono-label text-[11px] text-[#B4C292] bg-white/10 backdrop-blur-md border border-white/20 px-4 py-1.5 rounded-full inline-flex items-center gap-2 shadow-lg">
+              <ShieldCheck className="w-4 h-4 text-[#B4C292]" />
+              <span className="tracking-wider">ETHIOPIA PHYSICAL REAL ESTATE MARKETPLACE</span>
+            </span>
+
             <h1 className="font-serif-display text-4xl sm:text-6xl lg:text-7xl font-light text-white tracking-tight leading-[0.95] drop-shadow-md">
               Find your next <span className="italic font-normal text-[#B4C292]">home</span> in Ethiopia.
             </h1>
@@ -92,7 +97,7 @@ export default function HomePage() {
             <SearchBarCapsule onOpenFilters={() => setIsFilterModalOpen(true)} />
           </div>
 
-          {/* Quick Sub-City Tags
+          {/* Quick Sub-City Tags */}
           <div className="mt-6 flex flex-wrap items-center gap-2.5 text-xs text-[#ECE7DA]">
             <span className="font-mono-label text-[10px] text-[#B4C292] font-bold tracking-wider">POPULAR SEARCHES:</span>
             {["Bole Medhanialem", "Kazanchis UN", "Old Airport Villa", "CMC Apartment", "Hawassa Lake View"].map((tag) => (
@@ -104,7 +109,7 @@ export default function HomePage() {
                 {tag}
               </Link>
             ))}
-          </div> */}
+          </div>
 
         </div>
       </section>
@@ -199,34 +204,6 @@ export default function HomePage() {
               </Link>
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* 5. CERTIFIED BROKERS SPOTLIGHT */}
-      <section className="max-w-[1440px] mx-auto px-4 sm:px-8">
-        <div className="flex items-end justify-between mb-8 border-b border-[#ECE7DA] pb-4">
-          <div>
-            <span className="font-mono-label text-[10px] text-[#4C061D] block mb-1">
-              LICENSED ETHIOPIAN AGENCIES
-            </span>
-            <h2 className="font-serif-display text-3xl font-light text-[#1c1b12]">
-              Verified Brokers & Agencies
-            </h2>
-          </div>
-
-          <Link
-            href="/brokers"
-            className="font-mono-label text-[11px] text-[#4C061D] font-bold hover:underline flex items-center gap-1"
-          >
-            <span>ALL BROKERS</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {brokers.map((broker) => (
-            <BrokerCard key={broker.id} broker={broker} />
-          ))}
         </div>
       </section>
 

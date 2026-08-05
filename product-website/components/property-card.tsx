@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Heart, ShieldCheck, Star, Zap, Droplets, Car } from "lucide-react";
+import { Heart, ShieldCheck, Zap, Droplets, Car } from "lucide-react";
 import { Property } from "@/lib/types";
 
 export function PropertyCard({
@@ -15,7 +15,6 @@ export function PropertyCard({
   onToggleFavorite?: (id: string) => void;
 }) {
   const [fav, setFav] = useState(isFavorite);
-  const [currentImgIndex, setCurrentImgIndex] = useState(0);
 
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -88,10 +87,9 @@ export function PropertyCard({
               <span className="font-mono-label text-[10px] text-[#736F4E] truncate">
                 {property.subCity.toUpperCase()} • {property.city.toUpperCase()}
               </span>
-              <div className="flex items-center gap-1 text-xs font-bold text-[#1c1b12] shrink-0">
-                <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                <span>{property.broker.rating}</span>
-              </div>
+              <span className="font-mono-label text-[9px] text-[#4C061D] bg-[#FAF8F4] px-2 py-0.5 rounded-full border border-[#ECE7DA] font-bold">
+                {property.propertyType.toUpperCase()}
+              </span>
             </div>
 
             <h3 className="font-serif-display text-lg font-light text-[#1c1b12] line-clamp-1 group-hover:text-[#4C061D] transition-colors mb-1.5">

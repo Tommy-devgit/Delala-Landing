@@ -193,15 +193,17 @@ export default function PropertyDetailPage() {
 
           </div>
 
-          {/* Right Broker Contact Card */}
+          {/* Right Property Lister Contact Card */}
           <div className="lg:col-span-4 space-y-6">
             <div className="bg-white p-6 rounded-3xl border border-[#ECE7DA] shadow-md space-y-6 sticky top-24">
               
               <div className="flex items-center gap-4">
-                <img src={property.broker.avatar} alt="" className="w-14 h-14 rounded-full object-cover border border-[#ECE7DA]" />
+                <div className="w-14 h-14 rounded-full bg-[#4C061D] text-white flex items-center justify-center font-serif-display text-xl font-light border border-[#ECE7DA]">
+                  {(property.broker?.name || "Verified Owner").slice(0, 2).toUpperCase()}
+                </div>
                 <div>
-                  <h4 className="font-serif-display text-lg text-[#1c1b12]">{property.broker.name}</h4>
-                  <p className="text-xs font-mono-label text-[#4C061D]">{property.broker.agencyName}</p>
+                  <h4 className="font-serif-display text-lg text-[#1c1b12]">{property.broker?.name || "Verified Owner"}</h4>
+                  <p className="text-xs font-mono-label text-[#4C061D]">LISTED PROPERTY OWNER</p>
                 </div>
               </div>
 

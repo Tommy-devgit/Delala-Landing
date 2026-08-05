@@ -126,7 +126,7 @@ function SignUpContent() {
                 className="w-full p-3.5 rounded-2xl bg-[#FAF8F4] border border-[#ECE7DA] text-xs text-[#1C1B12] focus:outline-none focus:border-[#4C061D]"
               >
                 <option value="user">Explore & Rent / Buy Properties</option>
-                <option value="broker">List & Manage Properties (Broker / Owner)</option>
+                <option value="owner">Post & Manage My Properties</option>
               </select>
             </div>
 

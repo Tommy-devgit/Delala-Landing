@@ -51,7 +51,7 @@ export function Footer() {
               VERIFICATION & TRUST
             </h4>
             <ul className="space-y-2.5 text-xs text-[#736F4E]">
-              <li><Link href="/brokers" className="hover:text-[#4C061D]">Verified Broker Directory</Link></li>
+              <li><Link href="/search" className="hover:text-[#4C061D]">Verified Real Estate Marketplace</Link></li>
               <li><Link href="/search?verifiedOnly=true" className="hover:text-[#4C061D]">100% Field Audited Homes</Link></li>
               <li><Link href="/settings" className="hover:text-[#4C061D]">Account Settings</Link></li>
               <li><Link href="/favorites" className="hover:text-[#4C061D]">Saved Wishlist</Link></li>
