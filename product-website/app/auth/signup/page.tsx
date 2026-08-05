@@ -1,12 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import { Building2, Lock, Mail, User, Eye, EyeOff, ShieldCheck, CheckCircle2 } from "lucide-react";
 
-export default function SignUpPage() {
+export const dynamic = "force-dynamic";
+
+function SignUpContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/";
@@ -183,5 +185,13 @@ export default function SignUpPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SignUpPage() {
+  return (
+    <Suspense fallback={<div className="min-h-[calc(100vh-80px)] bg-[#FAF8F4] flex items-center justify-center text-xs text-[#736F4E]">Loading...</div>}>
+      <SignUpContent />
+    </Suspense>
   );
 }
