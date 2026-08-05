@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ShieldCheck, Star, Phone, MessageSquare, MapPin } from "lucide-react";
+import { ShieldCheck, Star, Phone, MapPin } from "lucide-react";
 import { Broker } from "@/lib/types";
 
 export function BrokerCard({ broker }: { broker: Broker }) {

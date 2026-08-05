@@ -7,7 +7,6 @@ import { AdminModule } from "./admin/admin.module";
 import { CitiesModule } from "./cities/cities.module";
 import { VisitsModule } from "./visits/visits.module";
 import { FavoritesModule } from "./favorites/favorites.module";
-import { MessagesModule } from "./messages/messages.module";
 import { NotificationsModule } from "./notifications/notifications.module";
 import { AuthModule } from "./auth/auth.module";
 
@@ -21,7 +20,6 @@ import { AuthModule } from "./auth/auth.module";
     CitiesModule,
     VisitsModule,
     FavoritesModule,
-    MessagesModule,
     NotificationsModule,
     AuthModule,
   ],

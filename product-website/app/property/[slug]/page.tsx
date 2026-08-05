@@ -22,7 +22,6 @@ import {
   Shield,
   Calendar,
   Phone,
-  MessageSquare,
   CheckCircle2,
   Building,
   Building2,

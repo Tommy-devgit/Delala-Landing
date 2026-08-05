@@ -10,7 +10,6 @@ import {
   MapPin,
   ShieldCheck,
   Plus,
-  MessageSquare,
   Bell,
   Building2,
   HelpCircle,
@@ -102,15 +101,6 @@ export function Header({ onOpenFilters }: { onOpenFilters?: () => void }) {
               title="Notifications"
             >
               <Bell className="w-4 h-4" />
-            </Link>
-
-            {/* Messages Chat Icon */}
-            <Link
-              href="/messages"
-              className="p-2.5 rounded-full bg-white border border-[#ECE7DA] text-[#736F4E] hover:text-[#4C061D] hover:border-[#4C061D] transition-colors"
-              title="Messages"
-            >
-              <MessageSquare className="w-4 h-4" />
             </Link>
 
             {/* Saved Wishlist */}

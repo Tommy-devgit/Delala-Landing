@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Search, Heart, Building2, MessageSquare, User } from "lucide-react";
+import { Search, Heart, Building2, User } from "lucide-react";
 
 export function MobileNav() {
   const pathname = usePathname();
@@ -11,7 +11,6 @@ export function MobileNav() {
     { label: "Search", href: "/search", icon: Search },
     { label: "Saved", href: "/favorites", icon: Heart },
     { label: "Listings", href: "/my-listings", icon: Building2 },
-    { label: "Messages", href: "/messages", icon: MessageSquare },
     { label: "Account", href: "/profile", icon: User },
   ];
 
