@@ -1,6 +1,12 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { CreatePropertyDto, ModeratePropertyDto } from "./dto/create-property.dto";
+import { randomUUID } from "crypto";
+
+const isValidUuid = (str?: string): boolean => {
+  if (!str) return false;
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(str);
+};
 
 @Injectable()
 export class PropertiesService {
@@ -25,9 +31,13 @@ export class PropertiesService {
   }
 
   async findOneBySlug(slugOrId: string) {
+    const isUuid = isValidUuid(slugOrId);
     const property = await this.prisma.property.findFirst({
       where: {
-        OR: [{ id: slugOrId }, { title: { contains: slugOrId, mode: "insensitive" } }],
+        OR: [
+          ...(isUuid ? [{ id: slugOrId }] : []),
+          { title: { contains: slugOrId, mode: "insensitive" } },
+        ],
       },
       include: {
         location: true,
@@ -45,12 +55,15 @@ export class PropertiesService {
   }
 
   async create(createDto: CreatePropertyDto, uploadedImageUrls: string[] = []) {
-    // 1. Resolve or create location record in locations table
-    let locationId = createDto.location_id;
+    // 1. Resolve or create valid UUID location record in locations table
+    let locationId: string | null = null;
+    const targetLocName = createDto.neighborhood || createDto.city || "Addis Ababa";
 
-    if (!locationId || locationId.length < 10) {
+    if (isValidUuid(createDto.location_id)) {
+      locationId = createDto.location_id!;
+    } else {
       const existingLoc = await this.prisma.location.findFirst({
-        where: { name: createDto.neighborhood || createDto.city || "Addis Ababa" },
+        where: { name: { equals: targetLocName, mode: "insensitive" } },
       });
 
       if (existingLoc) {
@@ -58,7 +71,8 @@ export class PropertiesService {
       } else {
         const newLoc = await this.prisma.location.create({
           data: {
-            name: createDto.neighborhood || createDto.city || "Addis Ababa",
+            id: randomUUID(),
+            name: targetLocName,
             type: "neighborhood",
           },
         });
@@ -66,22 +80,34 @@ export class PropertiesService {
       }
     }
 
-    // 2. Resolve or fallback owner user
-    let ownerId = createDto.brokerId || createDto.cityId;
-    const firstUser = await this.prisma.user.findFirst();
-    if (firstUser) {
-      ownerId = firstUser.id;
-    } else {
-      const newUser = await this.prisma.user.create({
-        data: {
-          id: crypto.randomUUID(),
-          email: "owner@delala.et",
-          profile: {
-            create: { firstName: "Verified", lastName: "Owner", role: "broker" },
+    // 2. Resolve or fallback owner user with a valid UUID
+    let ownerId: string | null = null;
+    if (isValidUuid(createDto.brokerId)) {
+      ownerId = createDto.brokerId!;
+    }
+
+    if (!ownerId) {
+      const firstUser = await this.prisma.user.findFirst();
+      if (firstUser) {
+        ownerId = firstUser.id;
+      } else {
+        const newUserId = randomUUID();
+        const newUser = await this.prisma.user.create({
+          data: {
+            id: newUserId,
+            email: "owner@delala.et",
+            profile: {
+              create: {
+                id: newUserId,
+                firstName: "Verified",
+                lastName: "Owner",
+                role: "broker",
+              },
+            },
           },
-        },
-      });
-      ownerId = newUser.id;
+        });
+        ownerId = newUser.id;
+      }
     }
 
     const priceAmount = Number(createDto.price || createDto.rentETB || 65000);
@@ -98,6 +124,7 @@ export class PropertiesService {
 
     const newProperty = await this.prisma.property.create({
       data: {
+        id: randomUUID(),
         ownerId,
         locationId,
         title: createDto.title,
@@ -148,7 +175,7 @@ export class PropertiesService {
   }
 
   private mapPropertyResponse(p: any) {
-    const slug = p.title.toLowerCase().replace(/[^a-z0-9]+/g, "-") + "-" + p.id.slice(0, 4);
+    const slug = p.title.toLowerCase().replace(/[^a-z0-9]+/g, "-") + "-" + (p.id ? p.id.slice(0, 4) : "prop");
     const ownerName = [p.owner?.profile?.firstName, p.owner?.profile?.lastName].filter(Boolean).join(" ") || "Verified Broker";
     const city = p.address?.split(",")?.[1]?.trim() || "Addis Ababa";
     const subCity = p.address?.split(",")?.[0]?.trim() || "Bole";
