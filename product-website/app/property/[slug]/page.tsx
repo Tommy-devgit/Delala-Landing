@@ -131,7 +131,12 @@ export default function PropertyDetailPage() {
 
             <p className="text-xs text-[#736F4E] mt-1 flex items-center gap-1 font-mono-label">
               <MapPin className="w-3.5 h-3.5 text-[#4C061D]" />
-              <span>{property.address} • {property.neighborhood}, {property.subCity}, {property.city}</span>
+              <span>
+                {[property.address, property.neighborhood, property.subCity, property.city]
+                  .filter(Boolean)
+                  .filter((val, idx, arr) => arr.indexOf(val) === idx)
+                  .join(", ")}
+              </span>
             </p>
           </div>
 

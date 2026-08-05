@@ -95,7 +95,7 @@ export function PropertyCard({
         <div>
           <div className="flex items-center justify-between gap-1.5 mb-1">
             <span className="font-mono-label text-[9.5px] text-[#736F4E] truncate">
-              {property.subCity.toUpperCase()} • {property.city.toUpperCase()}
+              {[property.subCity, property.city].filter(Boolean).join(" • ").toUpperCase()}
             </span>
             <span className="font-mono-label text-[8.5px] text-[#4C061D] bg-[#FAF8F4] px-1.5 py-0.5 rounded border border-[#ECE7DA] font-bold">
               {property.propertyType.toUpperCase()}

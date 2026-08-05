@@ -75,11 +75,11 @@ export class PropertiesService {
   async create(createDto: CreatePropertyDto, uploadedImageUrls: string[] = []) {
     // 1. Resolve or create valid UUID location record in locations table
     let locationId: string | null = null;
-    const targetLocName = createDto.neighborhood || createDto.city || "Addis Ababa";
+    const targetLocName = createDto.neighborhood || createDto.subCity || createDto.city || "";
 
     if (isValidUuid(createDto.location_id)) {
       locationId = createDto.location_id!;
-    } else {
+    } else if (targetLocName) {
       const existingLoc = await this.prisma.location.findFirst({
         where: { name: { equals: targetLocName, mode: "insensitive" } },
       });
@@ -136,7 +136,7 @@ export class PropertiesService {
       });
     }
 
-    const priceAmount = Number(createDto.price || createDto.rentETB || 65000);
+    const priceAmount = Number(createDto.price || createDto.rentETB || 0);
     const finalImageUrls = Array.from(
       new Set([...uploadedImageUrls, ...(createDto.imageUrls || [])])
     );
@@ -148,20 +148,22 @@ export class PropertiesService {
           { imageUrl: "/images/hero_home_away.jpg" },
         ];
 
+    const computedAddress = createDto.address || [createDto.subCity, createDto.city].filter(Boolean).join(", ");
+
     const newProperty = await this.prisma.property.create({
       data: {
         id: randomUUID(),
         ownerId,
-        locationId,
+        ...(locationId ? { locationId } : {}),
         title: createDto.title,
-        description: createDto.description || "Newly published residential property.",
+        description: createDto.description || "",
         propertyType: (createDto.propertyType || "villa").toLowerCase(),
         listingType: (createDto.listingType || "rent").toLowerCase(),
         price: priceAmount as any,
-        bedrooms: Number(createDto.bedrooms || 3),
-        bathrooms: Number(createDto.bathrooms || 2),
-        area: Number(createDto.areaSqm || 250) as any,
-        address: createDto.address || `${createDto.subCity || "Bole"}, ${createDto.city || "Addis Ababa"}`,
+        bedrooms: Number(createDto.bedrooms || 0),
+        bathrooms: Number(createDto.bathrooms || 0),
+        area: Number(createDto.areaSqm || 0) as any,
+        address: computedAddress,
         status: "approved",
         images: {
           create: imageRecords,
@@ -204,8 +206,11 @@ export class PropertiesService {
     const slug = p.title.toLowerCase().replace(/[^a-z0-9]+/g, "-") + "-" + (p.id ? p.id.slice(0, 4) : "prop");
     const ownerName = [p.owner?.profile?.firstName, p.owner?.profile?.lastName].filter(Boolean).join(" ") || "Verified Owner";
     const phone = p.owner?.profile?.phone || null;
-    const city = p.address?.split(",")?.[1]?.trim() || "Addis Ababa";
-    const subCity = p.address?.split(",")?.[0]?.trim() || "Bole";
+
+    const parts = p.address ? p.address.split(",").map((s: string) => s.trim()) : [];
+    const subCity = parts.length > 1 ? parts[0] : "";
+    const city = parts.length > 1 ? parts[1] : (parts[0] || p.location?.name || "");
+    const neighborhood = p.location?.name || "";
 
     return {
       id: p.id,
@@ -226,7 +231,8 @@ export class PropertiesService {
       status: p.status === "approved" ? "APPROVED" : "PENDING_APPROVAL",
       subCity,
       city,
-      neighborhood: p.location?.name || "Bole Medhanialem",
+      neighborhood,
+      address: p.address || "",
       cityId: p.locationId,
       neighborhoodId: p.locationId,
       brokerId: p.ownerId,
@@ -240,7 +246,7 @@ export class PropertiesService {
       },
       neighborhoodEntity: {
         id: p.locationId,
-        name: p.location?.name || "Bole Medhanialem",
+        name: neighborhood,
         subCity,
       },
       broker: {

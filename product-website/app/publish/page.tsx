@@ -587,7 +587,7 @@ export default function PublishListingPage() {
             {/* SECTION 4: PUBLISH ACTION */}
             <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="text-xs text-[#736F4E]">
-                By publishing, your property will immediately be submitted to the Delala marketplace database.
+                By publishing, your property will immediately be posted on the homepage.
               </div>
 
               <button

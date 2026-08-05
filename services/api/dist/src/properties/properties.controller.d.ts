@@ -29,6 +29,7 @@ export declare class PropertiesController {
         subCity: any;
         city: any;
         neighborhood: any;
+        address: any;
         cityId: any;
         neighborhoodId: any;
         brokerId: any;
@@ -83,6 +84,7 @@ export declare class PropertiesController {
         subCity: any;
         city: any;
         neighborhood: any;
+        address: any;
         cityId: any;
         neighborhoodId: any;
         brokerId: any;
@@ -140,6 +142,7 @@ export declare class PropertiesController {
         subCity: any;
         city: any;
         neighborhood: any;
+        address: any;
         cityId: any;
         neighborhoodId: any;
         brokerId: any;
@@ -194,6 +197,7 @@ export declare class PropertiesController {
         subCity: any;
         city: any;
         neighborhood: any;
+        address: any;
         cityId: any;
         neighborhoodId: any;
         brokerId: any;

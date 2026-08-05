@@ -28,6 +28,7 @@ export declare class PropertiesService {
         subCity: any;
         city: any;
         neighborhood: any;
+        address: any;
         cityId: any;
         neighborhoodId: any;
         brokerId: any;
@@ -82,6 +83,7 @@ export declare class PropertiesService {
         subCity: any;
         city: any;
         neighborhood: any;
+        address: any;
         cityId: any;
         neighborhoodId: any;
         brokerId: any;
@@ -136,6 +138,7 @@ export declare class PropertiesService {
         subCity: any;
         city: any;
         neighborhood: any;
+        address: any;
         cityId: any;
         neighborhoodId: any;
         brokerId: any;
@@ -190,6 +193,7 @@ export declare class PropertiesService {
         subCity: any;
         city: any;
         neighborhood: any;
+        address: any;
         cityId: any;
         neighborhoodId: any;
         brokerId: any;
