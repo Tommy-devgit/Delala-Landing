@@ -67,7 +67,7 @@ export default function PublishListingPage() {
   const [subCity, setSubCity] = useState("Bole");
   const [neighborhood, setNeighborhood] = useState("Bole Medhanialem");
   const [address, setAddress] = useState("");
-  const [phone, setPhone] = useState("+251 911 234 567");
+  const [phone, setPhone] = useState("");
   const [bedrooms, setBedrooms] = useState("3");
   const [bathrooms, setBathrooms] = useState("2");
   const [area, setArea] = useState("250");
@@ -216,9 +216,6 @@ export default function PublishListingPage() {
       {/* Simple Clean Header */}
       <div className="bg-[#4C061D] text-white py-10 border-b border-[#3B0416]">
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
-          <span className="font-mono-label text-[10px] text-[#B4C292] bg-white/10 px-3 py-1 rounded-full inline-block mb-2">
-            SINGLE-PAGE LISTING CREATOR
-          </span>
           <h1 className="font-serif-display text-3xl sm:text-4xl text-white font-light">
             Post Your Property
           </h1>
@@ -268,7 +265,6 @@ export default function PublishListingPage() {
               <div>
                 <h2 className="font-serif-display text-2xl text-[#1C1B12] flex items-center gap-2">
                   <span>1. Property Images</span>
-                  <span className="text-xs font-mono-label text-[#736F4E] font-normal">(Cloudflare R2 Cloud Storage)</span>
                 </h2>
                 <p className="text-xs text-[#736F4E]">Upload high-res photos. Click the star icon to set the primary hero photo.</p>
               </div>
@@ -303,9 +299,8 @@ export default function PublishListingPage() {
                   {previewUrls.map((url, idx) => (
                     <div
                       key={idx}
-                      className={`relative rounded-2xl overflow-hidden aspect-square border-2 transition-all group ${
-                        primaryIndex === idx ? "border-[#4C061D] ring-2 ring-[#4C061D]/20 shadow-md" : "border-[#ECE7DA]"
-                      }`}
+                      className={`relative rounded-2xl overflow-hidden aspect-square border-2 transition-all group ${primaryIndex === idx ? "border-[#4C061D] ring-2 ring-[#4C061D]/20 shadow-md" : "border-[#ECE7DA]"
+                        }`}
                     >
                       <img src={url} alt={`Preview ${idx + 1}`} className="w-full h-full object-cover" />
 
@@ -313,9 +308,8 @@ export default function PublishListingPage() {
                       <button
                         type="button"
                         onClick={() => setPrimaryIndex(idx)}
-                        className={`absolute top-2 left-2 p-1.5 rounded-full backdrop-blur-md transition-colors ${
-                          primaryIndex === idx ? "bg-[#4C061D] text-white" : "bg-black/40 text-white/70 hover:text-white"
-                        }`}
+                        className={`absolute top-2 left-2 p-1.5 rounded-full backdrop-blur-md transition-colors ${primaryIndex === idx ? "bg-[#4C061D] text-white" : "bg-black/40 text-white/70 hover:text-white"
+                          }`}
                         title="Set as Primary Image"
                       >
                         <Star className={`w-3.5 h-3.5 ${primaryIndex === idx ? "fill-white" : ""}`} />
@@ -602,7 +596,7 @@ export default function PublishListingPage() {
                 className="w-full sm:w-auto px-10 py-4 rounded-full bg-[#4C061D] text-white font-mono-label text-xs font-bold hover:bg-[#3B0416] transition-colors shadow-lg flex items-center justify-center gap-2"
               >
                 <CheckCircle2 className="w-4 h-4 text-[#B4C292]" />
-                <span>{isPublishing ? "Publishing..." : "Publish Property"}</span>
+                <span>{isPublishing ? "Publishing..." : "Post"}</span>
               </button>
             </div>
           </form>

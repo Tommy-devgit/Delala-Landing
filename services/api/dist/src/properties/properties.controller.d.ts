@@ -32,6 +32,7 @@ export declare class PropertiesController {
         cityId: any;
         neighborhoodId: any;
         brokerId: any;
+        phone: any;
         createdAt: any;
         updatedAt: any;
         cityEntity: {
@@ -47,6 +48,8 @@ export declare class PropertiesController {
         broker: {
             id: any;
             agencyName: string;
+            name: string;
+            phone: any;
             verified: boolean;
             rating: number;
             reviewsCount: number;
@@ -83,6 +86,7 @@ export declare class PropertiesController {
         cityId: any;
         neighborhoodId: any;
         brokerId: any;
+        phone: any;
         createdAt: any;
         updatedAt: any;
         cityEntity: {
@@ -98,6 +102,8 @@ export declare class PropertiesController {
         broker: {
             id: any;
             agencyName: string;
+            name: string;
+            phone: any;
             verified: boolean;
             rating: number;
             reviewsCount: number;
@@ -137,6 +143,7 @@ export declare class PropertiesController {
         cityId: any;
         neighborhoodId: any;
         brokerId: any;
+        phone: any;
         createdAt: any;
         updatedAt: any;
         cityEntity: {
@@ -152,6 +159,8 @@ export declare class PropertiesController {
         broker: {
             id: any;
             agencyName: string;
+            name: string;
+            phone: any;
             verified: boolean;
             rating: number;
             reviewsCount: number;
@@ -188,6 +197,7 @@ export declare class PropertiesController {
         cityId: any;
         neighborhoodId: any;
         brokerId: any;
+        phone: any;
         createdAt: any;
         updatedAt: any;
         cityEntity: {
@@ -203,6 +213,8 @@ export declare class PropertiesController {
         broker: {
             id: any;
             agencyName: string;
+            name: string;
+            phone: any;
             verified: boolean;
             rating: number;
             reviewsCount: number;

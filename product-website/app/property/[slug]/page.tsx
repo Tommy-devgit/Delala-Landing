@@ -205,28 +205,34 @@ export default function PropertyDetailPage() {
                 <div>
                   <h4 className="font-serif-display text-lg text-[#1c1b12]">{property.broker?.name || "Verified Owner"}</h4>
                   <p className="text-xs font-mono-label text-[#4C061D]">LISTED PROPERTY OWNER</p>
-                  <p className="text-xs font-mono-label text-[#736F4E] font-bold mt-0.5">{property.phone || property.broker?.phone || "+251 911 234 567"}</p>
+                  {(property.phone || property.broker?.phone) && (
+                    <p className="text-xs font-mono-label text-[#736F4E] font-bold mt-0.5">{property.phone || property.broker?.phone}</p>
+                  )}
                 </div>
               </div>
 
               <div className="space-y-3">
-                <a
-                  href={`tel:${(property.phone || property.broker?.phone || "+251911234567").replace(/\s+/g, "")}`}
-                  className="w-full py-3.5 rounded-full bg-[#4C061D] text-white font-mono-label text-xs font-bold hover:bg-[#3B0416] transition-colors shadow-md flex items-center justify-center gap-2"
-                >
-                  <Phone className="w-4 h-4 text-[#B4C292]" />
-                  <span>CALL {property.phone || property.broker?.phone || "+251 911 234 567"}</span>
-                </a>
+                {(property.phone || property.broker?.phone) ? (
+                  <>
+                    <a
+                      href={`tel:${(property.phone || property.broker?.phone).replace(/\s+/g, "")}`}
+                      className="w-full py-3.5 rounded-full bg-[#4C061D] text-white font-mono-label text-xs font-bold hover:bg-[#3B0416] transition-colors shadow-md flex items-center justify-center gap-2"
+                    >
+                      <Phone className="w-4 h-4 text-[#B4C292]" />
+                      <span>CALL {property.phone || property.broker?.phone}</span>
+                    </a>
 
-                <a
-                  href={`https://wa.me/${(property.phone || property.broker?.phone || "+251911234567").replace(/[^0-9]/g, "")}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full py-3 rounded-full bg-emerald-700 text-white font-mono-label text-xs font-bold hover:bg-emerald-800 transition-colors shadow-sm flex items-center justify-center gap-2"
-                >
-                  <MessageSquare className="w-4 h-4" />
-                  <span>WHATSAPP LISTER</span>
-                </a>
+                    <a
+                      href={`https://wa.me/${(property.phone || property.broker?.phone).replace(/[^0-9]/g, "")}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full py-3 rounded-full bg-emerald-700 text-white font-mono-label text-xs font-bold hover:bg-emerald-800 transition-colors shadow-sm flex items-center justify-center gap-2"
+                    >
+                      <MessageSquare className="w-4 h-4" />
+                      <span>WHATSAPP LISTER</span>
+                    </a>
+                  </>
+                ) : null}
 
                 <button
                   onClick={() => setIsScheduleOpen(true)}

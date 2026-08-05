@@ -16,7 +16,7 @@ export function PropertyCard({
 }) {
   const [fav, setFav] = useState(isFavorite);
 
-  const contactPhone = property.phone || property.broker?.phone || "+251 911 234 567";
+  const contactPhone = property.phone || property.broker?.phone;
 
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -27,8 +27,12 @@ export function PropertyCard({
     }
   };
 
-  const handlePhoneClick = (e: React.MouseEvent) => {
+  const handlePhoneCall = (e: React.MouseEvent) => {
+    e.preventDefault();
     e.stopPropagation();
+    if (contactPhone) {
+      window.location.href = `tel:${contactPhone.replace(/\s+/g, "")}`;
+    }
   };
 
   return (
@@ -54,6 +58,7 @@ export function PropertyCard({
 
         {/* Top-Right Wishlist Heart Button */}
         <button
+          type="button"
           onClick={handleFavoriteClick}
           className="absolute top-2.5 right-2.5 z-10 w-7 h-7 rounded-full bg-black/40 backdrop-blur-md text-white flex items-center justify-center hover:bg-black/60 transition-colors"
           aria-label="Save to favorites"
@@ -115,16 +120,18 @@ export function PropertyCard({
             </span>
           </div>
 
-          {/* Front Contact Phone Button */}
-          <a
-            href={`tel:${contactPhone.replace(/\s+/g, "")}`}
-            onClick={handlePhoneClick}
-            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[#4C061D] text-white hover:bg-[#3B0416] transition-colors text-[10px] font-mono-label font-bold shadow-xs shrink-0"
-            title="Call Property Owner Directly"
-          >
-            <Phone className="w-3 h-3 text-[#B4C292]" />
-            <span>{contactPhone}</span>
-          </a>
+          {/* Front Contact Phone Button (using button element to avoid nested <a> tags) */}
+          {contactPhone && (
+            <button
+              type="button"
+              onClick={handlePhoneCall}
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[#4C061D] text-white hover:bg-[#3B0416] transition-colors text-[10px] font-mono-label font-bold shadow-xs shrink-0"
+              title="Call Property Owner Directly"
+            >
+              <Phone className="w-3 h-3 text-[#B4C292]" />
+              <span>{contactPhone}</span>
+            </button>
+          )}
         </div>
       </div>
     </Link>

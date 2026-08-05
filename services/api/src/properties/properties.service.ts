@@ -118,6 +118,7 @@ export class PropertiesService {
               create: {
                 firstName: "Verified",
                 lastName: "Owner",
+                phone: createDto.phone || null,
                 role: "broker",
               },
             },
@@ -125,6 +126,14 @@ export class PropertiesService {
         });
         ownerId = newUser.id;
       }
+    }
+
+    // Update owner profile phone if provided in form submission
+    if (createDto.phone && ownerId) {
+      await this.prisma.profile.updateMany({
+        where: { id: ownerId },
+        data: { phone: createDto.phone },
+      });
     }
 
     const priceAmount = Number(createDto.price || createDto.rentETB || 65000);
@@ -193,7 +202,8 @@ export class PropertiesService {
 
   private mapPropertyResponse(p: any) {
     const slug = p.title.toLowerCase().replace(/[^a-z0-9]+/g, "-") + "-" + (p.id ? p.id.slice(0, 4) : "prop");
-    const ownerName = [p.owner?.profile?.firstName, p.owner?.profile?.lastName].filter(Boolean).join(" ") || "Verified Broker";
+    const ownerName = [p.owner?.profile?.firstName, p.owner?.profile?.lastName].filter(Boolean).join(" ") || "Verified Owner";
+    const phone = p.owner?.profile?.phone || null;
     const city = p.address?.split(",")?.[1]?.trim() || "Addis Ababa";
     const subCity = p.address?.split(",")?.[0]?.trim() || "Bole";
 
@@ -220,6 +230,7 @@ export class PropertiesService {
       cityId: p.locationId,
       neighborhoodId: p.locationId,
       brokerId: p.ownerId,
+      phone,
       createdAt: p.createdAt,
       updatedAt: p.updatedAt,
       cityEntity: {
@@ -235,6 +246,8 @@ export class PropertiesService {
       broker: {
         id: p.ownerId,
         agencyName: ownerName,
+        name: ownerName,
+        phone: phone || "",
         verified: true,
         rating: 4.9,
         reviewsCount: 12,
