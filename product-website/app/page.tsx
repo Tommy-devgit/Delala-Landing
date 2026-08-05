@@ -264,7 +264,7 @@ export default function HomePage() {
       <FilterModal
         isOpen={isFilterModalOpen}
         onClose={() => setIsFilterModalOpen(false)}
-        filters={filters}
+        initialFilters={filters}
         onApply={(newFilters) => setFilters(newFilters)}
       />
 
