@@ -16,6 +16,44 @@ exports.CitiesController = void 0;
 const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
 const prisma_service_1 = require("../prisma/prisma.service");
+const CITY_METADATA = {
+    "Addis Ababa": {
+        tagline: "Diplomatic Capital & Financial Hub",
+        startingRentETB: 35000,
+        propertiesCount: 24,
+        image: "/images/hero-img.jpg",
+    },
+    "Hawassa": {
+        tagline: "Rift Valley Lakeside Living",
+        startingRentETB: 22000,
+        propertiesCount: 12,
+        image: "/images/hero_home_away.jpg",
+    },
+    "Adama": {
+        tagline: "Fastest Growing Expressway Corridor",
+        startingRentETB: 18000,
+        propertiesCount: 9,
+        image: "/images/hero_property.png",
+    },
+    "Bahir Dar": {
+        tagline: "Lake Tana Tourism & Commercial Hub",
+        startingRentETB: 20000,
+        propertiesCount: 8,
+        image: "/images/hero_home_away.jpg",
+    },
+    "Dire Dawa": {
+        tagline: "Eastern Trade & Industrial Charter City",
+        startingRentETB: 16000,
+        propertiesCount: 7,
+        image: "/images/hero_property.png",
+    },
+    "Gondar": {
+        tagline: "Historic Royal City & Cultural Heritage",
+        startingRentETB: 17000,
+        propertiesCount: 6,
+        image: "/images/hero_home_away.jpg",
+    },
+};
 let CitiesController = class CitiesController {
     constructor(prisma) {
         this.prisma = prisma;
@@ -23,24 +61,34 @@ let CitiesController = class CitiesController {
     async findAll() {
         const locations = await this.prisma.location.findMany({
             where: { type: "city" },
-            include: { children: true },
+            include: { children: true, properties: true },
         });
         if (locations.length > 0) {
-            return locations.map((loc) => ({
-                id: loc.id,
-                name: loc.name,
-                slug: loc.name.toLowerCase().replace(/\s+/g, "-"),
-                tagline: "Prime Real Estate Location",
-                startingRentETB: 35000,
-                propertiesCount: 8,
-                image: "/images/hero_property.png",
-            }));
+            return locations.map((loc) => {
+                const meta = CITY_METADATA[loc.name] || {
+                    tagline: "Prime Real Estate Location",
+                    startingRentETB: 25000,
+                    propertiesCount: loc.properties?.length || 5,
+                    image: "/images/hero_property.png",
+                };
+                return {
+                    id: loc.id,
+                    name: loc.name,
+                    slug: loc.name.toLowerCase().replace(/\s+/g, "-"),
+                    tagline: meta.tagline,
+                    startingRentETB: meta.startingRentETB,
+                    propertiesCount: loc.properties?.length > 0 ? loc.properties.length : meta.propertiesCount,
+                    image: meta.image,
+                };
+            });
         }
         return [
-            { id: "c1", name: "Addis Ababa", slug: "addis-ababa", tagline: "Diplomatic Capital & Financial Hub", startingRentETB: 35000, propertiesCount: 14, image: "/images/hero_property.png" },
-            { id: "c2", name: "Hawassa", slug: "hawassa", tagline: "Rift Valley Lakeside Living", startingRentETB: 22000, propertiesCount: 6, image: "/images/hero_home_away.jpg" },
-            { id: "c3", name: "Adama", slug: "adama", tagline: "Fastest Growing Expressway Corridor", startingRentETB: 18000, propertiesCount: 5, image: "/images/hero_property.png" },
-            { id: "c4", name: "Bahir Dar", slug: "bahir-dar", tagline: "Lake Tana Tourism & Commercial Hub", startingRentETB: 20000, propertiesCount: 4, image: "/images/hero_home_away.jpg" },
+            { id: "c1", name: "Addis Ababa", slug: "addis-ababa", tagline: CITY_METADATA["Addis Ababa"].tagline, startingRentETB: 35000, propertiesCount: 24, image: CITY_METADATA["Addis Ababa"].image },
+            { id: "c2", name: "Hawassa", slug: "hawassa", tagline: CITY_METADATA["Hawassa"].tagline, startingRentETB: 22000, propertiesCount: 12, image: CITY_METADATA["Hawassa"].image },
+            { id: "c3", name: "Adama", slug: "adama", tagline: CITY_METADATA["Adama"].tagline, startingRentETB: 18000, propertiesCount: 9, image: CITY_METADATA["Adama"].image },
+            { id: "c4", name: "Bahir Dar", slug: "bahir-dar", tagline: CITY_METADATA["Bahir Dar"].tagline, startingRentETB: 20000, propertiesCount: 8, image: CITY_METADATA["Bahir Dar"].image },
+            { id: "c5", name: "Dire Dawa", slug: "dire-dawa", tagline: CITY_METADATA["Dire Dawa"].tagline, startingRentETB: 16000, propertiesCount: 7, image: CITY_METADATA["Dire Dawa"].image },
+            { id: "c6", name: "Gondar", slug: "gondar", tagline: CITY_METADATA["Gondar"].tagline, startingRentETB: 17000, propertiesCount: 6, image: CITY_METADATA["Gondar"].image },
         ];
     }
     async findOne(slug) {
