@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { Bell, CheckCircle2, Calendar, ShieldCheck, Tag, Lock } from "lucide-react";
 import { authClient, UserSession } from "@/lib/auth-client";
-import { AuthModal } from "@/components/auth-modal";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1";
 
@@ -11,7 +11,6 @@ export default function NotificationsPage() {
   const [session, setSession] = useState<{ user: UserSession; token: string } | null>(null);
   const [notifications, setNotifications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
   useEffect(() => {
     async function loadNotifications() {
@@ -57,12 +56,12 @@ export default function NotificationsPage() {
             <p className="text-xs text-[#736F4E]">
               Authenticate with your account to view walkthrough confirmations and property updates.
             </p>
-            <button
-              onClick={() => setIsAuthModalOpen(true)}
-              className="px-6 py-3 rounded-full bg-[#4C061D] text-white font-mono-label text-xs font-bold shadow-md hover:bg-[#3B0416] transition-colors"
+            <Link
+              href="/auth/signin?callbackUrl=/notifications"
+              className="inline-block px-6 py-3 rounded-full bg-[#4C061D] text-white font-mono-label text-xs font-bold shadow-md hover:bg-[#3B0416] transition-colors"
             >
               Sign In →
-            </button>
+            </Link>
           </div>
         ) : loading ? (
           <div className="space-y-3">
@@ -93,12 +92,6 @@ export default function NotificationsPage() {
           ))
         )}
       </div>
-
-      <AuthModal
-        isOpen={isAuthModalOpen}
-        onClose={() => setIsAuthModalOpen(false)}
-        onSuccess={(u) => setSession({ user: u, token: "active" })}
-      />
     </div>
   );
 }

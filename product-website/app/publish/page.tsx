@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { authClient, UserSession } from "@/lib/auth-client";
-import { AuthModal } from "@/components/auth-modal";
 import {
   Building2,
   MapPin,
@@ -139,7 +138,7 @@ export default function PublishListingPage() {
     setError("");
 
     if (!session?.user) {
-      setIsAuthModalOpen(true);
+      router.push("/auth/signin?callbackUrl=/publish");
       return;
     }
 
@@ -239,12 +238,12 @@ export default function PublishListingPage() {
               To post a property on Delala, you have to sign in with an existing account or create a new account first.
             </p>
             <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
-              <button
-                onClick={() => setIsAuthModalOpen(true)}
-                className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-[#4C061D] text-white font-mono-label text-xs font-bold hover:bg-[#3B0416] transition-colors shadow-md"
+              <Link
+                href="/auth/signin?callbackUrl=/publish"
+                className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-[#4C061D] text-white font-mono-label text-xs font-bold hover:bg-[#3B0416] transition-colors shadow-md text-center"
               >
                 Sign In / Create Account →
-              </button>
+              </Link>
               <Link
                 href="/"
                 className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-[#FAF8F4] border border-[#ECE7DA] text-[#1C1B12] font-mono-label text-xs hover:bg-[#ECE7DA] transition-colors"
@@ -586,11 +585,6 @@ export default function PublishListingPage() {
         )}
       </div>
 
-      <AuthModal
-        isOpen={isAuthModalOpen}
-        onClose={() => setIsAuthModalOpen(false)}
-        onSuccess={(u) => setSession({ user: u, token: "active" })}
-      />
     </div>
   );
 }

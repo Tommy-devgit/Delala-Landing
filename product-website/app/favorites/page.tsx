@@ -2,19 +2,19 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { apiClient } from "@/lib/api-client";
 import { authClient, UserSession } from "@/lib/auth-client";
-import { AuthModal } from "@/components/auth-modal";
 import { Property } from "@/lib/types";
 import { PropertyCard } from "@/components/property-card";
 import { Heart, Search, Lock } from "lucide-react";
 
 export default function FavoritesPage() {
+  const router = useRouter();
   const [session, setSession] = useState<{ user: UserSession; token: string } | null>(null);
   const [properties, setProperties] = useState<Property[]>([]);
   const [savedIds, setSavedIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
   useEffect(() => {
     async function loadData() {
@@ -33,7 +33,7 @@ export default function FavoritesPage() {
 
   const handleToggle = (id: string) => {
     if (!session?.user) {
-      setIsAuthModalOpen(true);
+      router.push("/auth/signin?callbackUrl=/favorites");
       return;
     }
     if (savedIds.includes(id)) {
@@ -71,12 +71,12 @@ export default function FavoritesPage() {
             <p className="text-xs text-[#736F4E]">
               Sign in with your account to save listings across devices.
             </p>
-            <button
-              onClick={() => setIsAuthModalOpen(true)}
-              className="px-8 py-3.5 rounded-full bg-[#4C061D] text-white font-mono-label text-xs font-bold shadow-md hover:bg-[#3B0416] transition-colors"
+            <Link
+              href="/auth/signin?callbackUrl=/favorites"
+              className="inline-block px-8 py-3.5 rounded-full bg-[#4C061D] text-white font-mono-label text-xs font-bold shadow-md hover:bg-[#3B0416] transition-colors"
             >
               Sign In →
-            </button>
+            </Link>
           </div>
         ) : loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -115,12 +115,6 @@ export default function FavoritesPage() {
         )}
 
       </div>
-
-      <AuthModal
-        isOpen={isAuthModalOpen}
-        onClose={() => setIsAuthModalOpen(false)}
-        onSuccess={(u) => setSession({ user: u, token: "active" })}
-      />
     </div>
   );
 }

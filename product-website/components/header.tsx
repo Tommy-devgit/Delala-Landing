@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { authClient, UserSession } from "@/lib/auth-client";
-import { AuthModal } from "@/components/auth-modal";
 import {
   Heart,
   User,
@@ -18,7 +17,6 @@ import {
   Settings,
   ChevronDown,
   Compass,
-  UserCheck,
   LogOut,
 } from "lucide-react";
 
@@ -26,7 +24,6 @@ export function Header({ onOpenFilters }: { onOpenFilters?: () => void }) {
   const pathname = usePathname();
   const [avatarOpen, setAvatarOpen] = useState(false);
   const [session, setSession] = useState<{ user: UserSession; token: string } | null>(null);
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
   useEffect(() => {
     function loadSession() {
@@ -90,13 +87,7 @@ export function Header({ onOpenFilters }: { onOpenFilters?: () => void }) {
             
             {/* List Property CTA Button */}
             <Link
-              href="/publish"
-              onClick={(e) => {
-                if (!user) {
-                  e.preventDefault();
-                  setIsAuthModalOpen(true);
-                }
-              }}
+              href={user ? "/publish" : "/auth/signin?callbackUrl=/publish"}
               className="flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-[#4C061D] text-white font-mono-label text-xs font-bold hover:bg-[#3B0416] transition-colors shadow-sm"
             >
               <Plus className="w-3.5 h-3.5 text-[#B4C292]" />
@@ -176,17 +167,6 @@ export function Header({ onOpenFilters }: { onOpenFilters?: () => void }) {
                     <button
                       onClick={() => {
                         setAvatarOpen(false);
-                        setIsAuthModalOpen(true);
-                      }}
-                      className="w-full flex items-center gap-2.5 px-4 py-2.5 text-[#1C1B12] hover:bg-[#FAF8F4] transition-colors text-left"
-                    >
-                      <UserCheck className="w-4 h-4 text-emerald-600" />
-                      <span>Switch Persona</span>
-                    </button>
-
-                    <button
-                      onClick={() => {
-                        setAvatarOpen(false);
                         authClient.signOut();
                       }}
                       className="w-full flex items-center gap-2.5 px-4 py-2.5 text-red-600 hover:bg-red-50 transition-colors border-t border-[#ECE7DA] mt-1 text-left font-bold"
@@ -198,24 +178,26 @@ export function Header({ onOpenFilters }: { onOpenFilters?: () => void }) {
                 )}
               </div>
             ) : (
-              <button
-                onClick={() => setIsAuthModalOpen(true)}
-                className="px-4 py-2.5 rounded-full bg-[#FAF8F4] border border-[#ECE7DA] text-xs font-mono-label font-bold text-[#4C061D] hover:bg-[#ECE7DA] transition-colors"
-              >
-                SIGN IN / SIGN UP
-              </button>
+              <div className="flex items-center gap-2">
+                <Link
+                  href="/auth/signin"
+                  className="px-4 py-2.5 rounded-full bg-[#FAF8F4] border border-[#ECE7DA] text-xs font-mono-label font-bold text-[#4C061D] hover:bg-[#ECE7DA] transition-colors"
+                >
+                  SIGN IN
+                </Link>
+                <Link
+                  href="/auth/signup"
+                  className="hidden sm:inline-block px-4 py-2.5 rounded-full bg-[#B4C292] text-[#4C061D] text-xs font-mono-label font-bold hover:bg-white transition-colors"
+                >
+                  CREATE ACCOUNT
+                </Link>
+              </div>
             )}
 
           </div>
 
         </div>
       </div>
-
-      <AuthModal
-        isOpen={isAuthModalOpen}
-        onClose={() => setIsAuthModalOpen(false)}
-        onSuccess={(u) => setSession({ user: u, token: "active" })}
-      />
     </header>
   );
 }

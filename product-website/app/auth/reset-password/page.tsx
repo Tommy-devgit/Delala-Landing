@@ -1,0 +1,146 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { authClient } from "@/lib/auth-client";
+import { Lock, Eye, EyeOff, CheckCircle2, ArrowRight } from "lucide-react";
+
+export default function ResetPasswordPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const token = searchParams.get("token") || "";
+
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [completed, setCompleted] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters long.");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await authClient.resetPassword(password, token);
+      setCompleted(true);
+    } catch (err: any) {
+      setError(err.message || "Failed to reset password.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-[calc(100vh-80px)] bg-[#FAF8F4] flex items-center justify-center p-4 sm:p-8">
+      <div className="w-full max-w-md">
+        {/* Brand Header */}
+        <div className="text-center mb-8">
+          <Link href="/" className="inline-flex items-center gap-2 mb-3">
+            <span className="font-serif-display font-light text-3xl tracking-tight text-[#4C061D]">
+              DELALA
+            </span>
+          </Link>
+          <h1 className="font-serif-display text-3xl font-light text-[#1C1B12]">
+            Create New Password
+          </h1>
+          <p className="text-xs text-[#736F4E] mt-1.5 font-medium">
+            Set a new secure password for your Delala account.
+          </p>
+        </div>
+
+        {/* Reset Password Card */}
+        <div className="bg-white rounded-3xl border border-[#ECE7DA] shadow-xl p-6 sm:p-8 space-y-6">
+          {completed ? (
+            <div className="text-center py-4 space-y-4">
+              <div className="w-12 h-12 rounded-full bg-[#B4C292]/20 text-[#4C061D] flex items-center justify-center mx-auto">
+                <CheckCircle2 className="w-6 h-6 text-[#4C061D]" />
+              </div>
+              <h3 className="font-serif-display text-xl text-[#1C1B12]">
+                Password Reset Successfully
+              </h3>
+              <p className="text-xs text-[#736F4E]">
+                Your password has been updated. You can now sign in with your new password.
+              </p>
+              <Link
+                href="/auth/signin"
+                className="inline-flex items-center justify-center gap-2 w-full py-3.5 rounded-full bg-[#4C061D] text-white font-mono-label text-xs font-bold hover:bg-[#3B0416] transition-colors"
+              >
+                <span>Proceed to Sign In →</span>
+              </Link>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {error && (
+                <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium">
+                  {error}
+                </div>
+              )}
+
+              <div>
+                <label className="block text-[10px] font-mono-label text-[#736F4E] font-bold uppercase mb-1.5">
+                  NEW PASSWORD *
+                </label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Min 6 characters"
+                    className="w-full p-3.5 pl-11 pr-11 rounded-2xl bg-[#FAF8F4] border border-[#ECE7DA] text-xs text-[#1C1B12] focus:outline-none focus:border-[#4C061D] transition-colors"
+                  />
+                  <Lock className="w-4 h-4 text-[#736F4E] absolute left-4 top-3.5 pointer-events-none" />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-3.5 text-[#736F4E] hover:text-[#1C1B12] transition-colors"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-mono-label text-[#736F4E] font-bold uppercase mb-1.5">
+                  CONFIRM NEW PASSWORD *
+                </label>
+                <div className="relative">
+                  <input
+                    type="password"
+                    required
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Re-enter new password"
+                    className="w-full p-3.5 pl-11 rounded-2xl bg-[#FAF8F4] border border-[#ECE7DA] text-xs text-[#1C1B12] focus:outline-none focus:border-[#4C061D] transition-colors"
+                  />
+                  <Lock className="w-4 h-4 text-[#736F4E] absolute left-4 top-3.5 pointer-events-none" />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-4 rounded-full bg-[#4C061D] text-white font-mono-label text-xs font-bold hover:bg-[#3B0416] transition-colors shadow-lg flex items-center justify-center gap-2"
+              >
+                <span>{loading ? "Updating Password..." : "Update Password →"}</span>
+              </button>
+            </form>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}

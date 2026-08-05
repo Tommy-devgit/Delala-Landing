@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { MessageSquare, Send, Lock } from "lucide-react";
 import { apiClient } from "@/lib/api-client";
 import { authClient, UserSession } from "@/lib/auth-client";
-import { AuthModal } from "@/components/auth-modal";
 import { Property } from "@/lib/types";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1";
@@ -13,9 +13,6 @@ export default function MessagesPage() {
   const [session, setSession] = useState<{ user: UserSession; token: string } | null>(null);
   const [messages, setMessages] = useState<any[]>([]);
   const [input, setInput] = useState("");
-  const [property, setProperty] = useState<Property | null>(null);
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function loadData() {
@@ -33,18 +30,13 @@ export default function MessagesPage() {
           console.warn("Messages API fetch offline.");
         }
       }
-      setLoading(false);
     }
     loadData();
   }, []);
 
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!session?.user) {
-      setIsAuthModalOpen(true);
-      return;
-    }
-    if (!input.trim()) return;
+    if (!input.trim() || !session?.user) return;
 
     const newMsg = {
       id: Date.now().toString(),
@@ -71,12 +63,12 @@ export default function MessagesPage() {
             <p className="text-xs text-[#736F4E]">
               Sign in with your account to chat directly about rental terms and walkthrough appointments.
             </p>
-            <button
-              onClick={() => setIsAuthModalOpen(true)}
-              className="px-8 py-3.5 rounded-full bg-[#4C061D] text-white font-mono-label text-xs font-bold shadow-md hover:bg-[#3B0416] transition-colors"
+            <Link
+              href="/auth/signin?callbackUrl=/messages"
+              className="inline-block px-8 py-3.5 rounded-full bg-[#4C061D] text-white font-mono-label text-xs font-bold shadow-md hover:bg-[#3B0416] transition-colors"
             >
               Sign In →
-            </button>
+            </Link>
           </div>
         ) : messages.length === 0 ? (
           <div className="py-20 text-center bg-white rounded-3xl border border-[#ECE7DA] p-8 max-w-xl mx-auto space-y-3 shadow-xs">
@@ -168,12 +160,6 @@ export default function MessagesPage() {
         )}
 
       </div>
-
-      <AuthModal
-        isOpen={isAuthModalOpen}
-        onClose={() => setIsAuthModalOpen(false)}
-        onSuccess={(u) => setSession({ user: u, token: "active" })}
-      />
     </div>
   );
 }

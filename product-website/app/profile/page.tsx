@@ -3,12 +3,10 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { authClient, UserSession } from "@/lib/auth-client";
-import { AuthModal } from "@/components/auth-modal";
-import { User, Calendar, ShieldCheck, Heart, Settings, CheckCircle2, Phone, LogOut, UserCheck } from "lucide-react";
+import { User, Calendar, ShieldCheck, Heart, Settings, CheckCircle2, Phone, LogOut } from "lucide-react";
 
 export default function ProfilePage() {
   const [session, setSession] = useState<{ user: UserSession; token: string } | null>(null);
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
   useEffect(() => {
     function loadSession() {
@@ -57,14 +55,6 @@ export default function ProfilePage() {
 
             <div className="flex items-center gap-3">
               <button
-                onClick={() => setIsAuthModalOpen(true)}
-                className="px-5 py-2.5 rounded-full bg-[#FAF8F4] border border-[#ECE7DA] text-xs font-mono-label text-[#4C061D] font-bold hover:border-[#4C061D] transition-colors flex items-center gap-2"
-              >
-                <UserCheck className="w-4 h-4" />
-                <span>SWITCH ROLE</span>
-              </button>
-
-              <button
                 onClick={handleLogOut}
                 className="px-5 py-2.5 rounded-full bg-red-50 border border-red-200 text-xs font-mono-label text-red-600 font-bold hover:bg-red-100 transition-colors flex items-center gap-2"
               >
@@ -82,12 +72,12 @@ export default function ProfilePage() {
             <p className="text-xs text-[#736F4E] max-w-md mx-auto">
               Please sign in with your email and password or create a new account to access your user dashboard.
             </p>
-            <button
-              onClick={() => setIsAuthModalOpen(true)}
-              className="px-8 py-3.5 rounded-full bg-[#4C061D] text-white font-mono-label text-xs font-bold shadow-md hover:bg-[#3B0416] transition-colors"
+            <Link
+              href="/auth/signin?callbackUrl=/profile"
+              className="inline-block px-8 py-3.5 rounded-full bg-[#4C061D] text-white font-mono-label text-xs font-bold shadow-md hover:bg-[#3B0416] transition-colors"
             >
               Sign In / Sign Up →
-            </button>
+            </Link>
           </div>
         )}
 
@@ -130,12 +120,6 @@ export default function ProfilePage() {
         </div>
 
       </div>
-
-      <AuthModal
-        isOpen={isAuthModalOpen}
-        onClose={() => setIsAuthModalOpen(false)}
-        onSuccess={(u) => setSession({ user: u, token: "active" })}
-      />
     </div>
   );
 }
