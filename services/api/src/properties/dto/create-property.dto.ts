@@ -126,6 +126,11 @@ export class CreatePropertyDto {
   @IsString()
   brokerId?: string;
 
+  @ApiProperty({ example: "+251 911 234 567", required: false })
+  @IsOptional()
+  @IsString()
+  phone?: string;
+
   @ApiProperty({ example: ["https://r2.delala.et/properties/1.jpg"], required: false })
   @IsOptional()
   @IsArray()

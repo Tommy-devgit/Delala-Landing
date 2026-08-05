@@ -45,6 +45,7 @@ export interface Property {
   trending?: boolean;
   recentlyAdded?: boolean;
   broker: Broker;
+  phone?: string;
   lat: number;
   lng: number;
   description: string;

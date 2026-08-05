@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Heart, ShieldCheck, Zap, Droplets, Car } from "lucide-react";
+import { Heart, ShieldCheck, Zap, Droplets, Car, Phone } from "lucide-react";
 import { Property } from "@/lib/types";
 
 export function PropertyCard({
@@ -16,6 +16,8 @@ export function PropertyCard({
 }) {
   const [fav, setFav] = useState(isFavorite);
 
+  const contactPhone = property.phone || property.broker?.phone || "+251 911 234 567";
+
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -23,6 +25,10 @@ export function PropertyCard({
     if (onToggleFavorite) {
       onToggleFavorite(property.id);
     }
+  };
+
+  const handlePhoneClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
   };
 
   return (
@@ -100,7 +106,8 @@ export function PropertyCard({
           </p>
         </div>
 
-        <div className="pt-2 border-t border-[#ECE7DA] flex items-center justify-between mt-auto">
+        {/* Price & Direct Contact Phone Button */}
+        <div className="pt-2 border-t border-[#ECE7DA] flex items-center justify-between gap-1.5 mt-auto">
           <div>
             <span className="text-[9px] font-mono-label text-[#736F4E] block">RENTAL</span>
             <span className="text-sm font-bold text-[#4C061D]">
@@ -108,9 +115,16 @@ export function PropertyCard({
             </span>
           </div>
 
-          <span className="text-[10px] font-mono-label text-[#4C061D] group-hover:translate-x-0.5 transition-transform font-bold">
-            VIEW →
-          </span>
+          {/* Front Contact Phone Button */}
+          <a
+            href={`tel:${contactPhone.replace(/\s+/g, "")}`}
+            onClick={handlePhoneClick}
+            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[#4C061D] text-white hover:bg-[#3B0416] transition-colors text-[10px] font-mono-label font-bold shadow-xs shrink-0"
+            title="Call Property Owner Directly"
+          >
+            <Phone className="w-3 h-3 text-[#B4C292]" />
+            <span>{contactPhone}</span>
+          </a>
         </div>
       </div>
     </Link>

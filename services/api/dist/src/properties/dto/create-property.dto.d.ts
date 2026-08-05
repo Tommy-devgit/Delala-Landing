@@ -22,6 +22,7 @@ export declare class CreatePropertyDto {
     securityGuard?: boolean;
     balcony?: boolean;
     brokerId?: string;
+    phone?: string;
     imageUrls?: string[];
 }
 export declare class ModeratePropertyDto {

@@ -38,6 +38,7 @@ export const apiClient = {
             furnished: p.furnished,
             securityGuard: p.securityGuard,
             balcony: p.balcony,
+            phone: p.phone || p.contactPhone || p.broker?.phone || "+251 911 234 567",
             broker: {
               id: p.broker?.id || "b1",
               slug: p.broker?.slug || "abebe-tesfaye",

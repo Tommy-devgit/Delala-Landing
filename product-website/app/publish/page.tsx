@@ -18,6 +18,7 @@ import {
   Home,
   Tag,
   DollarSign,
+  Phone,
 } from "lucide-react";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1";
@@ -66,6 +67,7 @@ export default function PublishListingPage() {
   const [subCity, setSubCity] = useState("Bole");
   const [neighborhood, setNeighborhood] = useState("Bole Medhanialem");
   const [address, setAddress] = useState("");
+  const [phone, setPhone] = useState("+251 911 234 567");
   const [bedrooms, setBedrooms] = useState("3");
   const [bathrooms, setBathrooms] = useState("2");
   const [area, setArea] = useState("250");
@@ -167,6 +169,7 @@ export default function PublishListingPage() {
       formData.append("neighborhood", neighborhood);
       formData.append("location_id", `${city}-${subCity}-${neighborhood}`);
       formData.append("address", address);
+      formData.append("phone", phone);
       formData.append("bedrooms", bedrooms);
       formData.append("bathrooms", bathrooms);
       formData.append("areaSqm", area);
@@ -507,6 +510,27 @@ export default function PublishListingPage() {
                       </span>
                     </div>
                   </div>
+                </div>
+
+                {/* Primary Contact Phone Number */}
+                <div>
+                  <label className="block text-[10px] font-mono-label text-[#736F4E] font-bold uppercase mb-1">
+                    PRIMARY CONTACT PHONE NUMBER *
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="tel"
+                      required
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      placeholder="+251 911 234 567"
+                      className="w-full p-3.5 pl-10 rounded-2xl bg-[#FAF8F4] border border-[#ECE7DA] text-xs font-mono-label text-[#1C1B12] focus:outline-none focus:border-[#4C061D]"
+                    />
+                    <Phone className="w-4 h-4 text-[#4C061D] absolute left-3.5 top-3.5" />
+                  </div>
+                  <p className="text-[10px] text-[#736F4E] mt-1">
+                    This phone number appears directly on the front of property cards for instant calls.
+                  </p>
                 </div>
 
                 {/* Optional Specs */}

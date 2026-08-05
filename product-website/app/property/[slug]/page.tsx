@@ -22,6 +22,7 @@ import {
   Shield,
   Calendar,
   Phone,
+  MessageSquare,
   CheckCircle2,
   Building,
   Building2,
@@ -204,16 +205,37 @@ export default function PropertyDetailPage() {
                 <div>
                   <h4 className="font-serif-display text-lg text-[#1c1b12]">{property.broker?.name || "Verified Owner"}</h4>
                   <p className="text-xs font-mono-label text-[#4C061D]">LISTED PROPERTY OWNER</p>
+                  <p className="text-xs font-mono-label text-[#736F4E] font-bold mt-0.5">{property.phone || property.broker?.phone || "+251 911 234 567"}</p>
                 </div>
               </div>
 
-              <button
-                onClick={() => setIsScheduleOpen(true)}
-                className="w-full py-4 rounded-full bg-[#4C061D] text-white font-mono-label text-xs font-bold hover:bg-[#3B0416] transition-colors shadow-md flex items-center justify-center gap-2"
-              >
-                <Calendar className="w-4 h-4 text-[#B4C292]" />
-                <span>SCHEDULE FIELD WALKTHROUGH</span>
-              </button>
+              <div className="space-y-3">
+                <a
+                  href={`tel:${(property.phone || property.broker?.phone || "+251911234567").replace(/\s+/g, "")}`}
+                  className="w-full py-3.5 rounded-full bg-[#4C061D] text-white font-mono-label text-xs font-bold hover:bg-[#3B0416] transition-colors shadow-md flex items-center justify-center gap-2"
+                >
+                  <Phone className="w-4 h-4 text-[#B4C292]" />
+                  <span>CALL {property.phone || property.broker?.phone || "+251 911 234 567"}</span>
+                </a>
+
+                <a
+                  href={`https://wa.me/${(property.phone || property.broker?.phone || "+251911234567").replace(/[^0-9]/g, "")}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-3 rounded-full bg-emerald-700 text-white font-mono-label text-xs font-bold hover:bg-emerald-800 transition-colors shadow-sm flex items-center justify-center gap-2"
+                >
+                  <MessageSquare className="w-4 h-4" />
+                  <span>WHATSAPP LISTER</span>
+                </a>
+
+                <button
+                  onClick={() => setIsScheduleOpen(true)}
+                  className="w-full py-3 rounded-full bg-[#FAF8F4] text-[#1C1B12] font-mono-label text-xs font-bold hover:bg-[#ECE7DA] transition-colors border border-[#ECE7DA] flex items-center justify-center gap-2"
+                >
+                  <Calendar className="w-4 h-4 text-[#4C061D]" />
+                  <span>SCHEDULE WALKTHROUGH</span>
+                </button>
+              </div>
 
             </div>
           </div>
