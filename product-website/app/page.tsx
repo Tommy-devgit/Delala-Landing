@@ -137,9 +137,9 @@ export default function HomePage() {
         </div>
 
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3, 4, 5, 6].map((n) => (
-              <div key={n} className="h-96 rounded-3xl bg-gray-100 animate-pulse" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
+              <div key={n} className="h-72 rounded-2xl bg-gray-100 animate-pulse" />
             ))}
           </div>
         ) : filteredListings.length === 0 ? (
@@ -149,7 +149,7 @@ export default function HomePage() {
             <p className="text-xs text-[#736F4E]">Try selecting a different category or search term.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
             {filteredListings.map((property) => (
               <PropertyCard key={property.id} property={property} />
             ))}
@@ -158,42 +158,42 @@ export default function HomePage() {
       </section>
 
       {/* 4. ETHIOPIAN CITIES EXPLORER */}
-      <section className="bg-[#FAF8F4] py-12 px-4 sm:px-8 border-y border-[#ECE7DA]">
+      <section className="bg-[#FAF8F4] py-10 px-4 sm:px-8 border-y border-[#ECE7DA]">
         <div className="max-w-[1440px] mx-auto">
-          <div className="mb-8">
+          <div className="mb-6">
             <span className="font-mono-label text-[10px] text-[#4C061D] block mb-1">
               REGIONAL HUB DISCOVERY
             </span>
-            <h2 className="font-serif-display text-3xl font-light text-[#1c1b12]">
+            <h2 className="font-serif-display text-2xl sm:text-3xl font-light text-[#1c1b12]">
               Explore Ethiopian Real Estate Markets
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3.5">
             {cities.map((city) => (
               <Link
                 key={city.id}
                 href={`/cities/${city.slug}`}
-                className="group relative rounded-3xl overflow-hidden aspect-[4/5] bg-gray-900 border border-[#ECE7DA] shadow-md hover:shadow-xl transition-all"
+                className="group relative rounded-2xl overflow-hidden aspect-[3/4] bg-gray-900 border border-[#ECE7DA] shadow-sm hover:shadow-md transition-all"
               >
                 <img
                   src={city.image || "/images/hero_property.png"}
                   alt={city.name}
                   className="w-full h-full object-cover opacity-80 group-hover:scale-105 group-hover:opacity-90 transition-all duration-500"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent p-6 flex flex-col justify-end text-white">
-                  <div className="font-mono-label text-[10px] text-[#B4C292] font-bold uppercase mb-1">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent p-3.5 flex flex-col justify-end text-white">
+                  <div className="font-mono-label text-[9px] text-[#B4C292] font-bold uppercase mb-0.5">
                     {city.propertiesCount} LISTINGS
                   </div>
-                  <h3 className="font-serif-display text-2xl font-light mb-1">
+                  <h3 className="font-serif-display text-lg font-light mb-0.5 leading-tight">
                     {city.name}
                   </h3>
-                  <p className="text-xs text-white/80 line-clamp-1 mb-3">
+                  <p className="text-[10px] text-white/80 line-clamp-1 mb-2">
                     {city.tagline}
                   </p>
-                  <div className="text-[11px] font-mono-label text-[#B4C292] flex items-center justify-between border-t border-white/20 pt-2">
+                  <div className="text-[9.5px] font-mono-label text-[#B4C292] flex items-center justify-between border-t border-white/20 pt-1.5 font-bold">
                     <span>FROM ETB {city.startingRentETB.toLocaleString()}/MO</span>
-                    <span>EXPLORE →</span>
+                    <span>→</span>
                   </div>
                 </div>
               </Link>

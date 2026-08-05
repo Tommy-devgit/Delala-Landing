@@ -171,7 +171,7 @@ function SearchContent() {
           <div>
             {/* GRID VIEW */}
             {viewMode === "grid" && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                 {filteredListings.map((property) => (
                   <PropertyCard key={property.id} property={property} />
                 ))}
@@ -181,7 +181,7 @@ function SearchContent() {
             {/* SPLIT VIEW (List + Map) */}
             {viewMode === "split" && (
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-180px)]">
-                <div className="lg:col-span-7 overflow-y-auto pr-2 grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="lg:col-span-7 overflow-y-auto pr-2 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
                   {filteredListings.map((property) => (
                     <PropertyCard key={property.id} property={property} />
                   ))}
