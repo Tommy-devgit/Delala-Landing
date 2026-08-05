@@ -60,7 +60,7 @@ export default function HomePage() {
 
   return (
     <div className="space-y-12 pb-16">
-      
+
       {/* 1. HERO DISCOVERY SECTION (Full 100vh Height Covering Down to Screen Bottom) */}
       <section className="relative w-full h-[calc(100vh-80px)] min-h-[580px] flex flex-col justify-center overflow-hidden border-b border-[#ECE7DA]">
         {/* Background Image Container */}
@@ -78,11 +78,6 @@ export default function HomePage() {
         {/* Hero Content Container */}
         <div className="relative z-10 max-w-[1440px] w-full mx-auto px-4 sm:px-8 py-8">
           <div className="max-w-3xl mb-8 space-y-4">
-            <span className="font-mono-label text-[11px] text-[#B4C292] bg-white/10 backdrop-blur-md border border-white/20 px-4 py-1.5 rounded-full inline-flex items-center gap-2 shadow-lg">
-              <ShieldCheck className="w-4 h-4 text-[#B4C292]" />
-              <span className="tracking-wider">ETHIOPIA PHYSICAL REAL ESTATE MARKETPLACE</span>
-            </span>
-
             <h1 className="font-serif-display text-4xl sm:text-6xl lg:text-7xl font-light text-white tracking-tight leading-[0.95] drop-shadow-md">
               Find your next <span className="italic font-normal text-[#B4C292]">home</span> in Ethiopia.
             </h1>
@@ -97,7 +92,7 @@ export default function HomePage() {
             <SearchBarCapsule onOpenFilters={() => setIsFilterModalOpen(true)} />
           </div>
 
-          {/* Quick Sub-City Tags */}
+          {/* Quick Sub-City Tags
           <div className="mt-6 flex flex-wrap items-center gap-2.5 text-xs text-[#ECE7DA]">
             <span className="font-mono-label text-[10px] text-[#B4C292] font-bold tracking-wider">POPULAR SEARCHES:</span>
             {["Bole Medhanialem", "Kazanchis UN", "Old Airport Villa", "CMC Apartment", "Hawassa Lake View"].map((tag) => (
@@ -109,7 +104,7 @@ export default function HomePage() {
                 {tag}
               </Link>
             ))}
-          </div>
+          </div> */}
 
         </div>
       </section>
