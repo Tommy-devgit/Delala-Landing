@@ -32,49 +32,44 @@ export class PropertiesService {
 
   async findOneBySlug(slugOrId: string) {
     const isUuid = isValidUuid(slugOrId);
-    const idPrefix = slugOrId.split("-").pop() || "";
 
-    let property = await this.prisma.property.findFirst({
-      where: {
-        OR: [
-          ...(isUuid ? [{ id: slugOrId }] : []),
-          ...(idPrefix.length >= 4 ? [{ id: { startsWith: idPrefix } }] : []),
-          { title: { contains: slugOrId.replace(/-/g, " "), mode: "insensitive" } },
-        ],
-      },
-      include: {
-        location: true,
-        images: true,
-        owner: {
-          include: { profile: true },
-        },
-      },
-    });
-
-    if (!property) {
-      // Fallback: match by mapped slug or ID prefix
-      const all = await this.prisma.property.findMany({
+    if (isUuid) {
+      const property = await this.prisma.property.findUnique({
+        where: { id: slugOrId },
         include: {
           location: true,
           images: true,
           owner: { include: { profile: true } },
         },
       });
-
-      property = all.find((p) => {
-        const pSlug = p.title.toLowerCase().replace(/[^a-z0-9]+/g, "-") + "-" + p.id.slice(0, 4);
-        return (
-          p.id === slugOrId ||
-          pSlug === slugOrId ||
-          (idPrefix.length >= 4 && p.id.startsWith(idPrefix))
-        );
-      }) || null;
+      if (property) return this.mapPropertyResponse(property);
     }
 
-    if (!property) {
+    // Match by slug or ID prefix across all listings
+    const idPrefix = slugOrId.split("-").pop() || "";
+    const all = await this.prisma.property.findMany({
+      include: {
+        location: true,
+        images: true,
+        owner: { include: { profile: true } },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    const matched = all.find((p) => {
+      const pSlug = p.title.toLowerCase().replace(/[^a-z0-9]+/g, "-") + "-" + p.id.slice(0, 4);
+      return (
+        p.id === slugOrId ||
+        pSlug === slugOrId ||
+        (idPrefix.length >= 4 && p.id.startsWith(idPrefix))
+      );
+    });
+
+    if (!matched) {
       throw new NotFoundException(`Property with ID or slug "${slugOrId}" not found`);
     }
-    return this.mapPropertyResponse(property);
+
+    return this.mapPropertyResponse(matched);
   }
 
   async create(createDto: CreatePropertyDto, uploadedImageUrls: string[] = []) {
