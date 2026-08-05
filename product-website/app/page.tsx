@@ -65,21 +65,17 @@ export default function HomePage() {
   return (
     <div className="space-y-12 pb-16">
 
-      {/* 1. HERO DISCOVERY SECTION (Full 100vh Height Covering Down to Screen Bottom) */}
       <section className="relative w-full h-[calc(100vh-80px)] min-h-[580px] flex flex-col justify-center overflow-hidden border-b border-[#ECE7DA]">
-        {/* Background Image Container */}
         <div className="absolute inset-0 w-full h-full z-0">
           <img
             src="/images/hero-img.jpg"
             alt="Delala Ethiopia Real Estate"
             className="w-full h-full object-cover object-center"
           />
-          {/* Dual Overlay Gradient for High Contrast & Text Legibility */}
           <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/65 to-black/40" />
           <div className="absolute inset-0 bg-gradient-to-t from-[#1C1B12] via-transparent to-black/30" />
         </div>
 
-        {/* Hero Content Container */}
         <div className="relative z-10 max-w-[1440px] w-full mx-auto px-4 sm:px-8 py-8">
           <div className="max-w-3xl mb-8 space-y-4">
             <h1 className="font-serif-display text-4xl sm:text-6xl lg:text-7xl font-light text-white tracking-tight leading-[0.95] drop-shadow-md">
@@ -96,7 +92,7 @@ export default function HomePage() {
             <SearchBarCapsule onOpenFilters={() => setIsFilterModalOpen(true)} />
           </div>
 
-          {/* Quick Sub-City Tags */}
+          {/* Quick Sub-City Tags
           <div className="mt-6 flex flex-wrap items-center gap-2.5 text-xs text-[#ECE7DA]">
             <span className="font-mono-label text-[10px] text-[#B4C292] font-bold tracking-wider">POPULAR SEARCHES:</span>
             {["Bole Medhanialem", "Kazanchis UN", "Old Airport Villa", "CMC Apartment", "Hawassa Lake View"].map((tag) => (
@@ -108,7 +104,7 @@ export default function HomePage() {
                 {tag}
               </Link>
             ))}
-          </div>
+          </div> */}
 
         </div>
       </section>
