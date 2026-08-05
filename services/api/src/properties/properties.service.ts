@@ -98,7 +98,6 @@ export class PropertiesService {
             email: "owner@delala.et",
             profile: {
               create: {
-                id: newUserId,
                 firstName: "Verified",
                 lastName: "Owner",
                 role: "broker",
@@ -167,7 +166,7 @@ export class PropertiesService {
       include: {
         location: true,
         images: true,
-        owner: { include: { profile: true } },
+        owner: { include: { profile: true }, },
       },
     });
 
