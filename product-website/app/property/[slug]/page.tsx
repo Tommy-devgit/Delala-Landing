@@ -90,12 +90,20 @@ export default function PropertyDetailPage() {
         <div className="flex items-center justify-between mb-6 pb-4 border-b border-[#ECE7DA]">
           <div className="flex items-center gap-2 text-xs font-mono-label text-[#736F4E]">
             <Link href="/" className="hover:text-[#4C061D]">MARKETPLACE</Link>
-            <span>/</span>
-            <Link href={`/cities/${property.city.toLowerCase().replace(/ /g, "-")}`} className="hover:text-[#4C061D]">
-              {property.city.toUpperCase()}
-            </Link>
-            <span>/</span>
-            <span className="text-[#4C061D] font-bold">{property.subCity.toUpperCase()}</span>
+            {property.city && (
+              <>
+                <span>/</span>
+                <Link href={`/cities/${property.city.toLowerCase().replace(/\s+/g, "-")}`} className="hover:text-[#4C061D]">
+                  {property.city.toUpperCase()}
+                </Link>
+              </>
+            )}
+            {property.subCity && (
+              <>
+                <span>/</span>
+                <span className="text-[#4C061D] font-bold">{property.subCity.toUpperCase()}</span>
+              </>
+            )}
           </div>
 
           <div className="flex items-center gap-3">
@@ -132,10 +140,7 @@ export default function PropertyDetailPage() {
             <p className="text-xs text-[#736F4E] mt-1 flex items-center gap-1 font-mono-label">
               <MapPin className="w-3.5 h-3.5 text-[#4C061D]" />
               <span>
-                {[property.address, property.neighborhood, property.subCity, property.city]
-                  .filter(Boolean)
-                  .filter((val, idx, arr) => arr.indexOf(val) === idx)
-                  .join(", ")}
+                {property.address || [property.neighborhood, property.subCity, property.city].filter(Boolean).join(", ")}
               </span>
             </p>
           </div>

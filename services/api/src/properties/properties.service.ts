@@ -18,7 +18,13 @@ export class PropertiesService {
         ...(query.propertyType ? { propertyType: query.propertyType.toLowerCase() } : {}),
       },
       include: {
-        location: true,
+        location: {
+          include: {
+            parent: {
+              include: { parent: true },
+            },
+          },
+        },
         images: true,
         owner: {
           include: { profile: true },
@@ -37,7 +43,13 @@ export class PropertiesService {
       const property = await this.prisma.property.findUnique({
         where: { id: slugOrId },
         include: {
-          location: true,
+          location: {
+            include: {
+              parent: {
+                include: { parent: true },
+              },
+            },
+          },
           images: true,
           owner: { include: { profile: true } },
         },
@@ -49,7 +61,13 @@ export class PropertiesService {
     const idPrefix = slugOrId.split("-").pop() || "";
     const all = await this.prisma.property.findMany({
       include: {
-        location: true,
+        location: {
+          include: {
+            parent: {
+              include: { parent: true },
+            },
+          },
+        },
         images: true,
         owner: { include: { profile: true } },
       },
@@ -170,7 +188,13 @@ export class PropertiesService {
         },
       },
       include: {
-        location: true,
+        location: {
+          include: {
+            parent: {
+              include: { parent: true },
+            },
+          },
+        },
         images: true,
         owner: {
           include: { profile: true },
@@ -193,7 +217,13 @@ export class PropertiesService {
         status: moderateDto.status === "APPROVED" ? "approved" : "rejected",
       },
       include: {
-        location: true,
+        location: {
+          include: {
+            parent: {
+              include: { parent: true },
+            },
+          },
+        },
         images: true,
         owner: { include: { profile: true } },
       },
@@ -207,10 +237,32 @@ export class PropertiesService {
     const ownerName = [p.owner?.profile?.firstName, p.owner?.profile?.lastName].filter(Boolean).join(" ") || "Verified Owner";
     const phone = p.owner?.profile?.phone || null;
 
-    const parts = p.address ? p.address.split(",").map((s: string) => s.trim()) : [];
-    const subCity = parts.length > 1 ? parts[0] : "";
-    const city = parts.length > 1 ? parts[1] : (parts[0] || p.location?.name || "");
-    const neighborhood = p.location?.name || "";
+    let city = "";
+    let subCity = "";
+    let neighborhood = "";
+
+    if (p.location) {
+      if (p.location.type === "city") {
+        city = p.location.name;
+      } else if (p.location.type === "sub_city" || p.location.type === "subcity") {
+        subCity = p.location.name;
+        city = p.location.parent?.name || "";
+      } else {
+        neighborhood = p.location.name;
+        subCity = p.location.parent?.name || "";
+        city = p.location.parent?.parent?.name || p.location.parent?.name || "";
+      }
+    }
+
+    if (!city && p.address) {
+      const parts = p.address.split(",").map((s: string) => s.trim());
+      if (parts.length > 1) {
+        subCity = parts[0];
+        city = parts[1];
+      } else {
+        city = parts[0];
+      }
+    }
 
     return {
       id: p.id,

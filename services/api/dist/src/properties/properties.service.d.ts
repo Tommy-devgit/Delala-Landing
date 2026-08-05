@@ -25,9 +25,9 @@ export declare class PropertiesService {
         securityGuard: boolean;
         balcony: boolean;
         status: string;
-        subCity: any;
-        city: any;
-        neighborhood: any;
+        subCity: string;
+        city: string;
+        neighborhood: string;
         address: any;
         cityId: any;
         neighborhoodId: any;
@@ -37,13 +37,13 @@ export declare class PropertiesService {
         updatedAt: any;
         cityEntity: {
             id: any;
-            name: any;
-            slug: any;
+            name: string;
+            slug: string;
         };
         neighborhoodEntity: {
             id: any;
-            name: any;
-            subCity: any;
+            name: string;
+            subCity: string;
         };
         broker: {
             id: any;
@@ -80,9 +80,9 @@ export declare class PropertiesService {
         securityGuard: boolean;
         balcony: boolean;
         status: string;
-        subCity: any;
-        city: any;
-        neighborhood: any;
+        subCity: string;
+        city: string;
+        neighborhood: string;
         address: any;
         cityId: any;
         neighborhoodId: any;
@@ -92,13 +92,13 @@ export declare class PropertiesService {
         updatedAt: any;
         cityEntity: {
             id: any;
-            name: any;
-            slug: any;
+            name: string;
+            slug: string;
         };
         neighborhoodEntity: {
             id: any;
-            name: any;
-            subCity: any;
+            name: string;
+            subCity: string;
         };
         broker: {
             id: any;
@@ -135,9 +135,9 @@ export declare class PropertiesService {
         securityGuard: boolean;
         balcony: boolean;
         status: string;
-        subCity: any;
-        city: any;
-        neighborhood: any;
+        subCity: string;
+        city: string;
+        neighborhood: string;
         address: any;
         cityId: any;
         neighborhoodId: any;
@@ -147,13 +147,13 @@ export declare class PropertiesService {
         updatedAt: any;
         cityEntity: {
             id: any;
-            name: any;
-            slug: any;
+            name: string;
+            slug: string;
         };
         neighborhoodEntity: {
             id: any;
-            name: any;
-            subCity: any;
+            name: string;
+            subCity: string;
         };
         broker: {
             id: any;
@@ -190,9 +190,9 @@ export declare class PropertiesService {
         securityGuard: boolean;
         balcony: boolean;
         status: string;
-        subCity: any;
-        city: any;
-        neighborhood: any;
+        subCity: string;
+        city: string;
+        neighborhood: string;
         address: any;
         cityId: any;
         neighborhoodId: any;
@@ -202,13 +202,13 @@ export declare class PropertiesService {
         updatedAt: any;
         cityEntity: {
             id: any;
-            name: any;
-            slug: any;
+            name: string;
+            slug: string;
         };
         neighborhoodEntity: {
             id: any;
-            name: any;
-            subCity: any;
+            name: string;
+            subCity: string;
         };
         broker: {
             id: any;
