@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ModeratePropertyDto = exports.CreatePropertyDto = void 0;
 const class_validator_1 = require("class-validator");
+const class_transformer_1 = require("class-transformer");
 const swagger_1 = require("@nestjs/swagger");
 class CreatePropertyDto {
 }
@@ -39,12 +40,14 @@ __decorate([
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 65000, required: false }),
     (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Type)(() => Number),
     (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
 ], CreatePropertyDto.prototype, "rentETB", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 65000, required: false }),
     (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Type)(() => Number),
     (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
 ], CreatePropertyDto.prototype, "price", void 0);
@@ -93,54 +96,63 @@ __decorate([
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 4, required: false }),
     (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Type)(() => Number),
     (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
 ], CreatePropertyDto.prototype, "bedrooms", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 3.5, required: false }),
     (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Type)(() => Number),
     (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
 ], CreatePropertyDto.prototype, "bathrooms", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 320, required: false }),
     (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Type)(() => Number),
     (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
 ], CreatePropertyDto.prototype, "areaSqm", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: true, required: false }),
     (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Transform)(({ value }) => value === "true" || value === true),
     (0, class_validator_1.IsBoolean)(),
     __metadata("design:type", Boolean)
 ], CreatePropertyDto.prototype, "generator", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: true, required: false }),
     (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Transform)(({ value }) => value === "true" || value === true),
     (0, class_validator_1.IsBoolean)(),
     __metadata("design:type", Boolean)
 ], CreatePropertyDto.prototype, "waterTank", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: true, required: false }),
     (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Transform)(({ value }) => value === "true" || value === true),
     (0, class_validator_1.IsBoolean)(),
     __metadata("design:type", Boolean)
 ], CreatePropertyDto.prototype, "parking", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: true, required: false }),
     (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Transform)(({ value }) => value === "true" || value === true),
     (0, class_validator_1.IsBoolean)(),
     __metadata("design:type", Boolean)
 ], CreatePropertyDto.prototype, "furnished", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: true, required: false }),
     (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Transform)(({ value }) => value === "true" || value === true),
     (0, class_validator_1.IsBoolean)(),
     __metadata("design:type", Boolean)
 ], CreatePropertyDto.prototype, "securityGuard", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: true, required: false }),
     (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Transform)(({ value }) => value === "true" || value === true),
     (0, class_validator_1.IsBoolean)(),
     __metadata("design:type", Boolean)
 ], CreatePropertyDto.prototype, "balcony", void 0);

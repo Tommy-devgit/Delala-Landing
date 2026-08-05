@@ -1,4 +1,5 @@
 import { IsString, IsNumber, IsBoolean, IsOptional, IsEnum, IsArray } from "class-validator";
+import { Type, Transform } from "class-transformer";
 import { ApiProperty } from "@nestjs/swagger";
 
 export class CreatePropertyDto {
@@ -21,11 +22,13 @@ export class CreatePropertyDto {
 
   @ApiProperty({ example: 65000, required: false })
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   rentETB?: number;
 
   @ApiProperty({ example: 65000, required: false })
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   price?: number;
 
@@ -66,46 +69,55 @@ export class CreatePropertyDto {
 
   @ApiProperty({ example: 4, required: false })
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   bedrooms?: number;
 
   @ApiProperty({ example: 3.5, required: false })
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   bathrooms?: number;
 
   @ApiProperty({ example: 320, required: false })
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   areaSqm?: number;
 
   @ApiProperty({ example: true, required: false })
   @IsOptional()
+  @Transform(({ value }) => value === "true" || value === true)
   @IsBoolean()
   generator?: boolean;
 
   @ApiProperty({ example: true, required: false })
   @IsOptional()
+  @Transform(({ value }) => value === "true" || value === true)
   @IsBoolean()
   waterTank?: boolean;
 
   @ApiProperty({ example: true, required: false })
   @IsOptional()
+  @Transform(({ value }) => value === "true" || value === true)
   @IsBoolean()
   parking?: boolean;
 
   @ApiProperty({ example: true, required: false })
   @IsOptional()
+  @Transform(({ value }) => value === "true" || value === true)
   @IsBoolean()
   furnished?: boolean;
 
   @ApiProperty({ example: true, required: false })
   @IsOptional()
+  @Transform(({ value }) => value === "true" || value === true)
   @IsBoolean()
   securityGuard?: boolean;
 
   @ApiProperty({ example: true, required: false })
   @IsOptional()
+  @Transform(({ value }) => value === "true" || value === true)
   @IsBoolean()
   balcony?: boolean;
 
