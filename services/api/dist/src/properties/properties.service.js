@@ -40,11 +40,13 @@ let PropertiesService = class PropertiesService {
     }
     async findOneBySlug(slugOrId) {
         const isUuid = isValidUuid(slugOrId);
-        const property = await this.prisma.property.findFirst({
+        const idPrefix = slugOrId.split("-").pop() || "";
+        let property = await this.prisma.property.findFirst({
             where: {
                 OR: [
                     ...(isUuid ? [{ id: slugOrId }] : []),
-                    { title: { contains: slugOrId, mode: "insensitive" } },
+                    ...(idPrefix.length >= 4 ? [{ id: { startsWith: idPrefix } }] : []),
+                    { title: { contains: slugOrId.replace(/-/g, " "), mode: "insensitive" } },
                 ],
             },
             include: {
@@ -56,7 +58,22 @@ let PropertiesService = class PropertiesService {
             },
         });
         if (!property) {
-            throw new common_1.NotFoundException(`Property with ID ${slugOrId} not found`);
+            const all = await this.prisma.property.findMany({
+                include: {
+                    location: true,
+                    images: true,
+                    owner: { include: { profile: true } },
+                },
+            });
+            property = all.find((p) => {
+                const pSlug = p.title.toLowerCase().replace(/[^a-z0-9]+/g, "-") + "-" + p.id.slice(0, 4);
+                return (p.id === slugOrId ||
+                    pSlug === slugOrId ||
+                    (idPrefix.length >= 4 && p.id.startsWith(idPrefix)));
+            }) || null;
+        }
+        if (!property) {
+            throw new common_1.NotFoundException(`Property with ID or slug "${slugOrId}" not found`);
         }
         return this.mapPropertyResponse(property);
     }
@@ -161,7 +178,7 @@ let PropertiesService = class PropertiesService {
             include: {
                 location: true,
                 images: true,
-                owner: { include: { profile: true }, },
+                owner: { include: { profile: true } },
             },
         });
         return this.mapPropertyResponse(updated);
