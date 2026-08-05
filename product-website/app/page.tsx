@@ -11,7 +11,7 @@ import { AuthModal } from "@/components/auth-modal";
 import { apiClient } from "@/lib/api-client";
 import { authClient, UserSession } from "@/lib/auth-client";
 import { Property, City, Broker, FilterState } from "@/lib/types";
-import { ShieldCheck, MapPin, Building2, ArrowRight, Sparkles, SlidersHorizontal, Flame, Info, UserPlus } from "lucide-react";
+import { ShieldCheck, MapPin, Building2, ArrowRight, Sparkles, SlidersHorizontal, Flame } from "lucide-react";
 
 export default function HomePage() {
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -67,33 +67,14 @@ export default function HomePage() {
   return (
     <div className="space-y-12 pb-16">
       
-      {/* 0. ONBOARDING WELCOME BANNER FOR FIRST VISITORS */}
-      {!session?.user && (
-        <div className="bg-[#4C061D] text-white py-3 px-4 sm:px-8 border-b border-[#3B0416]">
-          <div className="max-w-[1440px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-xs font-mono-label">
-            <div className="flex items-center gap-2">
-              <Info className="w-4 h-4 text-[#B4C292] shrink-0" />
-              <span>Looking for a home? Explore freely with zero account required. Want to list your property? Create an account.</span>
-            </div>
-            <button
-              onClick={() => setIsAuthModalOpen(true)}
-              className="px-4 py-1.5 rounded-full bg-[#B4C292] text-[#4C061D] font-bold hover:bg-white transition-colors shrink-0 flex items-center gap-1.5"
-            >
-              <UserPlus className="w-3.5 h-3.5" />
-              <span>Create Account / Sign In</span>
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* 1. HERO DISCOVERY SECTION (Full 100vh 16:9 Cover Background) */}
-      <section className="relative w-full min-h-[90vh] sm:min-h-screen flex items-center justify-center overflow-hidden border-b border-[#ECE7DA]">
+      {/* 1. HERO DISCOVERY SECTION (Balanced Aspect Ratio & Crisp Overlay) */}
+      <section className="relative w-full py-16 sm:py-24 lg:py-28 overflow-hidden border-b border-[#ECE7DA]">
         {/* Background Image Container */}
         <div className="absolute inset-0 w-full h-full z-0">
           <img
             src="/images/hero-img.jpg"
             alt="Delala Ethiopia Real Estate"
-            className="w-full h-full object-cover object-center scale-105 transition-transform duration-1000"
+            className="w-full h-full object-cover object-center"
           />
           {/* Dual Overlay Gradient for Breathtaking Typography & Search Capsule Contrast */}
           <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/65 to-black/40" />
@@ -101,7 +82,7 @@ export default function HomePage() {
         </div>
 
         {/* Hero Content Container */}
-        <div className="relative z-10 max-w-[1440px] w-full mx-auto px-4 sm:px-8 py-16 sm:py-24">
+        <div className="relative z-10 max-w-[1440px] w-full mx-auto px-4 sm:px-8">
           <div className="max-w-3xl mb-8 space-y-4">
             <span className="font-mono-label text-[11px] text-[#B4C292] bg-white/10 backdrop-blur-md border border-white/20 px-4 py-1.5 rounded-full inline-flex items-center gap-2 shadow-lg">
               <ShieldCheck className="w-4 h-4 text-[#B4C292]" />
