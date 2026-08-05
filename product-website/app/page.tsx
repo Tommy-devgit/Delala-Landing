@@ -67,8 +67,8 @@ export default function HomePage() {
   return (
     <div className="space-y-12 pb-16">
       
-      {/* 1. HERO DISCOVERY SECTION (Balanced Aspect Ratio & Crisp Overlay) */}
-      <section className="relative w-full py-16 sm:py-24 lg:py-28 overflow-hidden border-b border-[#ECE7DA]">
+      {/* 1. HERO DISCOVERY SECTION (Full 100vh Height Covering Down to Screen Bottom) */}
+      <section className="relative w-full h-[calc(100vh-80px)] min-h-[580px] flex flex-col justify-center overflow-hidden border-b border-[#ECE7DA]">
         {/* Background Image Container */}
         <div className="absolute inset-0 w-full h-full z-0">
           <img
@@ -76,13 +76,13 @@ export default function HomePage() {
             alt="Delala Ethiopia Real Estate"
             className="w-full h-full object-cover object-center"
           />
-          {/* Dual Overlay Gradient for Breathtaking Typography & Search Capsule Contrast */}
+          {/* Dual Overlay Gradient for High Contrast & Text Legibility */}
           <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/65 to-black/40" />
           <div className="absolute inset-0 bg-gradient-to-t from-[#1C1B12] via-transparent to-black/30" />
         </div>
 
         {/* Hero Content Container */}
-        <div className="relative z-10 max-w-[1440px] w-full mx-auto px-4 sm:px-8">
+        <div className="relative z-10 max-w-[1440px] w-full mx-auto px-4 sm:px-8 py-8">
           <div className="max-w-3xl mb-8 space-y-4">
             <span className="font-mono-label text-[11px] text-[#B4C292] bg-white/10 backdrop-blur-md border border-white/20 px-4 py-1.5 rounded-full inline-flex items-center gap-2 shadow-lg">
               <ShieldCheck className="w-4 h-4 text-[#B4C292]" />
