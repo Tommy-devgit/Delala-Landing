@@ -3,12 +3,15 @@ import { Property, City, Neighborhood, Broker } from "./types";
 const normalizeApiUrl = (url?: string): string => {
   if (!url) return "http://localhost:4000/api/v1";
   let cleaned = url.trim();
-  if (cleaned.startsWith("https//")) {
-    cleaned = cleaned.replace("https//", "https://");
-  } else if (cleaned.startsWith("http//")) {
-    cleaned = cleaned.replace("http//", "http://");
+  if (cleaned.includes("localhost")) {
+    return cleaned.replace(/\/+$/, "");
   }
-  return cleaned.replace(/\/+$/, "");
+  cleaned = cleaned.replace(/^(https?:?\/*)+/i, "");
+  cleaned = cleaned.replace(/\/+/g, "/");
+  if (!cleaned.includes("api/v1")) {
+    cleaned = `${cleaned}/api/v1`.replace(/\/+/g, "/");
+  }
+  return `https://${cleaned}`.replace(/\/+$/, "");
 };
 
 const API_BASE = normalizeApiUrl(process.env.NEXT_PUBLIC_API_URL);
