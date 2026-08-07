@@ -171,8 +171,8 @@ export class PropertiesService {
     const newProperty = await this.prisma.property.create({
       data: {
         id: randomUUID(),
-        ownerId,
-        ...(locationId ? { locationId } : {}),
+        owner: { connect: { id: ownerId } },
+        ...(locationId ? { location: { connect: { id: locationId } } } : {}),
         title: createDto.title,
         description: createDto.description || "",
         propertyType: (createDto.propertyType || "villa").toLowerCase(),

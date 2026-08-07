@@ -14,12 +14,12 @@ export declare class VisitsService {
     findAll(): Promise<({
         user: {
             profile: {
+                phone: string | null;
                 id: string;
                 createdAt: Date | null;
                 updatedAt: Date | null;
                 firstName: string | null;
                 lastName: string | null;
-                phone: string | null;
                 avatarUrl: string | null;
                 role: string | null;
             };
