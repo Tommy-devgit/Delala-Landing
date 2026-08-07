@@ -405,22 +405,44 @@ export default function ProfilePage() {
                   />
                 </div>
 
-                {/* Avatar URL */}
+                {/* Avatar File Upload & URL */}
                 <div>
                   <label className="block text-[11px] font-mono-label text-[#736F4E] font-bold uppercase mb-1">
-                    Avatar Image URL
+                    Profile Avatar Image
                   </label>
+                  <div className="flex flex-col sm:flex-row gap-3 items-center mb-2">
+                    <label className="cursor-pointer px-4 py-2.5 rounded-2xl bg-[#4C061D] text-white text-xs font-mono-label font-bold flex items-center gap-2 hover:bg-[#3B0416] transition-colors shadow-xs">
+                      <Camera className="w-4 h-4" />
+                      <span>Select Image from Device</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onload = (evt) => {
+                              if (evt.target?.result) setAvatarUrl(evt.target.result as string);
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                        className="hidden"
+                      />
+                    </label>
+                    <span className="text-xs text-[#736F4E] font-mono-label">or paste web URL below</span>
+                  </div>
                   <input
-                    type="url"
+                    type="text"
                     value={avatarUrl}
                     onChange={(e) => setAvatarUrl(e.target.value)}
-                    placeholder="https://example.com/my-photo.jpg"
+                    placeholder="https://example.com/photo.jpg or choose local file above"
                     className="w-full px-4 py-3 rounded-2xl bg-[#FAF8F4] border border-[#ECE7DA] text-sm focus:outline-none focus:border-[#4C061D]"
                   />
                   {avatarUrl && (
-                    <div className="mt-2 flex items-center gap-3">
-                      <img src={avatarUrl} alt="Avatar preview" className="w-10 h-10 rounded-full object-cover border border-[#ECE7DA]" />
-                      <span className="text-[11px] text-[#736F4E]">Live Preview</span>
+                    <div className="mt-2.5 flex items-center gap-3 bg-[#FAF8F4] p-2 rounded-2xl border border-[#ECE7DA] w-fit">
+                      <img src={avatarUrl} alt="Avatar preview" className="w-12 h-12 rounded-full object-cover border-2 border-[#4C061D]" />
+                      <span className="text-[11px] text-[#4C061D] font-mono-label font-bold">Selected Image Preview</span>
                     </div>
                   )}
                 </div>
