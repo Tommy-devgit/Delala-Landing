@@ -1,4 +1,15 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1";
+const normalizeApiUrl = (url?: string): string => {
+  if (!url) return "http://localhost:4000/api/v1";
+  let cleaned = url.trim();
+  if (cleaned.startsWith("https//")) {
+    cleaned = cleaned.replace("https//", "https://");
+  } else if (cleaned.startsWith("http//")) {
+    cleaned = cleaned.replace("http//", "http://");
+  }
+  return cleaned.replace(/\/+$/, "");
+};
+
+const API_BASE = normalizeApiUrl(process.env.NEXT_PUBLIC_API_URL);
 
 export interface UserSession {
   id: string;
