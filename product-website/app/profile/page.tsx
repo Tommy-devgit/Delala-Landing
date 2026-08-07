@@ -410,39 +410,66 @@ export default function ProfilePage() {
                   <label className="block text-[11px] font-mono-label text-[#736F4E] font-bold uppercase mb-1">
                     Profile Avatar Image
                   </label>
-                  <div className="flex flex-col sm:flex-row gap-3 items-center mb-2">
-                    <label className="cursor-pointer px-4 py-2.5 rounded-2xl bg-[#4C061D] text-white text-xs font-mono-label font-bold flex items-center gap-2 hover:bg-[#3B0416] transition-colors shadow-xs">
-                      <Camera className="w-4 h-4" />
-                      <span>Select Image from Device</span>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) {
-                            const reader = new FileReader();
-                            reader.onload = (evt) => {
-                              if (evt.target?.result) setAvatarUrl(evt.target.result as string);
-                            };
-                            reader.readAsDataURL(file);
+
+                  <input
+                    id="avatar-file-input"
+                    type="file"
+                    accept="image/*"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+
+                      try {
+                        const formData = new FormData();
+                        formData.append("file", file);
+                        const res = await fetch(
+                          `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1"}/properties/upload`,
+                          { method: "POST", body: formData }
+                        );
+                        if (res.ok) {
+                          const data = await res.json();
+                          if (data.url) {
+                            setAvatarUrl(data.url);
+                            return;
                           }
-                        }}
-                        className="hidden"
-                      />
-                    </label>
+                        }
+                      } catch {
+                        // Fallback
+                      }
+
+                      const reader = new FileReader();
+                      reader.onload = (evt) => {
+                        if (evt.target?.result) setAvatarUrl(evt.target.result as string);
+                      };
+                      reader.readAsDataURL(file);
+                    }}
+                    className="hidden"
+                  />
+
+                  <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center mb-2">
+                    <button
+                      type="button"
+                      onClick={() => document.getElementById("avatar-file-input")?.click()}
+                      className="px-4 py-2.5 rounded-2xl bg-[#4C061D] text-white text-xs font-mono-label font-bold flex items-center gap-2 hover:bg-[#3B0416] transition-colors shadow-xs"
+                    >
+                      <Camera className="w-4 h-4" />
+                      <span>Choose Photo from Device</span>
+                    </button>
                     <span className="text-xs text-[#736F4E] font-mono-label">or paste web URL below</span>
                   </div>
+
                   <input
                     type="text"
                     value={avatarUrl}
                     onChange={(e) => setAvatarUrl(e.target.value)}
-                    placeholder="https://example.com/photo.jpg or choose local file above"
+                    placeholder="https://example.com/photo.jpg or select image above"
                     className="w-full px-4 py-3 rounded-2xl bg-[#FAF8F4] border border-[#ECE7DA] text-sm focus:outline-none focus:border-[#4C061D]"
                   />
+
                   {avatarUrl && (
                     <div className="mt-2.5 flex items-center gap-3 bg-[#FAF8F4] p-2 rounded-2xl border border-[#ECE7DA] w-fit">
                       <img src={avatarUrl} alt="Avatar preview" className="w-12 h-12 rounded-full object-cover border-2 border-[#4C061D]" />
-                      <span className="text-[11px] text-[#4C061D] font-mono-label font-bold">Selected Image Preview</span>
+                      <span className="text-[11px] text-[#4C061D] font-mono-label font-bold">Selected Avatar Preview</span>
                     </div>
                   )}
                 </div>
