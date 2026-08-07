@@ -5,10 +5,10 @@ export declare class VisitsController {
     constructor(visitsService: VisitsService);
     create(dto: CreateVisitDto): Promise<{
         id: string;
-        status: string | null;
         createdAt: Date | null;
-        propertyId: string | null;
         userId: string | null;
+        propertyId: string | null;
+        status: string | null;
         visitDate: Date | null;
     }>;
     findAll(): Promise<({
@@ -16,21 +16,23 @@ export declare class VisitsController {
             profile: {
                 id: string;
                 createdAt: Date | null;
-                updatedAt: Date | null;
                 firstName: string | null;
                 lastName: string | null;
                 phone: string | null;
                 avatarUrl: string | null;
                 bio: string | null;
                 role: string | null;
+                updatedAt: Date | null;
             };
         } & {
             id: string;
-            createdAt: Date | null;
             email: string | null;
+            createdAt: Date | null;
         };
         property: {
             id: string;
+            createdAt: Date | null;
+            updatedAt: Date | null;
             ownerId: string;
             locationId: string;
             title: string;
@@ -44,15 +46,13 @@ export declare class VisitsController {
             address: string | null;
             contactPhone: string | null;
             status: string | null;
-            createdAt: Date | null;
-            updatedAt: Date | null;
         };
     } & {
         id: string;
-        status: string | null;
         createdAt: Date | null;
-        propertyId: string | null;
         userId: string | null;
+        propertyId: string | null;
+        status: string | null;
         visitDate: Date | null;
     })[]>;
 }

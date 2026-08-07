@@ -25,6 +25,8 @@ export declare class FavoritesController {
             }[];
         } & {
             id: string;
+            createdAt: Date | null;
+            updatedAt: Date | null;
             ownerId: string;
             locationId: string;
             title: string;
@@ -38,13 +40,11 @@ export declare class FavoritesController {
             address: string | null;
             contactPhone: string | null;
             status: string | null;
-            createdAt: Date | null;
-            updatedAt: Date | null;
         };
     } & {
         id: string;
         createdAt: Date | null;
-        propertyId: string | null;
         userId: string | null;
+        propertyId: string | null;
     })[]>;
 }
