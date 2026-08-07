@@ -39,8 +39,10 @@ let R2StorageService = R2StorageService_1 = class R2StorageService {
     }
     async uploadImage(file) {
         if (!this.s3Client) {
-            this.logger.log(`R2 disabled: Mocking upload for ${file.originalname}`);
-            return `/images/hero_property.png`;
+            this.logger.log(`R2 disabled: Converting uploaded file ${file.originalname} to Base64 Data URL`);
+            const mime = file.mimetype || "image/jpeg";
+            const base64 = file.buffer.toString("base64");
+            return `data:${mime};base64,${base64}`;
         }
         const fileExt = file.originalname.split(".").pop() || "jpg";
         const uniqueId = Date.now().toString(36) + Math.random().toString(36).substring(2, 7);
