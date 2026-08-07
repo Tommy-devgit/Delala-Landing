@@ -12,7 +12,12 @@ async function bootstrap() {
         transform: true,
         forbidNonWhitelisted: true,
     }));
-    app.enableCors();
+    app.enableCors({
+        origin: true,
+        methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
+        credentials: true,
+        allowedHeaders: "Content-Type, Accept, Authorization, X-Requested-With",
+    });
     const config = new swagger_1.DocumentBuilder()
         .setTitle("Delala Platform REST API")
         .setDescription("Single source of truth API powering Delala Marketplace, Mobile App, and Admin Dashboard.")

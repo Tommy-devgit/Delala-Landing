@@ -6,6 +6,18 @@ import express from "express";
 
 const server = express();
 
+// Explicit Express CORS Middleware for Vercel Serverless Preflights
+server.use((req: any, res: any, next: any) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Methods", "GET, HEAD, PUT, PATCH, POST, DELETE, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
+  next();
+});
+
 let isAppInitialized = false;
 
 const initApp = async () => {
@@ -23,7 +35,12 @@ const initApp = async () => {
         forbidNonWhitelisted: true,
       }),
     );
-    app.enableCors();
+    app.enableCors({
+      origin: true,
+      methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
+      credentials: true,
+      allowedHeaders: "Content-Type, Accept, Authorization, X-Requested-With",
+    });
 
     await app.init();
     isAppInitialized = true;

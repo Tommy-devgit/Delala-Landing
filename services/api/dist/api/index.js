@@ -7,6 +7,15 @@ const app_module_1 = require("../src/app.module");
 const platform_express_1 = require("@nestjs/platform-express");
 const express_1 = require("express");
 const server = (0, express_1.default)();
+server.use((req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Methods", "GET, HEAD, PUT, PATCH, POST, DELETE, OPTIONS");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+    if (req.method === "OPTIONS") {
+        return res.status(200).end();
+    }
+    next();
+});
 let isAppInitialized = false;
 const initApp = async () => {
     if (!isAppInitialized) {
@@ -17,7 +26,12 @@ const initApp = async () => {
             transform: true,
             forbidNonWhitelisted: true,
         }));
-        app.enableCors();
+        app.enableCors({
+            origin: true,
+            methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
+            credentials: true,
+            allowedHeaders: "Content-Type, Accept, Authorization, X-Requested-With",
+        });
         await app.init();
         isAppInitialized = true;
     }

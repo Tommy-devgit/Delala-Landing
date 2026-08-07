@@ -17,7 +17,12 @@ async function bootstrap() {
   );
 
   // Enable CORS
-  app.enableCors();
+  app.enableCors({
+    origin: true,
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
+    credentials: true,
+    allowedHeaders: "Content-Type, Accept, Authorization, X-Requested-With",
+  });
 
   // Swagger OpenAPI Setup
   const config = new DocumentBuilder()
