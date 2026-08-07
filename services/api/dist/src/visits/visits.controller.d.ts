@@ -21,6 +21,7 @@ export declare class VisitsController {
                 lastName: string | null;
                 phone: string | null;
                 avatarUrl: string | null;
+                bio: string | null;
                 role: string | null;
             };
         } & {

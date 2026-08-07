@@ -10,6 +10,7 @@ export declare class UsersController {
             lastName: string | null;
             phone: string | null;
             avatarUrl: string | null;
+            bio: string | null;
             role: string | null;
             updatedAt: Date | null;
         };
@@ -26,7 +27,7 @@ export declare class UsersController {
         fullName: string;
         phone: any;
         avatarUrl: any;
-        bio: any;
+        bio: string;
         role: any;
         createdAt: Date;
     }>;
@@ -41,13 +42,13 @@ export declare class UsersController {
     }): Promise<{
         id: string;
         email: string;
-        firstName: any;
-        lastName: any;
+        firstName: string;
+        lastName: string;
         fullName: string;
-        phone: any;
-        avatarUrl: any;
-        bio: any;
-        role: any;
+        phone: string;
+        avatarUrl: string;
+        bio: string;
+        role: string;
         createdAt: Date;
     }>;
     updateRole(id: string, body: {
@@ -59,6 +60,7 @@ export declare class UsersController {
         lastName: string | null;
         phone: string | null;
         avatarUrl: string | null;
+        bio: string | null;
         role: string | null;
         updatedAt: Date | null;
     }>;

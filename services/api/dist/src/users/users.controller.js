@@ -36,6 +36,13 @@ let UsersController = class UsersController {
         }
         const profile = user.profile || {};
         const fullName = [profile.firstName, profile.lastName].filter(Boolean).join(" ") || user.email || "User";
+        let bio = "";
+        try {
+            const bioRows = await this.prisma.$queryRawUnsafe(`SELECT bio FROM public.profiles WHERE id = $1::uuid`, id);
+            bio = bioRows[0]?.bio || "";
+        }
+        catch {
+        }
         return {
             id: user.id,
             email: user.email,
@@ -44,7 +51,7 @@ let UsersController = class UsersController {
             fullName,
             phone: profile.phone || "",
             avatarUrl: profile.avatarUrl || "/images/hero_home_away.jpg",
-            bio: profile.bio || "",
+            bio,
             role: profile.role || "user",
             createdAt: user.createdAt,
         };
@@ -73,8 +80,6 @@ let UsersController = class UsersController {
             profileData.phone = body.phone;
         if (body.avatarUrl !== undefined)
             profileData.avatarUrl = body.avatarUrl;
-        if (body.bio !== undefined)
-            profileData.bio = body.bio;
         if (body.role !== undefined)
             profileData.role = body.role.toLowerCase();
         const updatedProfile = await this.prisma.profile.upsert({
@@ -85,11 +90,18 @@ let UsersController = class UsersController {
                 lastName: lastName || "",
                 phone: body.phone || null,
                 avatarUrl: body.avatarUrl || null,
-                bio: body.bio || null,
                 role: body.role ? body.role.toLowerCase() : "user",
             },
             update: profileData,
         });
+        if (body.bio !== undefined) {
+            try {
+                await this.prisma.$executeRawUnsafe(`UPDATE public.profiles SET bio = $1 WHERE id = $2::uuid`, body.bio, id);
+            }
+            catch (err) {
+                console.warn("Failed to update bio in profiles table:", err);
+            }
+        }
         const fullName = [updatedProfile.firstName, updatedProfile.lastName].filter(Boolean).join(" ") || user.email || "User";
         return {
             id: user.id,
@@ -99,7 +111,7 @@ let UsersController = class UsersController {
             fullName,
             phone: updatedProfile.phone || "",
             avatarUrl: updatedProfile.avatarUrl || "/images/hero_home_away.jpg",
-            bio: updatedProfile.bio || "",
+            bio: body.bio !== undefined ? body.bio : "",
             role: updatedProfile.role || "user",
             createdAt: user.createdAt,
         };
