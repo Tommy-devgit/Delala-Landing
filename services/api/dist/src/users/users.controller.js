@@ -26,6 +26,84 @@ let UsersController = class UsersController {
             orderBy: { createdAt: "desc" },
         });
     }
+    async getProfile(id) {
+        const user = await this.prisma.user.findUnique({
+            where: { id },
+            include: { profile: true },
+        });
+        if (!user) {
+            throw new common_1.NotFoundException(`User with ID ${id} not found`);
+        }
+        const profile = user.profile || {};
+        const fullName = [profile.firstName, profile.lastName].filter(Boolean).join(" ") || user.email || "User";
+        return {
+            id: user.id,
+            email: user.email,
+            firstName: profile.firstName || "",
+            lastName: profile.lastName || "",
+            fullName,
+            phone: profile.phone || "",
+            avatarUrl: profile.avatarUrl || "/images/hero_home_away.jpg",
+            bio: profile.bio || "",
+            role: profile.role || "user",
+            createdAt: user.createdAt,
+        };
+    }
+    async updateProfile(id, body) {
+        const user = await this.prisma.user.findUnique({
+            where: { id },
+            include: { profile: true },
+        });
+        if (!user) {
+            throw new common_1.NotFoundException(`User with ID ${id} not found`);
+        }
+        let firstName = body.firstName;
+        let lastName = body.lastName;
+        if (!firstName && body.fullName) {
+            const parts = body.fullName.trim().split(" ");
+            firstName = parts[0];
+            lastName = parts.slice(1).join(" ");
+        }
+        const profileData = {};
+        if (firstName !== undefined)
+            profileData.firstName = firstName;
+        if (lastName !== undefined)
+            profileData.lastName = lastName;
+        if (body.phone !== undefined)
+            profileData.phone = body.phone;
+        if (body.avatarUrl !== undefined)
+            profileData.avatarUrl = body.avatarUrl;
+        if (body.bio !== undefined)
+            profileData.bio = body.bio;
+        if (body.role !== undefined)
+            profileData.role = body.role.toLowerCase();
+        const updatedProfile = await this.prisma.profile.upsert({
+            where: { id },
+            create: {
+                id,
+                firstName: firstName || "User",
+                lastName: lastName || "",
+                phone: body.phone || null,
+                avatarUrl: body.avatarUrl || null,
+                bio: body.bio || null,
+                role: body.role ? body.role.toLowerCase() : "user",
+            },
+            update: profileData,
+        });
+        const fullName = [updatedProfile.firstName, updatedProfile.lastName].filter(Boolean).join(" ") || user.email || "User";
+        return {
+            id: user.id,
+            email: user.email,
+            firstName: updatedProfile.firstName || "",
+            lastName: updatedProfile.lastName || "",
+            fullName,
+            phone: updatedProfile.phone || "",
+            avatarUrl: updatedProfile.avatarUrl || "/images/hero_home_away.jpg",
+            bio: updatedProfile.bio || "",
+            role: updatedProfile.role || "user",
+            createdAt: user.createdAt,
+        };
+    }
     async updateRole(id, body) {
         return this.prisma.profile.update({
             where: { id },
@@ -41,6 +119,23 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], UsersController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)("profile/:id"),
+    (0, swagger_1.ApiOperation)({ summary: "Get user profile by ID" }),
+    __param(0, (0, common_1.Param)("id")),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "getProfile", null);
+__decorate([
+    (0, common_1.Patch)("profile/:id"),
+    (0, swagger_1.ApiOperation)({ summary: "Update user profile details" }),
+    __param(0, (0, common_1.Param)("id")),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "updateProfile", null);
 __decorate([
     (0, common_1.Patch)(":id/role"),
     (0, swagger_1.ApiOperation)({ summary: "Assign platform role to user" }),

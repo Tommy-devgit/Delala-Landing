@@ -4,9 +4,13 @@ export interface UserSession {
   id: string;
   email: string;
   fullName: string;
+  firstName?: string;
+  lastName?: string;
   role: string;
   avatarUrl?: string;
   phone?: string;
+  bio?: string;
+  createdAt?: string;
 }
 
 export const authClient = {
@@ -62,9 +66,63 @@ export const authClient = {
     return { success: true, user: data.user, token: data.token };
   },
 
+  // Fetch full user profile from backend API
+  async fetchProfile(userId: string): Promise<UserSession | null> {
+    try {
+      const res = await fetch(`${API_BASE}/users/profile/${userId}`, { cache: "no-store" });
+      if (res.ok) {
+        const user = await res.json();
+        if (typeof window !== "undefined") {
+          localStorage.setItem("delala_user", JSON.stringify(user));
+          window.dispatchEvent(new Event("delala_auth_change"));
+        }
+        return user;
+      }
+    } catch (err) {
+      console.warn("Failed to fetch user profile:", err);
+    }
+    return null;
+  },
+
+  // Update profile in backend API and sync localStorage session
+  async updateProfile(
+    userId: string,
+    profileData: {
+      firstName?: string;
+      lastName?: string;
+      fullName?: string;
+      phone?: string;
+      avatarUrl?: string;
+      bio?: string;
+      role?: string;
+    }
+  ): Promise<{ success: boolean; user?: UserSession }> {
+    try {
+      const res = await fetch(`${API_BASE}/users/profile/${userId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(profileData),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        const errorMessage = Array.isArray(data.message) ? data.message.join(", ") : data.message || "Failed to update profile.";
+        throw new Error(errorMessage);
+      }
+
+      if (typeof window !== "undefined") {
+        localStorage.setItem("delala_user", JSON.stringify(data));
+        window.dispatchEvent(new Event("delala_auth_change"));
+      }
+
+      return { success: true, user: data };
+    } catch (err: any) {
+      throw new Error(err.message || "Failed to update user profile.");
+    }
+  },
+
   // Request Password Reset
   async forgotPassword(email: string) {
-    // Demo fallback / server integration
     try {
       const res = await fetch(`${API_BASE}/auth/forgot-password`, {
         method: "POST",
@@ -73,7 +131,7 @@ export const authClient = {
       });
       if (res.ok) return { success: true };
     } catch {
-      // Fallback response for dev mode
+      // Fallback response
     }
     return { success: true };
   },
@@ -88,7 +146,7 @@ export const authClient = {
       });
       if (res.ok) return { success: true };
     } catch {
-      // Fallback response for dev mode
+      // Fallback response
     }
     return { success: true };
   },
