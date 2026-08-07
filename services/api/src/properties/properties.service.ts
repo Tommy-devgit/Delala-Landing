@@ -92,12 +92,12 @@ export class PropertiesService {
 
   async create(createDto: CreatePropertyDto, uploadedImageUrls: string[] = []) {
     // 1. Resolve or create valid UUID location record in locations table
-    let locationId: string | null = null;
-    const targetLocName = createDto.neighborhood || createDto.subCity || createDto.city || "";
+    let locationId: string = "";
+    const targetLocName = createDto.neighborhood || createDto.subCity || createDto.city || "Addis Ababa";
 
     if (isValidUuid(createDto.location_id)) {
       locationId = createDto.location_id!;
-    } else if (targetLocName) {
+    } else {
       const existingLoc = await this.prisma.location.findFirst({
         where: { name: { equals: targetLocName, mode: "insensitive" } },
       });
@@ -117,7 +117,7 @@ export class PropertiesService {
     }
 
     // 2. Resolve or fallback owner user with a valid UUID
-    let ownerId: string | null = null;
+    let ownerId: string = "";
     if (isValidUuid(createDto.brokerId)) {
       ownerId = createDto.brokerId!;
     }
@@ -172,7 +172,7 @@ export class PropertiesService {
       data: {
         id: randomUUID(),
         owner: { connect: { id: ownerId } },
-        ...(locationId ? { location: { connect: { id: locationId } } } : {}),
+        location: { connect: { id: locationId } },
         title: createDto.title,
         description: createDto.description || "",
         propertyType: (createDto.propertyType || "villa").toLowerCase(),

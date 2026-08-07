@@ -91,12 +91,12 @@ let PropertiesService = class PropertiesService {
         return this.mapPropertyResponse(matched);
     }
     async create(createDto, uploadedImageUrls = []) {
-        let locationId = null;
-        const targetLocName = createDto.neighborhood || createDto.subCity || createDto.city || "";
+        let locationId = "";
+        const targetLocName = createDto.neighborhood || createDto.subCity || createDto.city || "Addis Ababa";
         if (isValidUuid(createDto.location_id)) {
             locationId = createDto.location_id;
         }
-        else if (targetLocName) {
+        else {
             const existingLoc = await this.prisma.location.findFirst({
                 where: { name: { equals: targetLocName, mode: "insensitive" } },
             });
@@ -114,7 +114,7 @@ let PropertiesService = class PropertiesService {
                 locationId = newLoc.id;
             }
         }
-        let ownerId = null;
+        let ownerId = "";
         if (isValidUuid(createDto.brokerId)) {
             ownerId = createDto.brokerId;
         }
@@ -161,7 +161,7 @@ let PropertiesService = class PropertiesService {
             data: {
                 id: (0, crypto_1.randomUUID)(),
                 owner: { connect: { id: ownerId } },
-                ...(locationId ? { location: { connect: { id: locationId } } } : {}),
+                location: { connect: { id: locationId } },
                 title: createDto.title,
                 description: createDto.description || "",
                 propertyType: (createDto.propertyType || "villa").toLowerCase(),
