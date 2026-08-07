@@ -9,12 +9,14 @@ const manrope = Manrope({
   subsets: ["latin"],
   variable: "--font-manrope",
   display: "swap",
+  fallback: ["system-ui", "sans-serif"],
 });
 
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
   display: "swap",
+  fallback: ["system-ui", "sans-serif"],
 });
 
 const serifDisplay = DM_Serif_Display({
@@ -22,12 +24,14 @@ const serifDisplay = DM_Serif_Display({
   subsets: ["latin"],
   variable: "--font-serif-display",
   display: "swap",
+  fallback: ["Georgia", "serif"],
 });
 
 const monoLabel = Roboto_Mono({
   subsets: ["latin"],
   variable: "--font-mono-label",
   display: "swap",
+  fallback: ["monospace"],
 });
 
 export const metadata: Metadata = {
