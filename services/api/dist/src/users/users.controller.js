@@ -37,9 +37,15 @@ let UsersController = class UsersController {
         const profile = user.profile || {};
         const fullName = [profile.firstName, profile.lastName].filter(Boolean).join(" ") || user.email || "User";
         let bio = "";
+        let avatarUrl = profile.avatarUrl || "/images/hero_home_away.jpg";
         try {
-            const bioRows = await this.prisma.$queryRawUnsafe(`SELECT bio FROM public.profiles WHERE id = $1::uuid`, id);
-            bio = bioRows[0]?.bio || "";
+            const rows = await this.prisma.$queryRawUnsafe(`SELECT bio, avatar_url FROM public.profiles WHERE id = $1::uuid`, id);
+            if (rows[0]) {
+                if (rows[0].bio)
+                    bio = rows[0].bio;
+                if (rows[0].avatar_url)
+                    avatarUrl = rows[0].avatar_url;
+            }
         }
         catch {
         }
@@ -50,7 +56,7 @@ let UsersController = class UsersController {
             lastName: profile.lastName || "",
             fullName,
             phone: profile.phone || "",
-            avatarUrl: profile.avatarUrl || "/images/hero_home_away.jpg",
+            avatarUrl,
             bio,
             role: profile.role || "user",
             createdAt: user.createdAt,
@@ -78,8 +84,6 @@ let UsersController = class UsersController {
             profileData.lastName = lastName;
         if (body.phone !== undefined)
             profileData.phone = body.phone;
-        if (body.avatarUrl !== undefined)
-            profileData.avatarUrl = body.avatarUrl;
         if (body.role !== undefined)
             profileData.role = body.role.toLowerCase();
         const updatedProfile = await this.prisma.profile.upsert({
@@ -89,7 +93,6 @@ let UsersController = class UsersController {
                 firstName: firstName || "User",
                 lastName: lastName || "",
                 phone: body.phone || null,
-                avatarUrl: body.avatarUrl || null,
                 role: body.role ? body.role.toLowerCase() : "user",
             },
             update: profileData,
@@ -102,6 +105,14 @@ let UsersController = class UsersController {
                 console.warn("Failed to update bio in profiles table:", err);
             }
         }
+        if (body.avatarUrl !== undefined) {
+            try {
+                await this.prisma.$executeRawUnsafe(`UPDATE public.profiles SET avatar_url = $1 WHERE id = $2::uuid`, body.avatarUrl, id);
+            }
+            catch (err) {
+                console.warn("Failed to update avatar_url in profiles table:", err);
+            }
+        }
         const fullName = [updatedProfile.firstName, updatedProfile.lastName].filter(Boolean).join(" ") || user.email || "User";
         return {
             id: user.id,
@@ -110,7 +121,7 @@ let UsersController = class UsersController {
             lastName: updatedProfile.lastName || "",
             fullName,
             phone: updatedProfile.phone || "",
-            avatarUrl: updatedProfile.avatarUrl || "/images/hero_home_away.jpg",
+            avatarUrl: body.avatarUrl !== undefined ? body.avatarUrl : (updatedProfile.avatarUrl || "/images/hero_home_away.jpg"),
             bio: body.bio !== undefined ? body.bio : "",
             role: updatedProfile.role || "user",
             createdAt: user.createdAt,
