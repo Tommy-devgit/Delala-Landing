@@ -133,19 +133,10 @@ export function Header({ onOpenFilters }: { onOpenFilters?: () => void }) {
                     <Link
                       href="/profile"
                       onClick={() => setAvatarOpen(false)}
-                      className="flex items-center gap-2.5 px-4 py-2.5 text-[#1C1B12] hover:bg-[#FAF8F4] transition-colors"
+                      className="flex items-center gap-2.5 px-4 py-2.5 text-[#1C1B12] hover:bg-[#FAF8F4] transition-colors font-medium"
                     >
                       <User className="w-4 h-4 text-[#4C061D]" />
                       <span>My Profile</span>
-                    </Link>
-
-                    <Link
-                      href="/my-listings"
-                      onClick={() => setAvatarOpen(false)}
-                      className="flex items-center gap-2.5 px-4 py-2.5 text-[#1C1B12] hover:bg-[#FAF8F4] transition-colors"
-                    >
-                      <Building2 className="w-4 h-4 text-[#4C061D]" />
-                      <span>My Listings</span>
                     </Link>
 
                     <button
