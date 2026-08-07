@@ -8,10 +8,10 @@ export declare class FavoritesService {
     findByUser(userId: string): Promise<({
         property: {
             location: {
-                type: string;
                 id: string;
                 createdAt: Date | null;
                 name: string;
+                type: string;
                 parentId: string | null;
             };
             images: {
@@ -21,19 +21,20 @@ export declare class FavoritesService {
                 imageUrl: string;
             }[];
         } & {
-            description: string | null;
-            title: string;
-            propertyType: string | null;
-            listingType: string | null;
-            price: import("@prisma/client/runtime/library").Decimal | null;
-            address: string | null;
-            bedrooms: number | null;
-            bathrooms: number | null;
-            status: string | null;
             id: string;
             ownerId: string;
             locationId: string;
+            title: string;
+            description: string | null;
+            propertyType: string | null;
+            listingType: string | null;
+            price: import("@prisma/client/runtime/library").Decimal | null;
+            bedrooms: number | null;
+            bathrooms: number | null;
             area: import("@prisma/client/runtime/library").Decimal | null;
+            address: string | null;
+            contactPhone: string | null;
+            status: string | null;
             createdAt: Date | null;
             updatedAt: Date | null;
         };

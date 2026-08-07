@@ -4,8 +4,8 @@ export declare class VisitsController {
     private readonly visitsService;
     constructor(visitsService: VisitsService);
     create(dto: CreateVisitDto): Promise<{
-        status: string | null;
         id: string;
+        status: string | null;
         createdAt: Date | null;
         propertyId: string | null;
         userId: string | null;
@@ -14,12 +14,12 @@ export declare class VisitsController {
     findAll(): Promise<({
         user: {
             profile: {
-                phone: string | null;
                 id: string;
                 createdAt: Date | null;
                 updatedAt: Date | null;
                 firstName: string | null;
                 lastName: string | null;
+                phone: string | null;
                 avatarUrl: string | null;
                 role: string | null;
             };
@@ -29,25 +29,26 @@ export declare class VisitsController {
             email: string | null;
         };
         property: {
-            description: string | null;
-            title: string;
-            propertyType: string | null;
-            listingType: string | null;
-            price: import("@prisma/client/runtime/library").Decimal | null;
-            address: string | null;
-            bedrooms: number | null;
-            bathrooms: number | null;
-            status: string | null;
             id: string;
             ownerId: string;
             locationId: string;
+            title: string;
+            description: string | null;
+            propertyType: string | null;
+            listingType: string | null;
+            price: import("@prisma/client/runtime/library").Decimal | null;
+            bedrooms: number | null;
+            bathrooms: number | null;
             area: import("@prisma/client/runtime/library").Decimal | null;
+            address: string | null;
+            contactPhone: string | null;
+            status: string | null;
             createdAt: Date | null;
             updatedAt: Date | null;
         };
     } & {
-        status: string | null;
         id: string;
+        status: string | null;
         createdAt: Date | null;
         propertyId: string | null;
         userId: string | null;

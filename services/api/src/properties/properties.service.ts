@@ -146,14 +146,6 @@ export class PropertiesService {
       }
     }
 
-    // Update owner profile phone if provided in form submission
-    if (createDto.phone && ownerId) {
-      await this.prisma.profile.updateMany({
-        where: { id: ownerId },
-        data: { phone: createDto.phone },
-      });
-    }
-
     const priceAmount = Number(createDto.price || createDto.rentETB || 0);
     const finalImageUrls = Array.from(
       new Set([...uploadedImageUrls, ...(createDto.imageUrls || [])])
@@ -182,6 +174,7 @@ export class PropertiesService {
         bathrooms: Number(createDto.bathrooms || 0),
         area: Number(createDto.areaSqm || 0) as any,
         address: computedAddress,
+        contactPhone: createDto.phone || null,
         status: "approved",
         images: {
           create: imageRecords,
@@ -235,7 +228,7 @@ export class PropertiesService {
   private mapPropertyResponse(p: any) {
     const slug = p.title.toLowerCase().replace(/[^a-z0-9]+/g, "-") + "-" + (p.id ? p.id.slice(0, 4) : "prop");
     const ownerName = [p.owner?.profile?.firstName, p.owner?.profile?.lastName].filter(Boolean).join(" ") || "Verified Owner";
-    const phone = p.owner?.profile?.phone || null;
+    const phone = p.contactPhone || p.owner?.profile?.phone || null;
 
     let city = "";
     let subCity = "";

@@ -142,12 +142,6 @@ let PropertiesService = class PropertiesService {
                 ownerId = newUser.id;
             }
         }
-        if (createDto.phone && ownerId) {
-            await this.prisma.profile.updateMany({
-                where: { id: ownerId },
-                data: { phone: createDto.phone },
-            });
-        }
         const priceAmount = Number(createDto.price || createDto.rentETB || 0);
         const finalImageUrls = Array.from(new Set([...uploadedImageUrls, ...(createDto.imageUrls || [])]));
         const imageRecords = finalImageUrls.length > 0
@@ -171,6 +165,7 @@ let PropertiesService = class PropertiesService {
                 bathrooms: Number(createDto.bathrooms || 0),
                 area: Number(createDto.areaSqm || 0),
                 address: computedAddress,
+                contactPhone: createDto.phone || null,
                 status: "approved",
                 images: {
                     create: imageRecords,
@@ -219,7 +214,7 @@ let PropertiesService = class PropertiesService {
     mapPropertyResponse(p) {
         const slug = p.title.toLowerCase().replace(/[^a-z0-9]+/g, "-") + "-" + (p.id ? p.id.slice(0, 4) : "prop");
         const ownerName = [p.owner?.profile?.firstName, p.owner?.profile?.lastName].filter(Boolean).join(" ") || "Verified Owner";
-        const phone = p.owner?.profile?.phone || null;
+        const phone = p.contactPhone || p.owner?.profile?.phone || null;
         let city = "";
         let subCity = "";
         let neighborhood = "";
