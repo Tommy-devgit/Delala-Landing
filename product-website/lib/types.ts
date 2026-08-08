@@ -1,5 +1,25 @@
 export type PropertyType = "Apartment" | "Villa" | "Studio" | "G+1 Residence" | "Penthouse" | "Commercial Space";
 
+/** A geographic point in WGS84 degrees. */
+export interface Coordinates {
+  latitude: number;
+  longitude: number;
+}
+
+/**
+ * One node of the Country > City > Sub-city > Neighborhood hierarchy served by
+ * GET /api/v1/cities. Coordinates are optional map metadata and are never a
+ * substitute for the structured location itself.
+ */
+export interface LocationNode {
+  id: string;
+  name: string;
+  slug: string;
+  latitude: number | null;
+  longitude: number | null;
+  children?: LocationNode[];
+}
+
 export interface Broker {
   id: string;
   slug: string;
@@ -46,8 +66,9 @@ export interface Property {
   recentlyAdded?: boolean;
   broker: Broker;
   phone?: string;
-  lat: number;
-  lng: number;
+  /** Approximate map position. Null when the publisher never placed a pin. */
+  latitude: number | null;
+  longitude: number | null;
   description: string;
   availableDate: string;
 }
@@ -60,7 +81,10 @@ export interface City {
   tagline: string;
   startingRentETB: number;
   propertiesCount: number;
-  subCities: string[];
+  /** Sub-cities of this city, each carrying its neighborhoods in `children`. */
+  subCities: LocationNode[];
+  latitude: number | null;
+  longitude: number | null;
   description: string;
 }
 
