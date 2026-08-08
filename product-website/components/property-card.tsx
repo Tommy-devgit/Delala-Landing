@@ -2,17 +2,23 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Heart, ShieldCheck, Zap, Droplets, Car, Phone } from "lucide-react";
+import { Heart, ShieldCheck, Zap, Droplets, Car, Phone, MapPin } from "lucide-react";
 import { Property } from "@/lib/types";
 
 export function PropertyCard({
   property,
   isFavorite = false,
   onToggleFavorite,
+  isSelected = false,
+  onActivate,
 }: {
   property: Property;
   isFavorite?: boolean;
   onToggleFavorite?: (id: string) => void;
+  /** Marks the card whose marker is currently active on the map. */
+  isSelected?: boolean;
+  /** Fired on hover/focus so the map can centre on this property. */
+  onActivate?: (id: string) => void;
 }) {
   const [fav, setFav] = useState(isFavorite);
 
@@ -38,7 +44,14 @@ export function PropertyCard({
   return (
     <Link
       href={`/property/${property.slug}`}
-      className="group flex flex-col h-full bg-white rounded-xl overflow-hidden listing-card-shadow border border-[#ECE7DA] transition-all duration-300 hover:shadow-md hover:border-[#4C061D]/30"
+      onMouseEnter={() => onActivate?.(property.id)}
+      onFocus={() => onActivate?.(property.id)}
+      aria-current={isSelected ? "true" : undefined}
+      className={`group flex flex-col h-full bg-white rounded-xl overflow-hidden listing-card-shadow border transition-all duration-300 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4C061D] focus-visible:ring-offset-1 ${
+        isSelected
+          ? "border-[#4C061D] ring-2 ring-[#4C061D]/25 shadow-md"
+          : "border-[#ECE7DA] hover:border-[#4C061D]/30"
+      }`}
     >
       {/* Full Bleed Compact Image Frame */}
       <div className="relative aspect-[16/11] w-full overflow-hidden bg-[#1c1b12] rounded-t-xl shrink-0">
@@ -47,6 +60,14 @@ export function PropertyCard({
           alt={property.title}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
         />
+
+        {/* Selected-on-map indicator: text + icon, never colour alone */}
+        {isSelected && (
+          <div className="absolute bottom-2 right-2 z-10 bg-[#4C061D] text-white px-2 py-0.5 rounded-full text-[9px] font-mono-label font-bold shadow-xs flex items-center gap-1">
+            <MapPin className="w-3 h-3 text-[#B4C292]" aria-hidden="true" />
+            <span>ON MAP</span>
+          </div>
+        )}
 
         {/* Top-Left Verified Badge */}
         {property.verified && (
