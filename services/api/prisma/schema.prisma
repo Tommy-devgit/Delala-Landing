@@ -48,6 +48,8 @@ model Location {
   name      String     @db.VarChar(150)
   type      String     @db.VarChar(30)
   parentId  String?    @map("parent_id") @db.Uuid
+  latitude  Decimal?   @db.Decimal(10, 7)
+  longitude Decimal?   @db.Decimal(10, 7)
   createdAt DateTime?  @default(now()) @map("created_at") @db.Timestamp(6)
 
   parent     Location?  @relation("LocationHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
@@ -71,6 +73,8 @@ model Property {
   bathrooms    Int?            @default(0)
   area         Decimal?        @db.Decimal(10, 2)
   address      String?
+  latitude     Decimal?        @db.Decimal(10, 7)
+  longitude    Decimal?        @db.Decimal(10, 7)
   contactPhone String?         @map("contact_phone") @db.VarChar(30)
   status       String?         @default("pending") @db.VarChar(30)
   createdAt    DateTime?       @default(now()) @map("created_at") @db.Timestamp(6)
