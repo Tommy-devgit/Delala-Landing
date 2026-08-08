@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useMap } from "react-leaflet";
+import L from "leaflet";
 import { Crosshair, Loader2, Minus, Plus } from "lucide-react";
 import { MAP_ZOOM } from "@/lib/map";
 
@@ -15,8 +16,20 @@ const BUTTON_CLASS =
  */
 export function MapControls({ showLocateButton = true }: { showLocateButton?: boolean }) {
   const map = useMap();
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const [locating, setLocating] = useState(false);
   const [locateError, setLocateError] = useState("");
+
+  // These controls live inside the Leaflet container, whose native click and
+  // wheel listeners fire before React can stop propagation. Without this, using
+  // a control would also register as a map click (placing a pin in the location
+  // picker) or scroll-zoom the map.
+  useEffect(() => {
+    const element = containerRef.current;
+    if (!element) return;
+    L.DomEvent.disableClickPropagation(element);
+    L.DomEvent.disableScrollPropagation(element);
+  }, []);
 
   const handleLocate = () => {
     if (typeof navigator === "undefined" || !navigator.geolocation) {
@@ -40,7 +53,7 @@ export function MapControls({ showLocateButton = true }: { showLocateButton?: bo
   };
 
   return (
-    <div className="absolute right-3 top-3 z-[500] flex flex-col items-end gap-2">
+    <div ref={containerRef} className="absolute right-3 top-3 z-[500] flex flex-col items-end gap-2">
       <div className="flex flex-col rounded-xl overflow-hidden border border-[#ECE7DA] shadow-sm divide-y divide-[#ECE7DA]">
         <button type="button" onClick={() => map.zoomIn()} className={BUTTON_CLASS} aria-label="Zoom in">
           <Plus className="w-4 h-4" aria-hidden="true" />
