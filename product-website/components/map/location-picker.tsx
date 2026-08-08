@@ -27,13 +27,13 @@ function ClickToPin({ onPick }: { onPick: (coordinates: Coordinates) => void }) 
  */
 function FocusOnLocation({ focus, zoom }: { focus: Coordinates | null; zoom: number }) {
   const map = useMap();
-  const hasFocusedOnce = useRef(false);
+  const isFirstRender = useRef(true);
   const signature = focus ? `${focus.latitude},${focus.longitude},${zoom}` : "";
 
   useEffect(() => {
     if (!focus) return;
-    if (!hasFocusedOnce.current) {
-      hasFocusedOnce.current = true;
+    if (isFirstRender.current) {
+      // The map was already created at this position — settle it without motion.
       map.setView([focus.latitude, focus.longitude], zoom, { animate: false });
       return;
     }
@@ -41,6 +41,11 @@ function FocusOnLocation({ focus, zoom }: { focus: Coordinates | null; zoom: num
     // `signature` collapses the focus point and zoom into one dependency.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [map, signature]);
+
+  // Declared after the effect above so the first pass still sees `true`.
+  useEffect(() => {
+    isFirstRender.current = false;
+  }, []);
 
   return null;
 }

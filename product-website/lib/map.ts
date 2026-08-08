@@ -68,10 +68,14 @@ export const getLocationCoordinates = (node?: LocationNode | null): Coordinates 
 export const formatApproximateCoordinates = ({ latitude, longitude }: Coordinates): string =>
   `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
 
-/** Stable key used to avoid refitting the map when the marker set is unchanged. */
+/**
+ * Order-independent key for a set of markers. Re-sorting the results (by price,
+ * for example) must not count as a change, or the map would refit needlessly.
+ */
 export const coordinatesSignature = (
   entries: Array<{ property: Property; coordinates: Coordinates }>
 ): string =>
   entries
     .map(({ property, coordinates }) => `${property.id}:${coordinates.latitude},${coordinates.longitude}`)
+    .sort()
     .join("|");

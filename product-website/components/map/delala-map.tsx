@@ -22,6 +22,10 @@ function MapLifecycle({ onReady }: { onReady?: (map: LeafletMapInstance) => void
   useEffect(() => {
     onReady?.(map);
 
+    // Runs before sibling layers mount their effects, so anything that fits
+    // bounds afterwards measures the real viewport rather than a collapsed one.
+    map.invalidateSize({ animate: false });
+
     const container = map.getContainer();
     const observer = new ResizeObserver(() => map.invalidateSize({ animate: false }));
     observer.observe(container);
