@@ -1,140 +1,148 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { authClient, UserSession } from "@/lib/auth-client";
-import {
-  Building2,
-  MapPin,
-  Upload,
-  CheckCircle2,
-  Lock,
-  X,
-  Star,
-  Sparkles,
-  ArrowRight,
-  Plus,
-  Home,
-  Tag,
-  DollarSign,
-  Phone,
-} from "lucide-react";
+import { apiClient } from "@/lib/api-client";
+import { LocationSelector } from "@/components/location-selector";
+import { LocationPicker } from "@/components/map";
+import { City, Coordinates } from "@/lib/types";
+import { EMPTY_LOCATION_SELECTION, LocationSelection, resolveLocationFocus } from "@/lib/locations";
+import { CheckCircle2, Lock, Phone, Star, Upload, X } from "lucide-react";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1";
+const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
+const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
+const MAX_IMAGES = 12;
 
-// Ethiopian Location Hierarchy Tree
-const LOCATION_TREE: Record<
-  string,
-  Record<string, string[]>
-> = {
-  "Addis Ababa": {
-    Bole: ["Bole Medhanialem", "Gerji", "Bole Atlas", "Bole Bulbula"],
-    Kirkos: ["Kazanchis UN Quarter", "Bole Road", "Meskel Square"],
-    "Nifas Silk": ["Old Airport", "Gotera", "Bisrate Gabriel"],
-    Yeka: ["CMC Sunshine", "Ayat", "Megenagna"],
-  },
-  Hawassa: {
-    Tabor: ["Lake View Riviera", "Haile Resort Area", "Piazza"],
-    Hawela: ["Referral Area", "Industrial Park Quarter"],
-  },
-  Adama: {
-    Bole: ["Expressway Gate", "Posta Bet", "Bishoftu Road"],
-  },
-  "Bahir Dar": {
-    "Belay Zeleke": ["Tana Waterfront", "Kebele 11", "Palace Zone"],
-  },
-};
+/** Amenities the marketplace assumes for new listings until a spec editor exists. */
+const DEFAULT_AMENITIES = { generator: true, waterTank: true, parking: true } as const;
+
+interface SelectedImage {
+  file: File;
+  previewUrl: string;
+}
+
+const INPUT_CLASS =
+  "w-full p-3.5 rounded-2xl bg-[#FAF8F4] border border-[#ECE7DA] text-xs text-[#1C1B12] focus:outline-none focus:border-[#4C061D]";
+const LABEL_CLASS = "block text-[10px] font-mono-label text-[#736F4E] font-bold uppercase mb-1";
 
 export default function PublishListingPage() {
   const router = useRouter();
   const [session, setSession] = useState<{ user: UserSession; token: string } | null>(null);
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
   useEffect(() => {
     setSession(authClient.getSession());
-    window.addEventListener("delala_auth_change", () => setSession(authClient.getSession()));
+    const onAuthChange = () => setSession(authClient.getSession());
+    window.addEventListener("delala_auth_change", onAuthChange);
+    return () => window.removeEventListener("delala_auth_change", onAuthChange);
   }, []);
 
-  // Form Fields
+  // Ethiopian locations come from the API — never from a hardcoded frontend list.
+  const [cities, setCities] = useState<City[]>([]);
+  const [citiesLoading, setCitiesLoading] = useState(true);
+  const [citiesError, setCitiesError] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+    async function loadCities() {
+      setCitiesLoading(true);
+      try {
+        const data = await apiClient.getCities();
+        if (cancelled) return;
+        setCities(data);
+        setCitiesError(data.length === 0 ? "No cities were returned by the Delala location service." : "");
+      } catch {
+        if (!cancelled) setCitiesError("The location service is unreachable. Please try again shortly.");
+      } finally {
+        if (!cancelled) setCitiesLoading(false);
+      }
+    }
+    loadCities();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Property information
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [propertyType, setPropertyType] = useState("Villa");
   const [listingType, setListingType] = useState<"Rent" | "Sale">("Rent");
   const [price, setPrice] = useState("");
-  const [country] = useState("Ethiopia");
-  const [city, setCity] = useState("Addis Ababa");
-  const [subCity, setSubCity] = useState("Bole");
-  const [neighborhood, setNeighborhood] = useState("Bole Medhanialem");
-  const [address, setAddress] = useState("");
-  const [phone, setPhone] = useState("");
   const [bedrooms, setBedrooms] = useState("3");
   const [bathrooms, setBathrooms] = useState("2");
   const [area, setArea] = useState("250");
-  const [generator, setGenerator] = useState(true);
-  const [waterTank, setWaterTank] = useState(true);
-  const [parking, setParking] = useState(true);
+  const [phone, setPhone] = useState("");
+  const [address, setAddress] = useState("");
 
-  // Image Upload State
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+  // Structured location (for search, filtering and SEO) and the map pin (for
+  // geographic display) are kept deliberately separate.
+  const [location, setLocation] = useState<LocationSelection>(EMPTY_LOCATION_SELECTION);
+  const [pin, setPin] = useState<Coordinates | null>(null);
+
+  const mapFocus = useMemo(() => resolveLocationFocus(cities, location), [cities, location]);
+
+  // Photos
+  const [images, setImages] = useState<SelectedImage[]>([]);
   const [primaryIndex, setPrimaryIndex] = useState(0);
 
   const [isPublishing, setIsPublishing] = useState(false);
   const [error, setError] = useState("");
 
-  // Update Sub Cities when City changes
-  const handleCityChange = (newCity: string) => {
-    setCity(newCity);
-    const subCities = Object.keys(LOCATION_TREE[newCity] || {});
-    if (subCities.length > 0) {
-      const firstSubCity = subCities[0];
-      setSubCity(firstSubCity);
-      const neighborhoods = LOCATION_TREE[newCity][firstSubCity] || [];
-      if (neighborhoods.length > 0) setNeighborhood(neighborhoods[0]);
-    }
-  };
+  // Preview object URLs are owned by this page and must be released.
+  useEffect(() => {
+    return () => images.forEach((image) => URL.revokeObjectURL(image.previewUrl));
+    // Cleanup only needs to run on unmount; removals revoke their own URL.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  // Update Neighborhoods when SubCity changes
-  const handleSubCityChange = (newSubCity: string) => {
-    setSubCity(newSubCity);
-    const neighborhoods = LOCATION_TREE[city]?.[newSubCity] || [];
-    if (neighborhoods.length > 0) setNeighborhood(neighborhoods[0]);
-  };
+  const addFiles = useCallback(
+    (fileList: FileList | null) => {
+      if (!fileList || fileList.length === 0) return;
+      const incoming = Array.from(fileList);
+      const rejected: string[] = [];
 
-  // Image Selection Handler
-  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const files = Array.from(e.target.files);
-      setSelectedFiles((prev) => [...prev, ...files]);
-      const newPreviews = files.map((file) => URL.createObjectURL(file));
-      setPreviewUrls((prev) => [...prev, ...newPreviews]);
-    }
-  };
+      setImages((prev) => {
+        const room = MAX_IMAGES - prev.length;
+        const accepted: SelectedImage[] = [];
 
-  // Drop File Handler
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    if (e.dataTransfer.files) {
-      const files = Array.from(e.dataTransfer.files);
-      setSelectedFiles((prev) => [...prev, ...files]);
-      const newPreviews = files.map((file) => URL.createObjectURL(file));
-      setPreviewUrls((prev) => [...prev, ...newPreviews]);
-    }
-  };
+        for (const file of incoming) {
+          if (accepted.length >= room) {
+            rejected.push(`${file.name} (limit of ${MAX_IMAGES} photos reached)`);
+            continue;
+          }
+          if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
+            rejected.push(`${file.name} (only JPG, PNG or WEBP)`);
+            continue;
+          }
+          if (file.size > MAX_IMAGE_BYTES) {
+            rejected.push(`${file.name} (larger than 8MB)`);
+            continue;
+          }
+          accepted.push({ file, previewUrl: URL.createObjectURL(file) });
+        }
 
-  // Remove Selected Image
+        return accepted.length > 0 ? [...prev, ...accepted] : prev;
+      });
+
+      setError(rejected.length > 0 ? `Some photos were skipped: ${rejected.join(", ")}.` : "");
+    },
+    []
+  );
+
   const handleRemoveImage = (index: number) => {
-    setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
-    setPreviewUrls((prev) => prev.filter((_, i) => i !== index));
-    if (primaryIndex === index) {
-      setPrimaryIndex(0);
-    } else if (primaryIndex > index) {
-      setPrimaryIndex((prev) => prev - 1);
-    }
+    setImages((prev) => {
+      const removed = prev[index];
+      if (removed) URL.revokeObjectURL(removed.previewUrl);
+      return prev.filter((_, i) => i !== index);
+    });
+    setPrimaryIndex((current) => {
+      if (current === index) return 0;
+      return current > index ? current - 1 : current;
+    });
   };
 
-  // Handle Submit
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -143,69 +151,55 @@ export default function PublishListingPage() {
       router.push("/auth/signin?callbackUrl=/publish");
       return;
     }
-
     if (!title.trim()) {
       setError("Please provide a property title.");
       return;
     }
-
     if (!price || Number(price) <= 0) {
       setError("Please specify a valid price.");
+      return;
+    }
+    if (!location.city) {
+      setError("Please select the city where the property is located.");
       return;
     }
 
     setIsPublishing(true);
 
     try {
-      const formData = new FormData();
-      formData.append("title", title);
-      formData.append("description", description || "Newly published residential property.");
-      formData.append("propertyType", propertyType);
-      formData.append("listingType", listingType);
-      formData.append("rentETB", price);
-      formData.append("price", price);
-      formData.append("city", city);
-      formData.append("subCity", subCity);
-      formData.append("neighborhood", neighborhood);
-      formData.append("location_id", `${city}-${subCity}-${neighborhood}`);
-      formData.append("address", address);
-      formData.append("phone", phone);
-      formData.append("bedrooms", bedrooms);
-      formData.append("bathrooms", bathrooms);
-      formData.append("areaSqm", area);
-      formData.append("generator", String(generator));
-      formData.append("waterTank", String(waterTank));
-      formData.append("parking", String(parking));
-
-      // Append images for Cloudflare R2 Upload backend handler
-      if (selectedFiles.length > 0) {
-        // Ensure primary image is placed first in array
-        const reorderedFiles = [...selectedFiles];
-        if (primaryIndex > 0 && primaryIndex < reorderedFiles.length) {
-          const [primaryFile] = reorderedFiles.splice(primaryIndex, 1);
-          reorderedFiles.unshift(primaryFile);
-        }
-        reorderedFiles.forEach((file) => formData.append("images", file));
+      // Hero photo first — the API treats the first upload as the hero image.
+      const orderedImages = [...images];
+      if (primaryIndex > 0 && primaryIndex < orderedImages.length) {
+        const [primary] = orderedImages.splice(primaryIndex, 1);
+        orderedImages.unshift(primary);
       }
 
-      const token = localStorage.getItem("delala_token");
-      const res = await fetch(`${API_BASE}/properties`, {
-        method: "POST",
-        headers: {
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      const created = await apiClient.createProperty(
+        {
+          title,
+          description: description || "Newly published residential property.",
+          propertyType,
+          listingType,
+          rentETB: price,
+          city: location.city,
+          subCity: location.subCity,
+          neighborhood: location.neighborhood,
+          address,
+          phone,
+          bedrooms,
+          bathrooms,
+          areaSqm: area,
+          ...DEFAULT_AMENITIES,
+          latitude: pin?.latitude ?? null,
+          longitude: pin?.longitude ?? null,
+          images: orderedImages.map((image) => image.file),
         },
-        body: formData,
-      });
+        session.token
+      );
 
-      const created = await res.json();
-      if (!res.ok) {
-        throw new Error(created.message || "Failed to publish property.");
-      }
-
-      // Success: Redirect to property details page
       router.push(`/property/${created.slug || created.id}`);
-    } catch (err: any) {
-      setError(err.message || "An error occurred while publishing listing.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An error occurred while publishing your listing.");
     } finally {
       setIsPublishing(false);
     }
@@ -217,10 +211,10 @@ export default function PublishListingPage() {
       <div className="bg-[#4C061D] text-white py-10 border-b border-[#3B0416]">
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
           <h1 className="font-serif-display text-3xl sm:text-4xl text-white font-light">
-            Post Your Property
+            List Your Property
           </h1>
           <p className="mt-1 text-sm text-[#ECE7DA]/80">
-            Share your house and find interested renters/buyers
+            Photos, details and location — everything on one page.
           </p>
         </div>
       </div>
@@ -229,7 +223,7 @@ export default function PublishListingPage() {
         {!session?.user ? (
           <div className="bg-white rounded-3xl border border-[#ECE7DA] shadow-xl p-8 sm:p-12 text-center space-y-5 max-w-xl mx-auto">
             <div className="w-16 h-16 rounded-full bg-[#4C061D]/10 text-[#4C061D] flex items-center justify-center mx-auto shadow-xs">
-              <Lock className="w-8 h-8" />
+              <Lock className="w-8 h-8" aria-hidden="true" />
             </div>
             <h2 className="font-serif-display text-3xl text-[#1C1B12]">
               Sign in or Create an Account to List a Property
@@ -253,356 +247,334 @@ export default function PublishListingPage() {
             </div>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="bg-white rounded-3xl border border-[#ECE7DA] shadow-xl p-6 sm:p-10 space-y-10">
+          <form
+            onSubmit={handleSubmit}
+            className="bg-white rounded-3xl border border-[#ECE7DA] shadow-xl p-6 sm:p-10 space-y-9"
+          >
             {error && (
-              <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium">
+              <div
+                role="alert"
+                className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium"
+              >
                 {error}
               </div>
             )}
 
-            {/* SECTION 1: PROPERTY IMAGES */}
-            <div className="space-y-4">
+            {/* PHOTOS */}
+            <section className="space-y-4">
               <div>
-                <h2 className="font-serif-display text-2xl text-[#1C1B12] flex items-center gap-2">
-                  <span>1. Property Images</span>
-                </h2>
-                <p className="text-xs text-[#736F4E]">Upload high-res photos. Click the star icon to set the primary hero photo.</p>
+                <h2 className="font-serif-display text-2xl text-[#1C1B12]">Photos</h2>
+                <p className="text-xs text-[#736F4E]">
+                  Add up to {MAX_IMAGES} photos. Use the star to choose the main photo.
+                </p>
               </div>
 
-              {/* Drag and Drop Zone */}
-              <div
-                onDragOver={(e) => e.preventDefault()}
-                onDrop={handleDrop}
-                className="p-8 border-2 border-dashed border-[#ECE7DA] rounded-3xl bg-[#FAF8F4] text-center space-y-3 cursor-pointer hover:border-[#4C061D] transition-colors relative"
-              >
-                <input
-                  type="file"
-                  multiple
-                  accept="image/*"
-                  onChange={handleImageSelect}
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                />
-                <div className="w-12 h-12 rounded-2xl bg-[#4C061D] text-white flex items-center justify-center mx-auto shadow-md">
-                  <Upload className="w-6 h-6 text-[#B4C292]" />
-                </div>
-                <div className="font-bold text-sm text-[#1C1B12]">
-                  Drag & Drop Property Photos or <span className="text-[#4C061D] underline">Browse Files</span>
-                </div>
-                <div className="text-xs text-[#736F4E] font-mono-label">
-                  Supports JPG, PNG, WEBP. Uploads directly to Cloudflare R2.
-                </div>
-              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <label
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    addFiles(e.dataTransfer.files);
+                  }}
+                  className="relative aspect-square rounded-2xl border-2 border-dashed border-[#ECE7DA] bg-[#FAF8F4] flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-[#4C061D] transition-colors focus-within:border-[#4C061D]"
+                >
+                  <input
+                    type="file"
+                    multiple
+                    accept={ACCEPTED_IMAGE_TYPES.join(",")}
+                    onChange={(e) => {
+                      addFiles(e.target.files);
+                      e.target.value = "";
+                    }}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    aria-label="Add property photos"
+                  />
+                  <span className="w-10 h-10 rounded-2xl bg-[#4C061D] text-[#B4C292] flex items-center justify-center shadow-md">
+                    <Upload className="w-5 h-5" aria-hidden="true" />
+                  </span>
+                  <span className="text-[11px] font-bold text-[#1C1B12]">Add photos</span>
+                  <span className="text-[9.5px] font-mono-label text-[#736F4E]">JPG • PNG • WEBP</span>
+                </label>
 
-              {/* Image Previews Grid */}
-              {previewUrls.length > 0 && (
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-2">
-                  {previewUrls.map((url, idx) => (
-                    <div
-                      key={idx}
-                      className={`relative rounded-2xl overflow-hidden aspect-square border-2 transition-all group ${primaryIndex === idx ? "border-[#4C061D] ring-2 ring-[#4C061D]/20 shadow-md" : "border-[#ECE7DA]"
-                        }`}
+                {images.map((image, idx) => (
+                  <div
+                    key={image.previewUrl}
+                    className={`relative rounded-2xl overflow-hidden aspect-square border-2 transition-all ${
+                      primaryIndex === idx
+                        ? "border-[#4C061D] ring-2 ring-[#4C061D]/20 shadow-md"
+                        : "border-[#ECE7DA]"
+                    }`}
+                  >
+                    <img src={image.previewUrl} alt={`Property photo ${idx + 1}`} className="w-full h-full object-cover" />
+
+                    <button
+                      type="button"
+                      onClick={() => setPrimaryIndex(idx)}
+                      className={`absolute top-2 left-2 p-1.5 rounded-full backdrop-blur-md transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white ${
+                        primaryIndex === idx ? "bg-[#4C061D] text-white" : "bg-black/40 text-white/70 hover:text-white"
+                      }`}
+                      aria-label={`Set photo ${idx + 1} as the main photo`}
+                      aria-pressed={primaryIndex === idx}
                     >
-                      <img src={url} alt={`Preview ${idx + 1}`} className="w-full h-full object-cover" />
+                      <Star className={`w-3.5 h-3.5 ${primaryIndex === idx ? "fill-white" : ""}`} aria-hidden="true" />
+                    </button>
 
-                      {/* Primary Hero Star Badge */}
-                      <button
-                        type="button"
-                        onClick={() => setPrimaryIndex(idx)}
-                        className={`absolute top-2 left-2 p-1.5 rounded-full backdrop-blur-md transition-colors ${primaryIndex === idx ? "bg-[#4C061D] text-white" : "bg-black/40 text-white/70 hover:text-white"
-                          }`}
-                        title="Set as Primary Image"
-                      >
-                        <Star className={`w-3.5 h-3.5 ${primaryIndex === idx ? "fill-white" : ""}`} />
-                      </button>
+                    {primaryIndex === idx && (
+                      <span className="absolute bottom-2 left-2 bg-[#4C061D] text-white font-mono-label text-[9px] font-bold px-2 py-0.5 rounded-full shadow-xs">
+                        MAIN
+                      </span>
+                    )}
 
-                      {/* Primary Badge Label */}
-                      {primaryIndex === idx && (
-                        <span className="absolute bottom-2 left-2 bg-[#4C061D] text-white font-mono-label text-[9px] font-bold px-2 py-0.5 rounded-full shadow-xs">
-                          PRIMARY
-                        </span>
-                      )}
-
-                      {/* Remove Image Button */}
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveImage(idx)}
-                        className="absolute top-2 right-2 p-1.5 rounded-full bg-black/50 text-white hover:bg-rose-600 transition-colors"
-                        title="Remove Image"
-                      >
-                        <X className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveImage(idx)}
+                      className="absolute top-2 right-2 p-1.5 rounded-full bg-black/50 text-white hover:bg-rose-600 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                      aria-label={`Remove photo ${idx + 1}`}
+                    >
+                      <X className="w-3.5 h-3.5" aria-hidden="true" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </section>
 
             <hr className="border-[#ECE7DA]" />
 
-            {/* SECTION 2: LOCATION SELECTION (Cascading Hierarchy) */}
-            <div className="space-y-4">
+            {/* PROPERTY INFORMATION */}
+            <section className="space-y-4">
+              <h2 className="font-serif-display text-2xl text-[#1C1B12]">Property information</h2>
+
               <div>
-                <h2 className="font-serif-display text-2xl text-[#1C1B12]">
-                  2. Location Selection
-                </h2>
-                <p className="text-xs text-[#736F4E]">Select country, city, sub-city, and neighborhood.</p>
+                <label htmlFor="property-title" className={LABEL_CLASS}>
+                  Property title *
+                </label>
+                <input
+                  id="property-title"
+                  type="text"
+                  required
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="e.g. Modern 3 Bedroom House in Bole"
+                  className={INPUT_CLASS}
+                />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-[10px] font-mono-label text-[#736F4E] font-bold uppercase mb-1">
-                    COUNTRY *
+                  <label htmlFor="property-type" className={LABEL_CLASS}>
+                    Property type *
+                  </label>
+                  <select
+                    id="property-type"
+                    value={propertyType}
+                    onChange={(e) => setPropertyType(e.target.value)}
+                    className={INPUT_CLASS}
+                  >
+                    <option value="Apartment">Apartment</option>
+                    <option value="House">House</option>
+                    <option value="Villa">Villa</option>
+                    <option value="Commercial">Commercial</option>
+                    <option value="Land">Land</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label htmlFor="listing-type" className={LABEL_CLASS}>
+                    Listing type *
+                  </label>
+                  <select
+                    id="listing-type"
+                    value={listingType}
+                    onChange={(e) => setListingType(e.target.value as "Rent" | "Sale")}
+                    className={INPUT_CLASS}
+                  >
+                    <option value="Rent">For Rent</option>
+                    <option value="Sale">For Sale</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label htmlFor="property-price" className={LABEL_CLASS}>
+                    Price (ETB) *
+                  </label>
+                  <div className="relative">
+                    <input
+                      id="property-price"
+                      type="number"
+                      min="0"
+                      required
+                      value={price}
+                      onChange={(e) => setPrice(e.target.value)}
+                      placeholder="65000"
+                      className={`${INPUT_CLASS} pl-12 font-mono-label`}
+                    />
+                    <span className="absolute left-3.5 top-3 font-mono-label text-xs font-bold text-[#4C061D]">
+                      ETB
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <label htmlFor="property-bedrooms" className={LABEL_CLASS}>
+                    Bedrooms
                   </label>
                   <input
-                    type="text"
-                    disabled
-                    value={country}
-                    className="w-full p-3.5 rounded-2xl bg-[#FAF8F4] border border-[#ECE7DA] text-xs font-bold text-[#1C1B12]"
+                    id="property-bedrooms"
+                    type="number"
+                    min="0"
+                    value={bedrooms}
+                    onChange={(e) => setBedrooms(e.target.value)}
+                    className={`${INPUT_CLASS} font-mono-label`}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-mono-label text-[#736F4E] font-bold uppercase mb-1">
-                    CITY *
+                  <label htmlFor="property-bathrooms" className={LABEL_CLASS}>
+                    Bathrooms
                   </label>
-                  <select
-                    value={city}
-                    onChange={(e) => handleCityChange(e.target.value)}
-                    className="w-full p-3.5 rounded-2xl bg-[#FAF8F4] border border-[#ECE7DA] text-xs text-[#1C1B12] focus:outline-none focus:border-[#4C061D]"
-                  >
-                    {Object.keys(LOCATION_TREE).map((c) => (
-                      <option key={c} value={c}>
-                        {c}
-                      </option>
-                    ))}
-                  </select>
+                  <input
+                    id="property-bathrooms"
+                    type="number"
+                    min="0"
+                    step="0.5"
+                    value={bathrooms}
+                    onChange={(e) => setBathrooms(e.target.value)}
+                    className={`${INPUT_CLASS} font-mono-label`}
+                  />
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-mono-label text-[#736F4E] font-bold uppercase mb-1">
-                    SUB CITY *
+                  <label htmlFor="property-area" className={LABEL_CLASS}>
+                    Area (sqm)
                   </label>
-                  <select
-                    value={subCity}
-                    onChange={(e) => handleSubCityChange(e.target.value)}
-                    className="w-full p-3.5 rounded-2xl bg-[#FAF8F4] border border-[#ECE7DA] text-xs text-[#1C1B12] focus:outline-none focus:border-[#4C061D]"
-                  >
-                    {Object.keys(LOCATION_TREE[city] || {}).map((sc) => (
-                      <option key={sc} value={sc}>
-                        {sc}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-[10px] font-mono-label text-[#736F4E] font-bold uppercase mb-1">
-                    NEIGHBORHOOD *
-                  </label>
-                  <select
-                    value={neighborhood}
-                    onChange={(e) => setNeighborhood(e.target.value)}
-                    className="w-full p-3.5 rounded-2xl bg-[#FAF8F4] border border-[#ECE7DA] text-xs text-[#1C1B12] focus:outline-none focus:border-[#4C061D]"
-                  >
-                    {(LOCATION_TREE[city]?.[subCity] || []).map((n) => (
-                      <option key={n} value={n}>
-                        {n}
-                      </option>
-                    ))}
-                  </select>
+                  <input
+                    id="property-area"
+                    type="number"
+                    min="0"
+                    value={area}
+                    onChange={(e) => setArea(e.target.value)}
+                    className={`${INPUT_CLASS} font-mono-label`}
+                  />
                 </div>
               </div>
+            </section>
+
+            <hr className="border-[#ECE7DA]" />
+
+            {/* LOCATION */}
+            <section className="space-y-4">
+              <div>
+                <h2 className="font-serif-display text-2xl text-[#1C1B12]">Location</h2>
+                <p className="text-xs text-[#736F4E]">
+                  Choose the city, sub-city and neighborhood renters will search by.
+                </p>
+              </div>
+
+              <LocationSelector
+                cities={cities}
+                value={location}
+                onChange={setLocation}
+                loading={citiesLoading}
+                error={citiesError}
+              />
 
               <div>
-                <label className="block text-[10px] font-mono-label text-[#736F4E] font-bold uppercase mb-1">
-                  OPTIONAL STREET ADDRESS & LANDMARK
+                <label htmlFor="property-address" className={LABEL_CLASS}>
+                  Street address or landmark (optional)
                 </label>
                 <input
+                  id="property-address"
                   type="text"
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
                   placeholder="e.g. Near Atlas Hotel, Ring Road access"
-                  className="w-full p-3.5 rounded-2xl bg-[#FAF8F4] border border-[#ECE7DA] text-xs text-[#1C1B12] focus:outline-none focus:border-[#4C061D]"
+                  className={INPUT_CLASS}
                 />
               </div>
-            </div>
+            </section>
 
             <hr className="border-[#ECE7DA]" />
 
-            {/* SECTION 3: PROPERTY DETAILS */}
-            <div className="space-y-4">
+            {/* APPROXIMATE MAP LOCATION */}
+            <section className="space-y-4">
               <div>
                 <h2 className="font-serif-display text-2xl text-[#1C1B12]">
-                  3. Property Details
+                  Approximate location
                 </h2>
-                <p className="text-xs text-[#736F4E]">Specify property type, listing type, price, and specs.</p>
+                <p className="text-xs text-[#736F4E]">
+                  Set the approximate location of the property on the map. You never have to share
+                  the exact address of a private home.
+                </p>
               </div>
 
-              {/* Title & Type */}
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-[10px] font-mono-label text-[#736F4E] font-bold uppercase mb-1">
-                    PROPERTY TITLE *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    placeholder="e.g. Bole Medhanialem Executive Villa Compound"
-                    className="w-full p-3.5 rounded-2xl bg-[#FAF8F4] border border-[#ECE7DA] text-xs text-[#1C1B12] focus:outline-none focus:border-[#4C061D]"
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-[10px] font-mono-label text-[#736F4E] font-bold uppercase mb-1">
-                      PROPERTY TYPE *
-                    </label>
-                    <select
-                      value={propertyType}
-                      onChange={(e) => setPropertyType(e.target.value)}
-                      className="w-full p-3.5 rounded-2xl bg-[#FAF8F4] border border-[#ECE7DA] text-xs text-[#1C1B12] focus:outline-none focus:border-[#4C061D]"
-                    >
-                      <option value="Apartment">Apartment</option>
-                      <option value="House">House</option>
-                      <option value="Villa">Villa</option>
-                      <option value="Commercial">Commercial</option>
-                      <option value="Land">Land</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-[10px] font-mono-label text-[#736F4E] font-bold uppercase mb-1">
-                      LISTING TYPE *
-                    </label>
-                    <select
-                      value={listingType}
-                      onChange={(e) => setListingType(e.target.value as "Rent" | "Sale")}
-                      className="w-full p-3.5 rounded-2xl bg-[#FAF8F4] border border-[#ECE7DA] text-xs text-[#1C1B12] focus:outline-none focus:border-[#4C061D]"
-                    >
-                      <option value="Rent">For Rent</option>
-                      <option value="Sale">For Sale</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-[10px] font-mono-label text-[#736F4E] font-bold uppercase mb-1">
-                      PRICE (ETB) *
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="number"
-                        required
-                        value={price}
-                        onChange={(e) => setPrice(e.target.value)}
-                        placeholder="65000"
-                        className="w-full p-3.5 pl-12 rounded-2xl bg-[#FAF8F4] border border-[#ECE7DA] text-xs font-mono-label text-[#1C1B12] focus:outline-none focus:border-[#4C061D]"
-                      />
-                      <span className="absolute left-3.5 top-3 font-mono-label text-xs font-bold text-[#4C061D]">
-                        ETB
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Primary Contact Phone Number */}
-                <div>
-                  <label className="block text-[10px] font-mono-label text-[#736F4E] font-bold uppercase mb-1">
-                    PRIMARY CONTACT PHONE NUMBER *
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="tel"
-                      required
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      placeholder="+251 911 234 567"
-                      className="w-full p-3.5 pl-10 rounded-2xl bg-[#FAF8F4] border border-[#ECE7DA] text-xs font-mono-label text-[#1C1B12] focus:outline-none focus:border-[#4C061D]"
-                    />
-                    <Phone className="w-4 h-4 text-[#4C061D] absolute left-3.5 top-3.5" />
-                  </div>
-                  <p className="text-[10px] text-[#736F4E] mt-1">
-                    This phone number appears directly on the front of property cards for instant calls.
-                  </p>
-                </div>
-
-                {/* Optional Specs */}
-                <div className="grid grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-[10px] font-mono-label text-[#736F4E] font-bold uppercase mb-1">
-                      BEDROOMS (OPTIONAL)
-                    </label>
-                    <input
-                      type="number"
-                      value={bedrooms}
-                      onChange={(e) => setBedrooms(e.target.value)}
-                      className="w-full p-3.5 rounded-2xl bg-[#FAF8F4] border border-[#ECE7DA] font-mono-label text-xs text-[#1C1B12]"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-[10px] font-mono-label text-[#736F4E] font-bold uppercase mb-1">
-                      BATHROOMS (OPTIONAL)
-                    </label>
-                    <input
-                      type="number"
-                      step="0.5"
-                      value={bathrooms}
-                      onChange={(e) => setBathrooms(e.target.value)}
-                      className="w-full p-3.5 rounded-2xl bg-[#FAF8F4] border border-[#ECE7DA] font-mono-label text-xs text-[#1C1B12]"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-[10px] font-mono-label text-[#736F4E] font-bold uppercase mb-1">
-                      AREA SQM (OPTIONAL)
-                    </label>
-                    <input
-                      type="number"
-                      value={area}
-                      onChange={(e) => setArea(e.target.value)}
-                      className="w-full p-3.5 rounded-2xl bg-[#FAF8F4] border border-[#ECE7DA] font-mono-label text-xs text-[#1C1B12]"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-[10px] font-mono-label text-[#736F4E] font-bold uppercase mb-1">
-                    DESCRIPTION *
-                  </label>
-                  <textarea
-                    rows={4}
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    placeholder="Describe the property layout, water tank, standby generator, and neighborhood features..."
-                    className="w-full p-3.5 rounded-2xl bg-[#FAF8F4] border border-[#ECE7DA] text-xs text-[#1C1B12] focus:outline-none focus:border-[#4C061D]"
-                  />
-                </div>
-              </div>
-            </div>
+              <LocationPicker
+                value={pin}
+                onChange={setPin}
+                focus={mapFocus.coordinates}
+                focusZoom={mapFocus.zoom}
+              />
+            </section>
 
             <hr className="border-[#ECE7DA]" />
 
-            {/* SECTION 4: PUBLISH ACTION */}
+            {/* DESCRIPTION & CONTACT */}
+            <section className="space-y-4">
+              <div>
+                <label htmlFor="property-description" className={LABEL_CLASS}>
+                  Description
+                </label>
+                <textarea
+                  id="property-description"
+                  rows={4}
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Describe the property layout, water tank, standby generator, and neighborhood features..."
+                  className={INPUT_CLASS}
+                />
+              </div>
+
+              <div>
+                <label htmlFor="property-phone" className={LABEL_CLASS}>
+                  Contact phone *
+                </label>
+                <div className="relative">
+                  <input
+                    id="property-phone"
+                    type="tel"
+                    required
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="+251 911 234 567"
+                    className={`${INPUT_CLASS} pl-10 font-mono-label`}
+                  />
+                  <Phone className="w-4 h-4 text-[#4C061D] absolute left-3.5 top-3.5" aria-hidden="true" />
+                </div>
+                <p className="text-[10px] text-[#736F4E] mt-1">
+                  This phone number appears directly on the front of property cards for instant calls.
+                </p>
+              </div>
+            </section>
+
+            {/* PUBLISH */}
             <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="text-xs text-[#736F4E]">
-                By publishing, your property will immediately be posted on the homepage.
+                By publishing, your property will immediately be posted on the marketplace.
               </div>
 
               <button
                 type="submit"
                 disabled={isPublishing}
-                className="w-full sm:w-auto px-10 py-4 rounded-full bg-[#4C061D] text-white font-mono-label text-xs font-bold hover:bg-[#3B0416] transition-colors shadow-lg flex items-center justify-center gap-2"
+                className="w-full sm:w-auto px-10 py-4 rounded-full bg-[#4C061D] text-white font-mono-label text-xs font-bold hover:bg-[#3B0416] disabled:opacity-60 transition-colors shadow-lg flex items-center justify-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4C061D] focus-visible:ring-offset-2"
               >
-                <CheckCircle2 className="w-4 h-4 text-[#B4C292]" />
-                <span>{isPublishing ? "Publishing..." : "Post"}</span>
+                <CheckCircle2 className="w-4 h-4 text-[#B4C292]" aria-hidden="true" />
+                <span>{isPublishing ? "Publishing…" : "Publish Property"}</span>
               </button>
             </div>
           </form>
         )}
       </div>
-
     </div>
   );
 }
