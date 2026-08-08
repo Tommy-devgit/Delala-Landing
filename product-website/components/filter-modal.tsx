@@ -1,23 +1,29 @@
 "use client";
 
 import { useState } from "react";
-import { X, Check, SlidersHorizontal, ShieldCheck, Zap, Droplets, Car, Home } from "lucide-react";
-import { FilterState } from "@/lib/types";
+import { X, SlidersHorizontal, ShieldCheck, Zap, Droplets, Car, Home } from "lucide-react";
+import { City, FilterState } from "@/lib/types";
+import { getSubCities } from "@/lib/locations";
 
 export function FilterModal({
   isOpen,
   onClose,
   initialFilters,
   onApply,
+  cities = [],
 }: {
   isOpen: boolean;
   onClose: () => void;
   initialFilters: FilterState;
   onApply: (filters: FilterState) => void;
+  /** Location options from GET /api/v1/cities. */
+  cities?: City[];
 }) {
   const [filters, setFilters] = useState<FilterState>(initialFilters);
 
   if (!isOpen) return null;
+
+  const subCities = getSubCities(cities, filters.city);
 
   const handleReset = () => {
     setFilters({
@@ -96,23 +102,39 @@ export function FilterModal({
             <div className="grid grid-cols-2 gap-3">
               <select
                 value={filters.city}
-                onChange={(e) => setFilters({ ...filters, city: e.target.value })}
+                aria-label="City"
+                // Changing the city clears the sub-city, which belongs to it.
+                onChange={(e) => setFilters({ ...filters, city: e.target.value, subCity: "" })}
                 className="w-full p-3 rounded-lg bg-white border border-[#ECE7DA] text-xs font-medium text-[#2D2D2D]"
               >
                 <option value="">All Cities</option>
-                <option value="Addis Ababa">Addis Ababa</option>
-                <option value="Hawassa">Hawassa</option>
-                <option value="Adama">Adama</option>
-                <option value="Bahir Dar">Bahir Dar</option>
+                {cities.map((city) => (
+                  <option key={city.id} value={city.name}>
+                    {city.name}
+                  </option>
+                ))}
               </select>
 
-              <input
-                type="text"
+              <select
                 value={filters.subCity}
+                aria-label="Sub-city"
+                disabled={!filters.city || subCities.length === 0}
                 onChange={(e) => setFilters({ ...filters, subCity: e.target.value })}
-                placeholder="Sub-city (Bole, Kazanchis...)"
-                className="w-full p-3 rounded-lg bg-white border border-[#ECE7DA] text-xs font-medium text-[#2D2D2D] placeholder-[#736F4E]"
-              />
+                className="w-full p-3 rounded-lg bg-white border border-[#ECE7DA] text-xs font-medium text-[#2D2D2D] disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                <option value="">
+                  {!filters.city
+                    ? "All Sub-cities"
+                    : subCities.length === 0
+                      ? "No sub-cities listed"
+                      : "All Sub-cities"}
+                </option>
+                {subCities.map((subCity) => (
+                  <option key={subCity.id} value={subCity.name}>
+                    {subCity.name}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 
