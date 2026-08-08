@@ -1,4 +1,5 @@
-import { Property, City, Neighborhood, Broker } from "./types";
+import { Property, City, Neighborhood, Broker, LocationNode } from "./types";
+import { toCoordinates } from "./map";
 
 const normalizeApiUrl = (url?: string): string => {
   if (!url) return "http://localhost:4000/api/v1";
@@ -16,6 +17,99 @@ const normalizeApiUrl = (url?: string): string => {
 
 const API_BASE = normalizeApiUrl(process.env.NEXT_PUBLIC_API_URL);
 
+const toSlug = (name: string): string => name.toLowerCase().replace(/\s+/g, "-");
+
+/** Normalizes one hierarchy node from the /cities response. */
+const mapLocationNode = (node: any): LocationNode => {
+  const coordinates = toCoordinates(node?.latitude, node?.longitude);
+  return {
+    id: String(node?.id ?? node?.name ?? ""),
+    name: node?.name ?? "",
+    slug: node?.slug ?? toSlug(node?.name ?? ""),
+    latitude: coordinates?.latitude ?? null,
+    longitude: coordinates?.longitude ?? null,
+    children: Array.isArray(node?.children) ? node.children.map(mapLocationNode) : [],
+  };
+};
+
+/** Maps a raw NestJS property payload onto the frontend `Property` shape. */
+const mapProperty = (p: any): Property => {
+  const propertyPhone = p.phone || p.contactPhone || p.broker?.phone || "";
+  const coordinates = toCoordinates(p.latitude, p.longitude);
+
+  return {
+    id: p.id,
+    slug: p.slug,
+    title: p.title,
+    propertyType: p.propertyType,
+    rentETB: p.rentETB,
+    city: typeof p.city === "string" ? p.city : (p.city?.name || p.cityEntity?.name || ""),
+    subCity: p.subCity || p.neighborhood?.subCity || p.neighborhoodEntity?.subCity || "",
+    neighborhood: typeof p.neighborhood === "string" ? p.neighborhood : (p.neighborhood?.name || p.neighborhoodEntity?.name || ""),
+    address: p.address || "",
+    bedrooms: p.bedrooms,
+    bathrooms: p.bathrooms,
+    areaSqm: p.areaSqm,
+    heroImage: p.images?.find((img: any) => img.isHero)?.url || p.images?.[0]?.url || "/images/hero_property.png",
+    galleryImages: p.images?.map((img: any) => img.url) || ["/images/hero_property.png"],
+    verified: p.status === "APPROVED",
+    fieldAgentNotes: p.fieldAgentNotes || "Physically verified by Delala field inspector.",
+    generator: p.generator,
+    waterTank: p.waterTank,
+    parking: p.parking,
+    furnished: p.furnished,
+    securityGuard: p.securityGuard,
+    balcony: p.balcony,
+    phone: propertyPhone,
+    broker: {
+      id: p.broker?.id || "b1",
+      slug: p.broker?.slug || "property-owner",
+      name: p.broker?.user?.profile?.fullName || p.broker?.agencyName || "Verified Owner",
+      avatar: "/images/hero_home_away.jpg",
+      agencyName: p.broker?.agencyName || "Verified Owner",
+      verified: true,
+      phone: propertyPhone,
+      email: "owner@delala.et",
+      rating: p.broker?.rating || 4.9,
+      reviewsCount: 14,
+      activeListingsCount: 8,
+      languages: ["Amharic", "English"],
+      responseTime: "Under 15 minutes",
+      specializedAreas: [],
+      bio: "",
+    },
+    latitude: coordinates?.latitude ?? null,
+    longitude: coordinates?.longitude ?? null,
+    description: p.description,
+    availableDate: "Immediate",
+  };
+};
+
+/** Payload accepted by `apiClient.createProperty`. Mirrors the NestJS CreatePropertyDto. */
+export interface CreatePropertyInput {
+  title: string;
+  description: string;
+  propertyType: string;
+  listingType: string;
+  rentETB: string | number;
+  city: string;
+  subCity: string;
+  neighborhood: string;
+  address?: string;
+  phone: string;
+  bedrooms: string | number;
+  bathrooms: string | number;
+  areaSqm: string | number;
+  generator: boolean;
+  waterTank: boolean;
+  parking: boolean;
+  /** Approximate map pin. Omitted from the request when the publisher set none. */
+  latitude?: number | null;
+  longitude?: number | null;
+  /** Files are uploaded to Cloudflare R2 by the API, hero image first. */
+  images?: File[];
+}
+
 export const apiClient = {
   // Fetch properties directly from NestJS REST API
   async getProperties(filters?: { city?: string; subCity?: string; propertyType?: string }): Promise<Property[]> {
@@ -28,54 +122,7 @@ export const apiClient = {
       const res = await fetch(`${API_BASE}/properties?${queryParams.toString()}`, { cache: "no-store" });
       if (res.ok) {
         const data = await res.json();
-        if (Array.isArray(data)) {
-          return data.map((p: any) => ({
-            id: p.id,
-            slug: p.slug,
-            title: p.title,
-            propertyType: p.propertyType,
-            rentETB: p.rentETB,
-            city: typeof p.city === "string" ? p.city : (p.city?.name || p.cityEntity?.name || ""),
-            subCity: p.subCity || p.neighborhood?.subCity || p.neighborhoodEntity?.subCity || "",
-            neighborhood: typeof p.neighborhood === "string" ? p.neighborhood : (p.neighborhood?.name || p.neighborhoodEntity?.name || ""),
-            address: p.address || "",
-            bedrooms: p.bedrooms,
-            bathrooms: p.bathrooms,
-            areaSqm: p.areaSqm,
-            heroImage: p.images?.find((img: any) => img.isHero)?.url || p.images?.[0]?.url || "/images/hero_property.png",
-            galleryImages: p.images?.map((img: any) => img.url) || ["/images/hero_property.png"],
-            verified: p.status === "APPROVED",
-            fieldAgentNotes: p.fieldAgentNotes || "Physically verified by Delala field inspector.",
-            generator: p.generator,
-            waterTank: p.waterTank,
-            parking: p.parking,
-            furnished: p.furnished,
-            securityGuard: p.securityGuard,
-            balcony: p.balcony,
-            phone: p.phone || p.contactPhone || p.broker?.phone || "",
-            broker: {
-              id: p.broker?.id || "b1",
-              slug: p.broker?.slug || "property-owner",
-              name: p.broker?.user?.profile?.fullName || p.broker?.agencyName || "Verified Owner",
-              avatar: "/images/hero_home_away.jpg",
-              agencyName: p.broker?.agencyName || "Verified Owner",
-              verified: true,
-              phone: p.phone || p.contactPhone || p.broker?.phone || "",
-              email: "owner@delala.et",
-              rating: p.broker?.rating || 4.9,
-              reviewsCount: 14,
-              activeListingsCount: 8,
-              languages: ["Amharic", "English"],
-              responseTime: "Under 15 minutes",
-              specializedAreas: [],
-              bio: "",
-            },
-            lat: 8.995,
-            lng: 38.788,
-            description: p.description,
-            availableDate: "Immediate",
-          }));
-        }
+        if (Array.isArray(data)) return data.map(mapProperty);
       }
     } catch (err) {
       console.warn("NestJS API fetch error:", err);
@@ -87,101 +134,77 @@ export const apiClient = {
   async getPropertyBySlug(slug: string): Promise<Property | null> {
     try {
       const res = await fetch(`${API_BASE}/properties/${slug}`, { cache: "no-store" });
-      if (res.ok) {
-        const p = await res.json();
-        const propertyPhone = p.phone || p.contactPhone || p.broker?.phone || "";
-        return {
-          id: p.id,
-          slug: p.slug,
-          title: p.title,
-          propertyType: p.propertyType,
-          rentETB: p.rentETB,
-          city: typeof p.city === "string" ? p.city : (p.city?.name || p.cityEntity?.name || ""),
-          subCity: p.subCity || p.neighborhood?.subCity || p.neighborhoodEntity?.subCity || "",
-          neighborhood: typeof p.neighborhood === "string" ? p.neighborhood : (p.neighborhood?.name || p.neighborhoodEntity?.name || ""),
-          address: p.address || "",
-          bedrooms: p.bedrooms,
-          bathrooms: p.bathrooms,
-          areaSqm: p.areaSqm,
-          heroImage: p.images?.find((img: any) => img.isHero)?.url || p.images?.[0]?.url || "/images/hero_property.png",
-          galleryImages: p.images?.map((img: any) => img.url) || ["/images/hero_property.png"],
-          verified: p.status === "APPROVED",
-          fieldAgentNotes: p.fieldAgentNotes || "Physically verified by Delala field inspector.",
-          generator: p.generator,
-          waterTank: p.waterTank,
-          parking: p.parking,
-          furnished: p.furnished,
-          securityGuard: p.securityGuard,
-          balcony: p.balcony,
-          phone: propertyPhone,
-          broker: {
-            id: p.broker?.id || "b1",
-            slug: p.broker?.slug || "property-owner",
-            name: p.broker?.user?.profile?.fullName || p.broker?.agencyName || "Verified Owner",
-            avatar: "/images/hero_home_away.jpg",
-            agencyName: p.broker?.agencyName || "Verified Owner",
-            verified: true,
-            phone: propertyPhone,
-            email: "owner@delala.et",
-            rating: p.broker?.rating || 4.9,
-            reviewsCount: 14,
-            activeListingsCount: 8,
-            languages: ["Amharic", "English"],
-            responseTime: "Under 15 minutes",
-            specializedAreas: [],
-            bio: "",
-          },
-          lat: 8.995,
-          lng: 38.788,
-          description: p.description,
-          availableDate: "Immediate",
-        };
-      }
+      if (res.ok) return mapProperty(await res.json());
     } catch (err) {
       console.warn("NestJS API fetch error:", err);
     }
     return null;
   },
 
-  // Create new property listing (Functional Publish Action)
-  async createProperty(propertyData: {
-    title: string;
-    description: string;
-    propertyType: string;
-    rentETB: number;
-    bedrooms: number;
-    bathrooms: number;
-    areaSqm: number;
-    generator: boolean;
-    waterTank: boolean;
-    parking: boolean;
-    furnished: boolean;
-    securityGuard: boolean;
-  }): Promise<{ success: boolean; property?: any }> {
-    try {
-      const res = await fetch(`${API_BASE}/properties`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(propertyData),
-      });
+  /**
+   * Create a new property listing through the existing multipart endpoint, which
+   * also pushes the attached images to Cloudflare R2.
+   */
+  async createProperty(input: CreatePropertyInput, token?: string | null): Promise<{ slug?: string; id?: string }> {
+    const formData = new FormData();
+    formData.append("title", input.title);
+    formData.append("description", input.description);
+    formData.append("propertyType", input.propertyType);
+    formData.append("listingType", input.listingType);
+    formData.append("rentETB", String(input.rentETB));
+    formData.append("price", String(input.rentETB));
+    formData.append("city", input.city);
+    formData.append("subCity", input.subCity);
+    formData.append("neighborhood", input.neighborhood);
+    formData.append("address", input.address || "");
+    formData.append("phone", input.phone);
+    formData.append("bedrooms", String(input.bedrooms));
+    formData.append("bathrooms", String(input.bathrooms));
+    formData.append("areaSqm", String(input.areaSqm));
+    formData.append("generator", String(input.generator));
+    formData.append("waterTank", String(input.waterTank));
+    formData.append("parking", String(input.parking));
 
-      if (res.ok) {
-        const property = await res.json();
-        return { success: true, property };
-      }
-    } catch (err) {
-      console.warn("NestJS API create property error:", err);
+    // Only send a pin when it is a genuine coordinate pair.
+    const pin = toCoordinates(input.latitude, input.longitude);
+    if (pin) {
+      formData.append("latitude", String(pin.latitude));
+      formData.append("longitude", String(pin.longitude));
     }
-    return { success: true, property: { id: `p-local-${Date.now()}`, title: propertyData.title } };
+
+    (input.images || []).forEach((file) => formData.append("images", file));
+
+    const res = await fetch(`${API_BASE}/properties`, {
+      method: "POST",
+      headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      body: formData,
+    });
+
+    const created = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error(created?.message || "Failed to publish property.");
+    }
+    return created;
   },
 
-  // Fetch cities
+  // Fetch cities together with their sub-city / neighborhood hierarchy
   async getCities(): Promise<City[]> {
     try {
       const res = await fetch(`${API_BASE}/cities`, { cache: "no-store" });
       if (res.ok) {
         const data = await res.json();
-        if (Array.isArray(data) && data.length > 0) return data;
+        if (Array.isArray(data) && data.length > 0) {
+          return data.map((c: any) => {
+            const coordinates = toCoordinates(c.latitude, c.longitude);
+            return {
+              ...c,
+              slug: c.slug || toSlug(c.name || ""),
+              subCities: Array.isArray(c.subCities) ? c.subCities.map(mapLocationNode) : [],
+              latitude: coordinates?.latitude ?? null,
+              longitude: coordinates?.longitude ?? null,
+            } as City;
+          });
+        }
       }
     } catch (err) {
       console.warn("NestJS API fetch error:", err);
