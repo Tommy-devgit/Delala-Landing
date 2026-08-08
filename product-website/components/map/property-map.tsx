@@ -140,6 +140,7 @@ function PropertyPreview({ property, onClose }: { property: Property; onClose: (
 export interface PropertyMapProps {
   /** The same filtered collection that feeds the property grid. */
   properties: Property[];
+  /** Pass this to control the selection from the parent; omit for local state. */
   selectedPropertyId?: string | null;
   onSelectProperty?: (propertyId: string | null) => void;
   className?: string;
@@ -151,7 +152,7 @@ export interface PropertyMapProps {
  */
 export function PropertyMap({
   properties,
-  selectedPropertyId = null,
+  selectedPropertyId,
   onSelectProperty,
   className = "",
 }: PropertyMapProps) {
@@ -159,7 +160,10 @@ export function PropertyMap({
   const [internalSelection, setInternalSelection] = useState<string | null>(null);
 
   const entries = useMemo(() => withCoordinates(properties), [properties]);
-  const activeId = selectedPropertyId ?? internalSelection;
+  // Controlled whenever the parent supplies the prop, so a parent clearing the
+  // selection is never overridden by a stale internal value.
+  const isControlled = selectedPropertyId !== undefined;
+  const activeId = isControlled ? selectedPropertyId : internalSelection;
   const activeProperty = entries.find(({ property }) => property.id === activeId)?.property ?? null;
   const unmappedCount = properties.length - entries.length;
 
@@ -169,10 +173,10 @@ export function PropertyMap({
 
   const handleSelect = useCallback(
     (propertyId: string | null) => {
-      setInternalSelection(propertyId);
+      if (!isControlled) setInternalSelection(propertyId);
       onSelectProperty?.(propertyId);
     },
-    [onSelectProperty]
+    [isControlled, onSelectProperty]
   );
 
   return (
