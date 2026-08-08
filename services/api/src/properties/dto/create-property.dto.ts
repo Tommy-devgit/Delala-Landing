@@ -1,6 +1,14 @@
-import { IsString, IsNumber, IsBoolean, IsOptional, IsEnum, IsArray } from "class-validator";
+import { IsString, IsNumber, IsBoolean, IsOptional, IsEnum, IsArray, Min, Max } from "class-validator";
 import { Type, Transform } from "class-transformer";
 import { ApiProperty } from "@nestjs/swagger";
+
+// Multipart/form-data submits every field as a string, so blank coordinate inputs
+// arrive as "" and would otherwise be coerced into a valid-looking 0,0 position.
+const toOptionalNumber = ({ value }: { value: unknown }): number | undefined => {
+  if (value === null || value === undefined || value === "") return undefined;
+  const parsed = typeof value === "number" ? value : Number(value);
+  return Number.isFinite(parsed) ? parsed : undefined;
+};
 
 export class CreatePropertyDto {
   @ApiProperty({ example: "Bole Medhanialem Modern Villa" })
@@ -66,6 +74,22 @@ export class CreatePropertyDto {
   @IsOptional()
   @IsString()
   address?: string;
+
+  @ApiProperty({ example: 9.0054, required: false, description: "Approximate property latitude (WGS84)" })
+  @IsOptional()
+  @Transform(toOptionalNumber)
+  @IsNumber()
+  @Min(-90)
+  @Max(90)
+  latitude?: number;
+
+  @ApiProperty({ example: 38.7636, required: false, description: "Approximate property longitude (WGS84)" })
+  @IsOptional()
+  @Transform(toOptionalNumber)
+  @IsNumber()
+  @Min(-180)
+  @Max(180)
+  longitude?: number;
 
   @ApiProperty({ example: 4, required: false })
   @IsOptional()

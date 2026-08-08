@@ -8,6 +8,15 @@ const isValidUuid = (str?: string): boolean => {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(str);
 };
 
+// Coordinates are optional everywhere: anything that is not a finite number inside
+// the WGS84 range is stored as null so the marketplace map never receives junk.
+const toCoordinate = (value: unknown, max: number): number | null => {
+  if (value === null || value === undefined || value === "") return null;
+  const parsed = typeof value === "number" ? value : Number(value);
+  if (!Number.isFinite(parsed) || parsed < -max || parsed > max) return null;
+  return parsed;
+};
+
 @Injectable()
 export class PropertiesService {
   constructor(private prisma: PrismaService) {}
@@ -90,30 +99,54 @@ export class PropertiesService {
     return this.mapPropertyResponse(matched);
   }
 
+  /**
+   * Resolves (or lazily creates) a single level of the city > sub_city > neighborhood
+   * tree, keeping newly submitted locations attached to their parent instead of
+   * orphaned at the root.
+   */
+  private async resolveLocationLevel(
+    name: string | undefined,
+    type: string,
+    parentId: string | null
+  ): Promise<string | null> {
+    const trimmed = name?.trim();
+    if (!trimmed) return null;
+
+    const existing = await this.prisma.location.findFirst({
+      where: {
+        name: { equals: trimmed, mode: "insensitive" },
+        ...(parentId ? { parentId } : { type }),
+      },
+    });
+    if (existing) return existing.id;
+
+    const created = await this.prisma.location.create({
+      data: {
+        id: randomUUID(),
+        name: trimmed,
+        type,
+        ...(parentId ? { parentId } : {}),
+      },
+    });
+    return created.id;
+  }
+
   async create(createDto: CreatePropertyDto, uploadedImageUrls: string[] = []) {
     // 1. Resolve or create valid UUID location record in locations table
     let locationId: string = "";
-    const targetLocName = createDto.neighborhood || createDto.subCity || createDto.city || "Addis Ababa";
 
     if (isValidUuid(createDto.location_id)) {
       locationId = createDto.location_id!;
     } else {
-      const existingLoc = await this.prisma.location.findFirst({
-        where: { name: { equals: targetLocName, mode: "insensitive" } },
-      });
+      const cityId = await this.resolveLocationLevel(createDto.city || "Addis Ababa", "city", null);
+      const subCityId = await this.resolveLocationLevel(createDto.subCity, "sub_city", cityId);
+      const neighborhoodId = await this.resolveLocationLevel(
+        createDto.neighborhood,
+        "neighborhood",
+        subCityId ?? cityId
+      );
 
-      if (existingLoc) {
-        locationId = existingLoc.id;
-      } else {
-        const newLoc = await this.prisma.location.create({
-          data: {
-            id: randomUUID(),
-            name: targetLocName,
-            type: "neighborhood",
-          },
-        });
-        locationId = newLoc.id;
-      }
+      locationId = (neighborhoodId ?? subCityId ?? cityId)!;
     }
 
     // 2. Resolve or fallback owner user with a valid UUID
@@ -174,6 +207,8 @@ export class PropertiesService {
         bathrooms: Number(createDto.bathrooms || 0),
         area: Number(createDto.areaSqm || 0) as any,
         address: computedAddress,
+        latitude: toCoordinate(createDto.latitude, 90) as any,
+        longitude: toCoordinate(createDto.longitude, 180) as any,
         contactPhone: createDto.phone || null,
         status: "approved",
         images: {
@@ -234,6 +269,19 @@ export class PropertiesService {
     let subCity = "";
     let neighborhood = "";
 
+    // Prefer the pin the publisher placed; otherwise fall back to the centre of the
+    // most specific location in the hierarchy that has a complete coordinate pair.
+    const coordinateSources = [p, p.location, p.location?.parent, p.location?.parent?.parent];
+    const resolvedPair = coordinateSources
+      .map((source) => ({
+        latitude: toCoordinate(source?.latitude, 90),
+        longitude: toCoordinate(source?.longitude, 180),
+      }))
+      .find((pair) => pair.latitude !== null && pair.longitude !== null);
+
+    const latitude = resolvedPair?.latitude ?? null;
+    const longitude = resolvedPair?.longitude ?? null;
+
     if (p.location) {
       if (p.location.type === "city") {
         city = p.location.name;
@@ -278,6 +326,8 @@ export class PropertiesService {
       city,
       neighborhood,
       address: p.address || "",
+      latitude,
+      longitude,
       cityId: p.locationId,
       neighborhoodId: p.locationId,
       brokerId: p.ownerId,
