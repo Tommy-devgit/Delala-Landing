@@ -6,7 +6,7 @@ import { PropertyCard } from "@/components/property-card";
 import { FilterModal } from "@/components/filter-modal";
 import { PropertyMap } from "@/components/map";
 import { apiClient } from "@/lib/api-client";
-import { Property, FilterState } from "@/lib/types";
+import { City, Property, FilterState } from "@/lib/types";
 import { SlidersHorizontal, Map, Grid, List, ArrowUpDown, Building2 } from "lucide-react";
 
 /** Shown in the results column when no listing matches the active filters. */
@@ -30,6 +30,7 @@ function SearchContent() {
   const [viewMode, setViewMode] = useState<"grid" | "split" | "map">("split");
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [properties, setProperties] = useState<Property[]>([]);
+  const [cities, setCities] = useState<City[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null);
 
@@ -63,6 +64,11 @@ function SearchContent() {
     }
     loadProperties();
   }, [filters.city, filters.subCity, filters.propertyType]);
+
+  // Location filter options come from the API, not a hardcoded list.
+  useEffect(() => {
+    apiClient.getCities().then(setCities);
+  }, []);
 
   // Client-side filtering & sorting
   const filteredListings = useMemo(() => {
@@ -280,6 +286,7 @@ function SearchContent() {
         onClose={() => setIsFilterModalOpen(false)}
         initialFilters={filters}
         onApply={(newFilters) => setFilters(newFilters)}
+        cities={cities}
       />
 
     </div>

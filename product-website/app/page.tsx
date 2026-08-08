@@ -208,6 +208,7 @@ export default function HomePage() {
         onClose={() => setIsFilterModalOpen(false)}
         initialFilters={filters}
         onApply={(newFilters) => setFilters(newFilters)}
+        cities={cities}
       />
     </div>
   );
