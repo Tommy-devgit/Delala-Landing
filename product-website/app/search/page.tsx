@@ -92,12 +92,12 @@ function SearchContent() {
     });
   }, [properties, filters]);
 
-  // Drop a stale selection when filtering removes the highlighted property.
-  useEffect(() => {
-    if (selectedPropertyId && !filteredListings.some((p) => p.id === selectedPropertyId)) {
-      setSelectedPropertyId(null);
-    }
-  }, [filteredListings, selectedPropertyId]);
+  // A selection only counts while its property survives the active filters, so
+  // it is derived rather than cleared from an effect.
+  const activeSelectionId =
+    selectedPropertyId && filteredListings.some((p) => p.id === selectedPropertyId)
+      ? selectedPropertyId
+      : null;
 
   const handleSelectProperty = useCallback((propertyId: string | null) => {
     setSelectedPropertyId(propertyId);
@@ -109,7 +109,7 @@ function SearchContent() {
       <PropertyCard
         key={property.id}
         property={property}
-        isSelected={property.id === selectedPropertyId}
+        isSelected={property.id === activeSelectionId}
         onActivate={handleSelectProperty}
       />
     ));
@@ -145,7 +145,7 @@ function SearchContent() {
               <ArrowUpDown className="w-3.5 h-3.5 text-[#4C061D]" />
               <select
                 value={filters.sortBy}
-                onChange={(e) => setFilters({ ...filters, sortBy: e.target.value as any })}
+                onChange={(e) => setFilters({ ...filters, sortBy: e.target.value as FilterState["sortBy"] })}
                 className="bg-transparent text-xs text-[#2D2D2D] focus:outline-none cursor-pointer font-sans"
               >
                 <option value="newest">Sort: Newest</option>
@@ -258,7 +258,7 @@ function SearchContent() {
                 <div className="hidden lg:block lg:col-span-5 rounded-3xl overflow-hidden border border-[#ECE7DA] shadow-sm sticky top-0 h-full">
                   <PropertyMap
                     properties={filteredListings}
-                    selectedPropertyId={selectedPropertyId}
+                    selectedPropertyId={activeSelectionId}
                     onSelectProperty={handleSelectProperty}
                   />
                 </div>
@@ -270,7 +270,7 @@ function SearchContent() {
               <div className="h-[calc(100vh-220px)] min-h-[420px] rounded-3xl overflow-hidden border border-[#ECE7DA] shadow-sm">
                 <PropertyMap
                   properties={filteredListings}
-                  selectedPropertyId={selectedPropertyId}
+                  selectedPropertyId={activeSelectionId}
                   onSelectProperty={handleSelectProperty}
                 />
               </div>
