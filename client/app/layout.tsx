@@ -40,6 +40,11 @@ export const metadata: Metadata = {
   title: "Delala | The Modern Way Ethiopians Find Homes",
   description:
     "Delala is Ethiopia's digital housing platform. Browse 100% physically verified homes, connect with ID-checked brokers, and find your next apartment in Addis Ababa, Hawassa, Adama & beyond.",
+  icons: {
+    icon: "/app_icon.png",
+    shortcut: "/app_icon.png",
+    apple: "/app_icon.png",
+  },
   keywords: [
     "Delala",
     "Ethiopia Real Estate",

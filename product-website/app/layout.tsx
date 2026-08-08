@@ -38,6 +38,11 @@ export const metadata: Metadata = {
   title: "Delala Product Website | Verified Homes & Real Estate Marketplace",
   description:
     "Discover physically verified apartments, villas, serviced studios, and diplomatic residences across Ethiopia. Instant search, owner chat, and legal protection.",
+  icons: {
+    icon: "/app_icon.png",
+    shortcut: "/app_icon.png",
+    apple: "/app_icon.png",
+  },
 };
 
 export const viewport: Viewport = {

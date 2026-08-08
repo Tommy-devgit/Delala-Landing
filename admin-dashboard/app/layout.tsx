@@ -28,6 +28,11 @@ const robotoMono = Roboto_Mono({
 export const metadata: Metadata = {
   title: "Delala Admin Platform | Enterprise Infrastructure",
   description: "Administrative moderation, verification, and analytics platform for Delala Ethiopia.",
+  icons: {
+    icon: "/app_icon.png",
+    shortcut: "/app_icon.png",
+    apple: "/app_icon.png",
+  },
 };
 
 export default function RootLayout({
