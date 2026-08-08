@@ -1,13 +1,28 @@
 "use client";
 
-import { useState, useEffect, useMemo, Suspense } from "react";
+import { useState, useEffect, useMemo, useCallback, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { PropertyCard } from "@/components/property-card";
 import { FilterModal } from "@/components/filter-modal";
-import { MapView } from "@/components/map-view";
+import { PropertyMap } from "@/components/map";
 import { apiClient } from "@/lib/api-client";
 import { Property, FilterState } from "@/lib/types";
-import { SlidersHorizontal, Map, Grid, ShieldCheck, ArrowUpDown, Building2 } from "lucide-react";
+import { SlidersHorizontal, Map, Grid, List, ArrowUpDown, Building2 } from "lucide-react";
+
+/** Shown in the results column when no listing matches the active filters. */
+function EmptyResults() {
+  return (
+    <div className="col-span-full py-20 text-center space-y-4 max-w-md mx-auto">
+      <div className="w-16 h-16 rounded-full bg-[#4C061D]/10 text-[#4C061D] flex items-center justify-center mx-auto">
+        <Building2 className="w-8 h-8" aria-hidden="true" />
+      </div>
+      <h2 className="font-serif-display text-2xl text-[#1C1B12]">No Properties Found</h2>
+      <p className="text-xs text-[#736F4E]">
+        There are no property listings currently in the database matching your criteria.
+      </p>
+    </div>
+  );
+}
 
 function SearchContent() {
   const searchParams = useSearchParams();
@@ -16,6 +31,7 @@ function SearchContent() {
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null);
 
   const [filters, setFilters] = useState<FilterState>({
     city: searchParams.get("city") || "",
@@ -70,6 +86,28 @@ function SearchContent() {
     });
   }, [properties, filters]);
 
+  // Drop a stale selection when filtering removes the highlighted property.
+  useEffect(() => {
+    if (selectedPropertyId && !filteredListings.some((p) => p.id === selectedPropertyId)) {
+      setSelectedPropertyId(null);
+    }
+  }, [filteredListings, selectedPropertyId]);
+
+  const handleSelectProperty = useCallback((propertyId: string | null) => {
+    setSelectedPropertyId(propertyId);
+  }, []);
+
+  // One filtered collection feeds both the grid and the map markers.
+  const renderCards = (listings: Property[]) =>
+    listings.map((property) => (
+      <PropertyCard
+        key={property.id}
+        property={property}
+        isSelected={property.id === selectedPropertyId}
+        onActivate={handleSelectProperty}
+      />
+    ));
+
   return (
     <div className="min-h-screen bg-[#FAF8F4] flex flex-col">
       
@@ -111,21 +149,29 @@ function SearchContent() {
             </div>
           </div>
 
-          {/* Right View Mode Toggle */}
-          <div className="flex items-center gap-1 bg-[#FAF8F4] p-1 rounded-full border border-[#ECE7DA]">
+          {/* Right View Mode Toggle — desktop keeps grid / split / map */}
+          <div
+            className="hidden lg:flex items-center gap-1 bg-[#FAF8F4] p-1 rounded-full border border-[#ECE7DA]"
+            role="group"
+            aria-label="Result view"
+          >
             <button
+              type="button"
               onClick={() => setViewMode("grid")}
-              className={`p-2 rounded-full transition-colors ${
+              aria-pressed={viewMode === "grid"}
+              className={`p-2 rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4C061D] ${
                 viewMode === "grid" ? "bg-white text-[#4C061D] shadow-xs" : "text-[#736F4E] hover:text-[#1c1b12]"
               }`}
-              title="Grid View"
+              aria-label="Grid view"
             >
-              <Grid className="w-4 h-4" />
+              <Grid className="w-4 h-4" aria-hidden="true" />
             </button>
 
             <button
+              type="button"
               onClick={() => setViewMode("split")}
-              className={`hidden lg:flex items-center gap-1 px-3 py-1 rounded-full text-xs font-mono-label font-bold transition-colors ${
+              aria-pressed={viewMode === "split"}
+              className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs font-mono-label font-bold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4C061D] ${
                 viewMode === "split" ? "bg-white text-[#4C061D] shadow-xs" : "text-[#736F4E] hover:text-[#1c1b12]"
               }`}
             >
@@ -133,13 +179,46 @@ function SearchContent() {
             </button>
 
             <button
+              type="button"
               onClick={() => setViewMode("map")}
-              className={`p-2 rounded-full transition-colors ${
+              aria-pressed={viewMode === "map"}
+              className={`p-2 rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4C061D] ${
                 viewMode === "map" ? "bg-white text-[#4C061D] shadow-xs" : "text-[#736F4E] hover:text-[#1c1b12]"
               }`}
-              title="Full Map View"
+              aria-label="Full map view"
             >
-              <Map className="w-4 h-4" />
+              <Map className="w-4 h-4" aria-hidden="true" />
+            </button>
+          </div>
+
+          {/* Mobile / tablet never force a split view — plain List / Map toggle */}
+          <div
+            className="flex lg:hidden items-center gap-1 bg-[#FAF8F4] p-1 rounded-full border border-[#ECE7DA]"
+            role="group"
+            aria-label="Result view"
+          >
+            <button
+              type="button"
+              onClick={() => setViewMode("split")}
+              aria-pressed={viewMode !== "map"}
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[11px] font-mono-label font-bold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4C061D] ${
+                viewMode !== "map" ? "bg-white text-[#4C061D] shadow-xs" : "text-[#736F4E]"
+              }`}
+            >
+              <List className="w-3.5 h-3.5" aria-hidden="true" />
+              <span>LIST</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setViewMode("map")}
+              aria-pressed={viewMode === "map"}
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[11px] font-mono-label font-bold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4C061D] ${
+                viewMode === "map" ? "bg-white text-[#4C061D] shadow-xs" : "text-[#736F4E]"
+              }`}
+            >
+              <Map className="w-3.5 h-3.5" aria-hidden="true" />
+              <span>MAP</span>
             </button>
           </div>
 
@@ -155,47 +234,39 @@ function SearchContent() {
               <div key={i} className="h-80 rounded-3xl bg-white border border-[#ECE7DA] animate-pulse" />
             ))}
           </div>
-        ) : filteredListings.length === 0 ? (
-          <div className="py-20 text-center space-y-4 max-w-md mx-auto">
-            <div className="w-16 h-16 rounded-full bg-[#4C061D]/10 text-[#4C061D] flex items-center justify-center mx-auto">
-              <Building2 className="w-8 h-8" />
-            </div>
-            <h2 className="font-serif-display text-2xl text-[#1C1B12]">
-              No Properties Found
-            </h2>
-            <p className="text-xs text-[#736F4E]">
-              There are no property listings currently in the database matching your criteria.
-            </p>
-          </div>
         ) : (
           <div>
             {/* GRID VIEW */}
             {viewMode === "grid" && (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                {filteredListings.map((property) => (
-                  <PropertyCard key={property.id} property={property} />
-                ))}
+                {filteredListings.length === 0 ? <EmptyResults /> : renderCards(filteredListings)}
               </div>
             )}
 
-            {/* SPLIT VIEW (List + Map) */}
+            {/* SPLIT VIEW — list + map on desktop, list only below lg */}
             {viewMode === "split" && (
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-180px)]">
-                <div className="lg:col-span-7 overflow-y-auto pr-2 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 items-start content-start auto-rows-max">
-                  {filteredListings.map((property) => (
-                    <PropertyCard key={property.id} property={property} />
-                  ))}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:h-[calc(100vh-180px)]">
+                <div className="lg:col-span-7 lg:overflow-y-auto lg:pr-2 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 items-start content-start auto-rows-max">
+                  {filteredListings.length === 0 ? <EmptyResults /> : renderCards(filteredListings)}
                 </div>
                 <div className="hidden lg:block lg:col-span-5 rounded-3xl overflow-hidden border border-[#ECE7DA] shadow-sm sticky top-0 h-full">
-                  <MapView properties={filteredListings} />
+                  <PropertyMap
+                    properties={filteredListings}
+                    selectedPropertyId={selectedPropertyId}
+                    onSelectProperty={handleSelectProperty}
+                  />
                 </div>
               </div>
             )}
 
             {/* FULL MAP VIEW */}
             {viewMode === "map" && (
-              <div className="h-[calc(100vh-180px)] rounded-3xl overflow-hidden border border-[#ECE7DA] shadow-sm">
-                <MapView properties={filteredListings} />
+              <div className="h-[calc(100vh-220px)] min-h-[420px] rounded-3xl overflow-hidden border border-[#ECE7DA] shadow-sm">
+                <PropertyMap
+                  properties={filteredListings}
+                  selectedPropertyId={selectedPropertyId}
+                  onSelectProperty={handleSelectProperty}
+                />
               </div>
             )}
           </div>
