@@ -18,6 +18,14 @@ const isValidUuid = (str) => {
         return false;
     return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(str);
 };
+const toCoordinate = (value, max) => {
+    if (value === null || value === undefined || value === "")
+        return null;
+    const parsed = typeof value === "number" ? value : Number(value);
+    if (!Number.isFinite(parsed) || parsed < -max || parsed > max)
+        return null;
+    return parsed;
+};
 let PropertiesService = class PropertiesService {
     constructor(prisma) {
         this.prisma = prisma;
@@ -90,29 +98,38 @@ let PropertiesService = class PropertiesService {
         }
         return this.mapPropertyResponse(matched);
     }
+    async resolveLocationLevel(name, type, parentId) {
+        const trimmed = name?.trim();
+        if (!trimmed)
+            return null;
+        const existing = await this.prisma.location.findFirst({
+            where: {
+                name: { equals: trimmed, mode: "insensitive" },
+                ...(parentId ? { parentId } : { type }),
+            },
+        });
+        if (existing)
+            return existing.id;
+        const created = await this.prisma.location.create({
+            data: {
+                id: (0, crypto_1.randomUUID)(),
+                name: trimmed,
+                type,
+                ...(parentId ? { parentId } : {}),
+            },
+        });
+        return created.id;
+    }
     async create(createDto, uploadedImageUrls = []) {
         let locationId = "";
-        const targetLocName = createDto.neighborhood || createDto.subCity || createDto.city || "Addis Ababa";
         if (isValidUuid(createDto.location_id)) {
             locationId = createDto.location_id;
         }
         else {
-            const existingLoc = await this.prisma.location.findFirst({
-                where: { name: { equals: targetLocName, mode: "insensitive" } },
-            });
-            if (existingLoc) {
-                locationId = existingLoc.id;
-            }
-            else {
-                const newLoc = await this.prisma.location.create({
-                    data: {
-                        id: (0, crypto_1.randomUUID)(),
-                        name: targetLocName,
-                        type: "neighborhood",
-                    },
-                });
-                locationId = newLoc.id;
-            }
+            const cityId = await this.resolveLocationLevel(createDto.city || "Addis Ababa", "city", null);
+            const subCityId = await this.resolveLocationLevel(createDto.subCity, "sub_city", cityId);
+            const neighborhoodId = await this.resolveLocationLevel(createDto.neighborhood, "neighborhood", subCityId ?? cityId);
+            locationId = (neighborhoodId ?? subCityId ?? cityId);
         }
         let ownerId = "";
         if (isValidUuid(createDto.brokerId)) {
@@ -165,6 +182,8 @@ let PropertiesService = class PropertiesService {
                 bathrooms: Number(createDto.bathrooms || 0),
                 area: Number(createDto.areaSqm || 0),
                 address: computedAddress,
+                latitude: toCoordinate(createDto.latitude, 90),
+                longitude: toCoordinate(createDto.longitude, 180),
                 contactPhone: createDto.phone || null,
                 status: "approved",
                 images: {
@@ -218,6 +237,15 @@ let PropertiesService = class PropertiesService {
         let city = "";
         let subCity = "";
         let neighborhood = "";
+        const coordinateSources = [p, p.location, p.location?.parent, p.location?.parent?.parent];
+        const resolvedPair = coordinateSources
+            .map((source) => ({
+            latitude: toCoordinate(source?.latitude, 90),
+            longitude: toCoordinate(source?.longitude, 180),
+        }))
+            .find((pair) => pair.latitude !== null && pair.longitude !== null);
+        const latitude = resolvedPair?.latitude ?? null;
+        const longitude = resolvedPair?.longitude ?? null;
         if (p.location) {
             if (p.location.type === "city") {
                 city = p.location.name;
@@ -263,6 +291,8 @@ let PropertiesService = class PropertiesService {
             city,
             neighborhood,
             address: p.address || "",
+            latitude,
+            longitude,
             cityId: p.locationId,
             neighborhoodId: p.locationId,
             brokerId: p.ownerId,

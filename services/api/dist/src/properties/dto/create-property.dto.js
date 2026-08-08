@@ -13,6 +13,12 @@ exports.ModeratePropertyDto = exports.CreatePropertyDto = void 0;
 const class_validator_1 = require("class-validator");
 const class_transformer_1 = require("class-transformer");
 const swagger_1 = require("@nestjs/swagger");
+const toOptionalNumber = ({ value }) => {
+    if (value === null || value === undefined || value === "")
+        return undefined;
+    const parsed = typeof value === "number" ? value : Number(value);
+    return Number.isFinite(parsed) ? parsed : undefined;
+};
 class CreatePropertyDto {
 }
 exports.CreatePropertyDto = CreatePropertyDto;
@@ -93,6 +99,24 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreatePropertyDto.prototype, "address", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 9.0054, required: false, description: "Approximate property latitude (WGS84)" }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Transform)(toOptionalNumber),
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.Min)(-90),
+    (0, class_validator_1.Max)(90),
+    __metadata("design:type", Number)
+], CreatePropertyDto.prototype, "latitude", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 38.7636, required: false, description: "Approximate property longitude (WGS84)" }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Transform)(toOptionalNumber),
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.Min)(-180),
+    (0, class_validator_1.Max)(180),
+    __metadata("design:type", Number)
+], CreatePropertyDto.prototype, "longitude", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 4, required: false }),
     (0, class_validator_1.IsOptional)(),

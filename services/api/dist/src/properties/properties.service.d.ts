@@ -29,6 +29,8 @@ export declare class PropertiesService {
         city: string;
         neighborhood: string;
         address: any;
+        latitude: number;
+        longitude: number;
         cityId: any;
         neighborhoodId: any;
         brokerId: any;
@@ -84,6 +86,8 @@ export declare class PropertiesService {
         city: string;
         neighborhood: string;
         address: any;
+        latitude: number;
+        longitude: number;
         cityId: any;
         neighborhoodId: any;
         brokerId: any;
@@ -118,6 +122,7 @@ export declare class PropertiesService {
         };
         images: any;
     }>;
+    private resolveLocationLevel;
     create(createDto: CreatePropertyDto, uploadedImageUrls?: string[]): Promise<{
         id: any;
         slug: string;
@@ -139,6 +144,8 @@ export declare class PropertiesService {
         city: string;
         neighborhood: string;
         address: any;
+        latitude: number;
+        longitude: number;
         cityId: any;
         neighborhoodId: any;
         brokerId: any;
@@ -194,6 +201,8 @@ export declare class PropertiesService {
         city: string;
         neighborhood: string;
         address: any;
+        latitude: number;
+        longitude: number;
         cityId: any;
         neighborhoodId: any;
         brokerId: any;

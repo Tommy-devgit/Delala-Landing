@@ -12,6 +12,8 @@ export declare class CreatePropertyDto {
     neighborhoodId?: string;
     location_id?: string;
     address?: string;
+    latitude?: number;
+    longitude?: number;
     bedrooms?: number;
     bathrooms?: number;
     areaSqm?: number;

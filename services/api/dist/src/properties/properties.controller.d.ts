@@ -30,6 +30,8 @@ export declare class PropertiesController {
         city: string;
         neighborhood: string;
         address: any;
+        latitude: number;
+        longitude: number;
         cityId: any;
         neighborhoodId: any;
         brokerId: any;
@@ -85,6 +87,8 @@ export declare class PropertiesController {
         city: string;
         neighborhood: string;
         address: any;
+        latitude: number;
+        longitude: number;
         cityId: any;
         neighborhoodId: any;
         brokerId: any;
@@ -143,6 +147,8 @@ export declare class PropertiesController {
         city: string;
         neighborhood: string;
         address: any;
+        latitude: number;
+        longitude: number;
         cityId: any;
         neighborhoodId: any;
         brokerId: any;
@@ -198,6 +204,8 @@ export declare class PropertiesController {
         city: string;
         neighborhood: string;
         address: any;
+        latitude: number;
+        longitude: number;
         cityId: any;
         neighborhoodId: any;
         brokerId: any;
