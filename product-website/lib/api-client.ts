@@ -1,5 +1,80 @@
-import { Property, City, Neighborhood, Broker, LocationNode } from "./types";
+import { Property, City, Broker, LocationNode, PropertyType } from "./types";
 import { toCoordinates } from "./map";
+
+/**
+ * Loose shapes of the NestJS payloads. The API is generous with optional and
+ * legacy field names, so everything here is optional and normalized on the way
+ * into the strict frontend types.
+ */
+interface ApiLocationNode {
+  id?: string;
+  name?: string;
+  slug?: string;
+  latitude?: number | string | null;
+  longitude?: number | string | null;
+  children?: ApiLocationNode[];
+}
+
+interface ApiPropertyImage {
+  id?: string;
+  url?: string;
+  isHero?: boolean;
+}
+
+interface ApiBroker {
+  id?: string;
+  slug?: string;
+  agencyName?: string;
+  phone?: string;
+  rating?: number;
+  user?: { profile?: { fullName?: string; avatarUrl?: string } };
+}
+
+interface ApiProperty {
+  id: string;
+  slug: string;
+  title: string;
+  propertyType: PropertyType;
+  rentETB: number;
+  description: string;
+  bedrooms: number;
+  bathrooms: number;
+  areaSqm: number;
+  status?: string;
+  city?: string | { name?: string };
+  cityEntity?: { name?: string };
+  subCity?: string;
+  neighborhood?: string | { name?: string; subCity?: string };
+  neighborhoodEntity?: { name?: string; subCity?: string };
+  address?: string;
+  latitude?: number | string | null;
+  longitude?: number | string | null;
+  images?: ApiPropertyImage[];
+  fieldAgentNotes?: string;
+  generator?: boolean;
+  waterTank?: boolean;
+  parking?: boolean;
+  furnished?: boolean;
+  securityGuard?: boolean;
+  balcony?: boolean;
+  phone?: string;
+  contactPhone?: string;
+  broker?: ApiBroker;
+}
+
+interface ApiCity {
+  id: string;
+  name: string;
+  slug?: string;
+  image?: string;
+  tagline?: string;
+  startingRentETB?: number;
+  propertiesCount?: number;
+  description?: string;
+  latitude?: number | string | null;
+  longitude?: number | string | null;
+  subCities?: ApiLocationNode[];
+}
 
 const normalizeApiUrl = (url?: string): string => {
   if (!url) return "http://localhost:4000/api/v1";
@@ -20,7 +95,7 @@ const API_BASE = normalizeApiUrl(process.env.NEXT_PUBLIC_API_URL);
 const toSlug = (name: string): string => name.toLowerCase().replace(/\s+/g, "-");
 
 /** Normalizes one hierarchy node from the /cities response. */
-const mapLocationNode = (node: any): LocationNode => {
+const mapLocationNode = (node: ApiLocationNode): LocationNode => {
   const coordinates = toCoordinates(node?.latitude, node?.longitude);
   return {
     id: String(node?.id ?? node?.name ?? ""),
@@ -33,9 +108,11 @@ const mapLocationNode = (node: any): LocationNode => {
 };
 
 /** Maps a raw NestJS property payload onto the frontend `Property` shape. */
-const mapProperty = (p: any): Property => {
+const mapProperty = (p: ApiProperty): Property => {
   const propertyPhone = p.phone || p.contactPhone || p.broker?.phone || "";
   const coordinates = toCoordinates(p.latitude, p.longitude);
+  // `neighborhood` is a plain name on newer payloads and an object on older ones.
+  const neighborhoodObject = typeof p.neighborhood === "object" ? p.neighborhood : undefined;
 
   return {
     id: p.id,
@@ -44,22 +121,28 @@ const mapProperty = (p: any): Property => {
     propertyType: p.propertyType,
     rentETB: p.rentETB,
     city: typeof p.city === "string" ? p.city : (p.city?.name || p.cityEntity?.name || ""),
-    subCity: p.subCity || p.neighborhood?.subCity || p.neighborhoodEntity?.subCity || "",
-    neighborhood: typeof p.neighborhood === "string" ? p.neighborhood : (p.neighborhood?.name || p.neighborhoodEntity?.name || ""),
+    subCity: p.subCity || neighborhoodObject?.subCity || p.neighborhoodEntity?.subCity || "",
+    neighborhood:
+      typeof p.neighborhood === "string"
+        ? p.neighborhood
+        : neighborhoodObject?.name || p.neighborhoodEntity?.name || "",
     address: p.address || "",
     bedrooms: p.bedrooms,
     bathrooms: p.bathrooms,
     areaSqm: p.areaSqm,
-    heroImage: p.images?.find((img: any) => img.isHero)?.url || p.images?.[0]?.url || "/images/hero_property.png",
-    galleryImages: p.images?.map((img: any) => img.url) || ["/images/hero_property.png"],
+    heroImage: p.images?.find((img) => img.isHero)?.url || p.images?.[0]?.url || "/images/hero_property.png",
+    galleryImages:
+      p.images?.map((img) => img.url).filter((url): url is string => Boolean(url)) || [
+        "/images/hero_property.png",
+      ],
     verified: p.status === "APPROVED",
     fieldAgentNotes: p.fieldAgentNotes || "Physically verified by Delala field inspector.",
-    generator: p.generator,
-    waterTank: p.waterTank,
-    parking: p.parking,
-    furnished: p.furnished,
-    securityGuard: p.securityGuard,
-    balcony: p.balcony,
+    generator: Boolean(p.generator),
+    waterTank: Boolean(p.waterTank),
+    parking: Boolean(p.parking),
+    furnished: Boolean(p.furnished),
+    securityGuard: Boolean(p.securityGuard),
+    balcony: Boolean(p.balcony),
     phone: propertyPhone,
     broker: {
       id: p.broker?.id || "b1",
@@ -194,15 +277,21 @@ export const apiClient = {
       if (res.ok) {
         const data = await res.json();
         if (Array.isArray(data) && data.length > 0) {
-          return data.map((c: any) => {
+          return (data as ApiCity[]).map((c) => {
             const coordinates = toCoordinates(c.latitude, c.longitude);
             return {
-              ...c,
+              id: c.id,
+              name: c.name,
               slug: c.slug || toSlug(c.name || ""),
+              image: c.image || "/images/hero_property.png",
+              tagline: c.tagline || "",
+              startingRentETB: c.startingRentETB ?? 0,
+              propertiesCount: c.propertiesCount ?? 0,
+              description: c.description || "",
               subCities: Array.isArray(c.subCities) ? c.subCities.map(mapLocationNode) : [],
               latitude: coordinates?.latitude ?? null,
               longitude: coordinates?.longitude ?? null,
-            } as City;
+            };
           });
         }
       }
