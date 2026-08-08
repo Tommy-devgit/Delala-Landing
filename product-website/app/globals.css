@@ -70,6 +70,39 @@
   box-shadow: 0px 12px 28px rgba(76, 6, 29, 0.1);
 }
 
+/* Leaflet / OpenStreetMap surface styled to the Delala design system.
+   The Leaflet stylesheet itself is imported by the map components. */
+.leaflet-container {
+  font-family: var(--font-inter), sans-serif;
+  background: #ECE7DA;
+}
+
+/* Custom divIcon markers must not inherit Leaflet's default white box. */
+.delala-marker,
+.delala-pin {
+  background: transparent;
+  border: 0;
+}
+
+.delala-marker:focus-visible,
+.delala-pin:focus-visible {
+  outline: 2px solid #4C061D;
+  outline-offset: 4px;
+  border-radius: 9999px;
+}
+
+.leaflet-control-attribution {
+  background: rgba(255, 255, 255, 0.9);
+  color: #736F4E;
+  font-size: 10px;
+  padding: 1px 6px;
+  border-top-left-radius: 8px;
+}
+
+.leaflet-control-attribution a {
+  color: #4C061D;
+}
+
 /* Smooth custom scrollbars */
 ::-webkit-scrollbar {
   height: 6px;
