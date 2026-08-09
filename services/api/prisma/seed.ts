@@ -1,7 +1,12 @@
 import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
 
-const prisma = new PrismaClient();
+// Seeding is a long run of sequential statements. Supabase's transaction pooler
+// (DATABASE_URL, port 6543) drops those partway through, so prefer the direct
+// connection when one is configured.
+const prisma = new PrismaClient({
+  datasources: { db: { url: process.env.DIRECT_URL || process.env.DATABASE_URL } },
+});
 
 /** `--dry-run` reports every change without writing anything. */
 const DRY_RUN = process.argv.includes("--dry-run");

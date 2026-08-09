@@ -39,10 +39,33 @@ The steps, in order:
 5. Rebuild (`npm run build`) — `dist/` is committed and is what Vercel deploys.
 6. Deploy.
 
+## Connection: use the direct URL for scripts
+
+`DATABASE_URL` is Supabase's **transaction pooler** (port 6543). It is right for
+the serverless API but drops long runs of sequential statements partway through,
+which shows up as:
+
+```
+Can't reach database server at `aws-0-...pooler.supabase.com:6543`
+```
+
+Maintenance scripts should connect through `DIRECT_URL` (port 5432) instead:
+
+```ts
+new PrismaClient({
+  datasources: { db: { url: process.env.DIRECT_URL || process.env.DATABASE_URL } },
+});
+```
+
+`seed.ts` already does this. Note that the seed is **not** wrapped in a single
+transaction, so a dropped connection can leave it partly applied — re-running is
+safe, but check with `--dry-run` first if a run fails midway.
+
 ## Seed data
 
 ```bash
-npm run prisma:seed
+npm run prisma:seed              # apply
+npm run prisma:seed -- --dry-run # preview every change, write nothing
 ```
 
 Unlike the migration scripts this **writes rows** — Ethiopian cities, sub-cities
