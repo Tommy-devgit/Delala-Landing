@@ -3,6 +3,46 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
+/** `--dry-run` reports every change without writing anything. */
+const DRY_RUN = process.argv.includes("--dry-run");
+const planned: string[] = [];
+/** Orphans this run adopts — tracked so the dry-run summary reflects the plan. */
+const adoptedIds = new Set<string>();
+const plan = (message: string) => {
+  planned.push(message);
+  console.log(`${DRY_RUN ? "would " : ""}${message}`);
+};
+
+/**
+ * Finds an existing location for `name` at this level, adopting a matching
+ * orphan (a row left with no parent by the pre-fix create() path) rather than
+ * creating a duplicate beside it. Returns its id, or null when none exists.
+ */
+async function findOrAdopt(
+  name: string,
+  type: string,
+  parentId: string | null
+): Promise<string | null> {
+  const attached = await prisma.location.findFirst({
+    where: { name: { equals: name, mode: "insensitive" }, ...(parentId ? { parentId } : { type }) },
+  });
+  if (attached) return attached.id;
+
+  if (!parentId) return null;
+
+  const orphan = await prisma.location.findFirst({
+    where: { name: { equals: name, mode: "insensitive" }, type, parentId: null },
+  });
+  if (!orphan) return null;
+
+  plan(`adopt orphan ${type} "${orphan.name}" into parent ${parentId}`);
+  adoptedIds.add(orphan.id);
+  if (!DRY_RUN) {
+    await prisma.location.update({ where: { id: orphan.id }, data: { parentId } });
+  }
+  return orphan.id;
+}
+
 type SubCitySeed = {
   name: string;
   latitude?: number;
@@ -26,19 +66,29 @@ async function main() {
       latitude: 9.0192,
       longitude: 38.7525,
       subCities: [
-        {
-          name: "Bole",
-          latitude: 8.9944,
-          longitude: 38.7891,
-          neighborhoods: ["Bole Medhanialem", "Bole Michael", "Gerji", "Bole Atlas", "Bole Bulbula"],
-        },
-        { name: "Kazanchis", latitude: 9.0155, longitude: 38.7684, neighborhoods: ["Kazanchis UN Quarter", "Kazanchis Ring Road"] },
-        { name: "Old Airport", latitude: 8.9863, longitude: 38.7327, neighborhoods: ["Old Airport Villa Zone", "Bisrate Gabriel"] },
-        { name: "CMC", latitude: 9.0349, longitude: 38.8291, neighborhoods: ["CMC Sunshine", "CMC Michael"] },
-        { name: "Sarbet", latitude: 8.9911, longitude: 38.7412, neighborhoods: ["Sarbet Ethio-China", "Meskel Flower"] },
-        { name: "Atlas", latitude: 9.0093, longitude: 38.7877, neighborhoods: ["Atlas Roundabout"] },
-        { name: "Nifas Silk", latitude: 8.9612, longitude: 38.7397, neighborhoods: ["Gotera", "Saris"] },
-        { name: "Kirkos", latitude: 9.0072, longitude: 38.7583, neighborhoods: ["Meskel Square", "Bole Road"] },
+        // The 11 official Addis Ababa administrative sub-cities.
+        { name: "Bole", latitude: 8.9944, longitude: 38.7891, neighborhoods: ["Bole Medhanialem", "Bole Michael", "Gerji", "Goro", "Edna Mall", "Hayahulet", "Airport Area", "Atlas"] },
+        { name: "Yeka", latitude: 9.05, longitude: 38.81, neighborhoods: ["CMC", "Kotebe", "Summit", "Megenagna", "Lamberet"] },
+        { name: "Arada", latitude: 9.035, longitude: 38.753, neighborhoods: ["Piazza", "Mexico", "Sidist Kilo", "Arat Kilo"] },
+        { name: "Kirkos", latitude: 9.0072, longitude: 38.7583, neighborhoods: ["Kazanchis", "Meskel Square", "Sar Bet", "Bole Road"] },
+        { name: "Lideta", latitude: 9.013, longitude: 38.735, neighborhoods: ["Lideta", "Tewodros Square"] },
+        { name: "Gulele", latitude: 9.064, longitude: 38.742, neighborhoods: ["Entoto", "Shiro Meda"] },
+        { name: "Kolfe Keranio", latitude: 9.023, longitude: 38.69, neighborhoods: ["Kolfe", "Ayer Tena", "Asko"] },
+        { name: "Akaky Kaliti", latitude: 8.89, longitude: 38.79, neighborhoods: ["Akaki", "Kaliti"] },
+        { name: "Addis Ketema", latitude: 9.035, longitude: 38.735, neighborhoods: ["Merkato", "Piassa"] },
+        { name: "Lemi Kura", latitude: 9.025, longitude: 38.86, neighborhoods: ["Woreda 12", "Bole Bulbula"] },
+        { name: "Nifas Silk-Lafto", latitude: 8.9612, longitude: 38.7397, neighborhoods: ["Lafto", "Jemo", "Sarbet", "Bisrate Gabriel"] },
+
+        // Informal area names an earlier seed created as sub-cities. They are
+        // kept so listings already filed under them keep working and get a map
+        // position; see prisma/README.md for the cleanup note.
+        { name: "Kazanchis", latitude: 9.0155, longitude: 38.7684 },
+        { name: "Old Airport", latitude: 8.9863, longitude: 38.7327 },
+        { name: "CMC", latitude: 9.0349, longitude: 38.8291 },
+        { name: "Sarbet", latitude: 8.9911, longitude: 38.7412 },
+        { name: "Atlas", latitude: 9.0093, longitude: 38.7877 },
+        { name: "Nifas Silk", latitude: 8.9612, longitude: 38.7397 },
+        { name: "Bole Sub City", latitude: 8.9944, longitude: 38.7891 },
       ],
     },
     {
@@ -98,84 +148,105 @@ async function main() {
     },
   ];
 
-  for (const city of citiesData) {
-    const existing = await prisma.location.findFirst({
-      where: { name: city.name, type: "city" },
-    });
-
-    let cityRecord = existing;
-    if (!cityRecord) {
-      cityRecord = await prisma.location.create({
-        data: {
-          name: city.name,
-          type: "city",
-          latitude: city.latitude as any,
-          longitude: city.longitude as any,
-        },
+  /** Writes coordinates onto a location that is still missing them. */
+  async function backfillCoordinates(
+    id: string,
+    label: string,
+    current: { latitude: unknown; longitude: unknown },
+    latitude?: number,
+    longitude?: number
+  ) {
+    if (latitude === undefined || longitude === undefined) return;
+    if (current.latitude !== null && current.longitude !== null) return;
+    plan(`set coordinates on ${label} -> ${latitude}, ${longitude}`);
+    if (!DRY_RUN) {
+      await prisma.location.update({
+        where: { id },
+        data: { latitude: latitude as any, longitude: longitude as any },
       });
-      console.log(`Created City: ${city.name}`);
+    }
+  }
+
+  for (const city of citiesData) {
+    let cityId = await findOrAdopt(city.name, "city", null);
+
+    if (!cityId) {
+      plan(`create city "${city.name}"`);
+      cityId = DRY_RUN
+        ? `dry-run-city-${city.name}`
+        : (
+            await prisma.location.create({
+              data: { name: city.name, type: "city", latitude: city.latitude as any, longitude: city.longitude as any },
+            })
+          ).id;
     } else {
-      // Backfill coordinates onto cities seeded before the map release.
-      if (cityRecord.latitude === null || cityRecord.longitude === null) {
-        await prisma.location.update({
-          where: { id: cityRecord.id },
-          data: { latitude: city.latitude as any, longitude: city.longitude as any },
-        });
-        console.log(`Backfilled coordinates for City: ${city.name}`);
-      } else {
-        console.log(`City already exists: ${city.name}`);
+      const current = await prisma.location.findUnique({ where: { id: cityId } });
+      if (current) {
+        await backfillCoordinates(cityId, `city "${city.name}"`, current, city.latitude, city.longitude);
       }
     }
 
     for (const subCity of city.subCities) {
-      const subExisting = await prisma.location.findFirst({
-        where: { name: subCity.name, parentId: cityRecord.id },
-      });
+      let subCityId = await findOrAdopt(subCity.name, "sub_city", cityId);
 
-      let subCityRecord = subExisting;
-      if (!subCityRecord) {
-        subCityRecord = await prisma.location.create({
-          data: {
-            name: subCity.name,
-            type: "sub_city",
-            parentId: cityRecord.id,
-            latitude: (subCity.latitude ?? null) as any,
-            longitude: (subCity.longitude ?? null) as any,
-          },
-        });
-        console.log(`  └─ Created Sub-City: ${subCity.name}`);
-      } else if (
-        (subCityRecord.latitude === null || subCityRecord.longitude === null) &&
-        subCity.latitude !== undefined &&
-        subCity.longitude !== undefined
-      ) {
-        await prisma.location.update({
-          where: { id: subCityRecord.id },
-          data: { latitude: subCity.latitude as any, longitude: subCity.longitude as any },
-        });
-        console.log(`  └─ Backfilled coordinates for Sub-City: ${subCity.name}`);
+      if (!subCityId) {
+        plan(`create sub-city "${subCity.name}" under "${city.name}"`);
+        subCityId = DRY_RUN
+          ? `dry-run-sub-${subCity.name}`
+          : (
+              await prisma.location.create({
+                data: {
+                  name: subCity.name,
+                  type: "sub_city",
+                  parentId: cityId,
+                  latitude: (subCity.latitude ?? null) as any,
+                  longitude: (subCity.longitude ?? null) as any,
+                },
+              })
+            ).id;
+      } else {
+        const current = await prisma.location.findUnique({ where: { id: subCityId } });
+        if (current) {
+          await backfillCoordinates(
+            subCityId,
+            `sub-city "${subCity.name}"`,
+            current,
+            subCity.latitude,
+            subCity.longitude
+          );
+        }
       }
 
       for (const neighborhoodName of subCity.neighborhoods || []) {
-        const neighborhoodExists = await prisma.location.findFirst({
-          where: { name: neighborhoodName, parentId: subCityRecord.id },
-        });
+        const neighborhoodId = await findOrAdopt(neighborhoodName, "neighborhood", subCityId);
+        if (neighborhoodId) continue;
 
-        if (!neighborhoodExists) {
+        plan(`create neighborhood "${neighborhoodName}" under "${subCity.name}"`);
+        if (!DRY_RUN) {
           await prisma.location.create({
-            data: {
-              name: neighborhoodName,
-              type: "neighborhood",
-              parentId: subCityRecord.id,
-            },
+            data: { name: neighborhoodName, type: "neighborhood", parentId: subCityId },
           });
-          console.log(`     └─ Created Neighborhood: ${neighborhoodName}`);
         }
       }
     }
   }
 
-  console.log("🎉 Database seeding completed successfully!");
+  const remainingOrphans = await prisma.location.findMany({
+    where: { parentId: null, type: { not: "country" } },
+    select: { id: true, name: true, type: true },
+  });
+  // Cities may legitimately sit at the root; adopted rows are already accounted
+  // for by this run even though a dry run has not written them yet.
+  const strays = remainingOrphans.filter((o) => o.type !== "city" && !adoptedIds.has(o.id));
+
+  console.log("");
+  console.log(`${DRY_RUN ? "DRY RUN — " : ""}${planned.length} change(s) ${DRY_RUN ? "planned" : "applied"}.`);
+  if (strays.length > 0) {
+    console.log(`⚠️  ${strays.length} location(s) still have no parent and will not appear in the hierarchy:`);
+    strays.forEach((o) => console.log(`   - ${o.type} "${o.name}"`));
+  } else {
+    console.log("✅ No stray locations outside the hierarchy.");
+  }
 }
 
 main()
