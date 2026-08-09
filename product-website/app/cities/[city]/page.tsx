@@ -30,11 +30,11 @@ export default function CityDetailPage() {
   }, [cityName]);
 
   return (
-    <div className="bg-[#FAF8F4] min-h-screen py-8">
+    <div className="bg-canvas min-h-screen py-8">
       <div className="max-w-[1440px] mx-auto px-4 sm:px-8">
         
         {/* City Hero */}
-        <div className="relative rounded-3xl overflow-hidden bg-[#1c1b12] p-8 sm:p-12 mb-12 border border-[#ECE7DA] shadow-xl text-white">
+        <div className="relative rounded-panel overflow-hidden bg-ink p-8 sm:p-12 mb-12 border border-line shadow-xl text-white">
           <img
             src="/images/hero_property.png"
             alt={cityName}
@@ -43,7 +43,7 @@ export default function CityDetailPage() {
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
 
           <div className="relative z-10 max-w-2xl">
-            <span className="font-mono-label text-[10px] text-[#B4C292] bg-black/60 border border-white/20 px-3 py-1 rounded-full inline-block mb-4">
+            <span className="font-mono-label text-label text-accent bg-black/60 border border-white/20 px-3 py-1 rounded-full inline-block mb-4">
               {cityProperties.length} VERIFIED MARKET LISTINGS
             </span>
 
@@ -58,12 +58,12 @@ export default function CityDetailPage() {
         </div>
 
         {/* Verified City Listings */}
-        <div className="mb-8 flex items-center justify-between border-b border-[#ECE7DA] pb-4">
+        <div className="mb-8 flex items-center justify-between border-b border-line pb-4">
           <div>
-            <span className="font-mono-label text-[10px] text-[#4C061D] block mb-1">
+            <span className="font-mono-label text-label text-primary block mb-1">
               FIELD VERIFIED MARKETPLACE
             </span>
-            <h2 className="font-serif-display text-3xl font-light text-[#1c1b12]">
+            <h2 className="font-serif-display text-3xl font-light text-ink">
               Available Homes in {cityName}
             </h2>
           </div>
@@ -72,18 +72,18 @@ export default function CityDetailPage() {
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-80 rounded-3xl bg-white border border-[#ECE7DA] animate-pulse" />
+              <div key={i} className="h-80 rounded-panel bg-surface border border-line animate-pulse" />
             ))}
           </div>
         ) : cityProperties.length === 0 ? (
           <div className="py-16 text-center space-y-4 max-w-md mx-auto">
-            <div className="w-16 h-16 rounded-full bg-[#4C061D]/10 text-[#4C061D] flex items-center justify-center mx-auto">
+            <div className="w-16 h-16 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto">
               <Building2 className="w-8 h-8" />
             </div>
-            <h2 className="font-serif-display text-2xl text-[#1C1B12]">
+            <h2 className="font-serif-display text-2xl text-ink">
               No Homes Listed in {cityName}
             </h2>
-            <p className="text-xs text-[#736F4E]">
+            <p className="text-xs text-muted">
               There are currently no active properties listed in {cityName} in your database.
             </p>
           </div>

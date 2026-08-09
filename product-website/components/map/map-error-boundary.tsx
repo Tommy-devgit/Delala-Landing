@@ -23,11 +23,11 @@ export class MapErrorBoundary extends Component<
       return (
         <div
           role="status"
-          className="w-full h-full min-h-[280px] flex flex-col items-center justify-center gap-2 bg-[#FAF8F4] border border-[#ECE7DA] rounded-2xl p-6 text-center"
+          className="w-full h-full min-h-[280px] flex flex-col items-center justify-center gap-2 bg-canvas border border-line rounded-card p-6 text-center"
         >
-          <MapPinOff className="w-7 h-7 text-[#736F4E]" aria-hidden="true" />
-          <p className="font-mono-label text-[10px] text-[#4C061D] font-bold">MAP UNAVAILABLE</p>
-          <p className="text-xs text-[#736F4E] max-w-xs">
+          <MapPinOff className="w-7 h-7 text-muted" aria-hidden="true" />
+          <p className="font-mono-label text-label text-primary font-bold">MAP UNAVAILABLE</p>
+          <p className="text-xs text-muted max-w-xs">
             {this.props.label || "The map could not be loaded. Everything else on this page still works."}
           </p>
         </div>

@@ -14,8 +14,8 @@ import type { PropertyMapProps } from "./property-map";
 
 function MapSkeleton({ label }: { label: string }) {
   return (
-    <div className="w-full h-full min-h-[280px] rounded-2xl bg-[#ECE7DA]/60 border border-[#ECE7DA] animate-pulse flex items-center justify-center">
-      <span className="font-mono-label text-[10px] text-[#736F4E]">{label}</span>
+    <div className="w-full h-full min-h-[280px] rounded-card bg-line/60 border border-line animate-pulse flex items-center justify-center">
+      <span className="font-mono-label text-label text-muted">{label}</span>
     </div>
   );
 }

@@ -57,25 +57,25 @@ export default function PropertyDetailPage() {
 
   if (loading) {
     return (
-      <div className="bg-[#FAF8F4] min-h-screen py-16 px-8">
-        <div className="max-w-[1440px] mx-auto h-96 rounded-3xl bg-white border border-[#ECE7DA] animate-pulse" />
+      <div className="bg-canvas min-h-screen py-16 px-8">
+        <div className="max-w-[1440px] mx-auto h-96 rounded-panel bg-surface border border-line animate-pulse" />
       </div>
     );
   }
 
   if (!property) {
     return (
-      <div className="bg-[#FAF8F4] min-h-screen py-24 text-center space-y-4 max-w-md mx-auto">
-        <div className="w-16 h-16 rounded-full bg-[#4C061D]/10 text-[#4C061D] flex items-center justify-center mx-auto">
+      <div className="bg-canvas min-h-screen py-24 text-center space-y-4 max-w-md mx-auto">
+        <div className="w-16 h-16 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto">
           <Building2 className="w-8 h-8" />
         </div>
-        <h2 className="font-serif-display text-2xl text-[#1C1B12]">
+        <h2 className="font-serif-display text-2xl text-ink">
           Property Not Found
         </h2>
-        <p className="text-xs text-[#736F4E]">
+        <p className="text-xs text-muted">
           The requested property listing does not exist or has been removed from the database.
         </p>
-        <Link href="/" className="inline-block px-6 py-2.5 rounded-full bg-[#4C061D] text-white font-mono-label text-xs font-bold">
+        <Link href="/" className="inline-block px-6 py-2.5 rounded-full bg-primary text-white font-mono-label text-xs font-bold">
           Return to Marketplace
         </Link>
       </div>
@@ -83,17 +83,17 @@ export default function PropertyDetailPage() {
   }
 
   return (
-    <div className="bg-[#FAF8F4] min-h-screen py-8">
+    <div className="bg-canvas min-h-screen py-8">
       <div className="max-w-[1440px] mx-auto px-4 sm:px-8">
         
         {/* Top Breadcrumb & Actions Bar */}
-        <div className="flex items-center justify-between mb-6 pb-4 border-b border-[#ECE7DA]">
-          <div className="flex items-center gap-2 text-xs font-mono-label text-[#736F4E]">
-            <Link href="/" className="hover:text-[#4C061D]">MARKETPLACE</Link>
+        <div className="flex items-center justify-between mb-6 pb-4 border-b border-line">
+          <div className="flex items-center gap-2 text-xs font-mono-label text-muted">
+            <Link href="/" className="hover:text-primary">MARKETPLACE</Link>
             {property.city && (
               <>
                 <span>/</span>
-                <Link href={`/cities/${property.city.toLowerCase().replace(/\s+/g, "-")}`} className="hover:text-[#4C061D]">
+                <Link href={`/cities/${property.city.toLowerCase().replace(/\s+/g, "-")}`} className="hover:text-primary">
                   {property.city.toUpperCase()}
                 </Link>
               </>
@@ -101,7 +101,7 @@ export default function PropertyDetailPage() {
             {property.subCity && (
               <>
                 <span>/</span>
-                <span className="text-[#4C061D] font-bold">{property.subCity.toUpperCase()}</span>
+                <span className="text-primary font-bold">{property.subCity.toUpperCase()}</span>
               </>
             )}
           </div>
@@ -109,13 +109,13 @@ export default function PropertyDetailPage() {
           <div className="flex items-center gap-3">
             <button
               onClick={() => setIsFav(!isFav)}
-              className={`p-2.5 rounded-full border border-[#ECE7DA] transition-colors ${
-                isFav ? "bg-red-50 text-red-600 border-red-200" : "bg-white text-[#736F4E] hover:text-[#4C061D]"
+              className={`p-2.5 rounded-full border border-line transition-colors ${
+                isFav ? "bg-red-50 text-red-600 border-red-200" : "bg-surface text-muted hover:text-primary"
               }`}
             >
               <Heart className={`w-4 h-4 ${isFav ? "fill-current" : ""}`} />
             </button>
-            <button className="p-2.5 rounded-full bg-white border border-[#ECE7DA] text-[#736F4E] hover:text-[#4C061D] transition-colors">
+            <button className="p-2.5 rounded-full bg-surface border border-line text-muted hover:text-primary transition-colors">
               <Share2 className="w-4 h-4" />
             </button>
           </div>
@@ -125,37 +125,37 @@ export default function PropertyDetailPage() {
         <div className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <span className="font-mono-label text-[10px] text-[#4C061D] bg-[#B4C292]/30 border border-[#B4C292]/50 px-2.5 py-0.5 rounded-full font-bold">
+              <span className="font-mono-label text-label text-primary bg-accent/30 border border-accent/50 px-2.5 py-0.5 rounded-full font-bold">
                 VERIFIED PROPERTY
               </span>
-              <span className="text-xs font-mono-label text-[#736F4E]">
+              <span className="text-xs font-mono-label text-muted">
                 {property.propertyType}
               </span>
             </div>
 
-            <h1 className="font-serif-display text-3xl sm:text-4xl font-light text-[#1c1b12]">
+            <h1 className="font-serif-display text-3xl sm:text-4xl font-light text-ink">
               {property.title}
             </h1>
 
-            <p className="text-xs text-[#736F4E] mt-1 flex items-center gap-1 font-mono-label">
-              <MapPin className="w-3.5 h-3.5 text-[#4C061D]" />
+            <p className="text-xs text-muted mt-1 flex items-center gap-1 font-mono-label">
+              <MapPin className="w-3.5 h-3.5 text-primary" />
               <span>
                 {property.address || [property.neighborhood, property.subCity, property.city].filter(Boolean).join(", ")}
               </span>
             </p>
           </div>
 
-          <div className="bg-white p-4 rounded-2xl border border-[#ECE7DA] shadow-xs text-right">
-            <span className="font-mono-label text-[10px] text-[#736F4E] block">MONTHLY RENT</span>
-            <div className="font-mono-label text-2xl font-bold text-[#4C061D]">
-              ETB {property.rentETB.toLocaleString()} <span className="text-xs font-normal text-[#736F4E]">/mo</span>
+          <div className="bg-surface p-4 rounded-card border border-line shadow-xs text-right">
+            <span className="font-mono-label text-label text-muted block">MONTHLY RENT</span>
+            <div className="font-mono-label text-2xl font-bold text-primary">
+              ETB {property.rentETB.toLocaleString()} <span className="text-xs font-normal text-muted">/mo</span>
             </div>
           </div>
         </div>
 
         {/* Image Gallery */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 mb-8">
-          <div className="lg:col-span-8 aspect-[16/10] rounded-3xl overflow-hidden border border-[#ECE7DA] bg-[#1c1b12] relative shadow-md">
+          <div className="lg:col-span-8 aspect-[16/10] rounded-panel overflow-hidden border border-line bg-ink relative shadow-md">
             <img src={activeImage} alt={property.title} className="w-full h-full object-cover" />
           </div>
 
@@ -164,8 +164,8 @@ export default function PropertyDetailPage() {
               <button
                 key={idx}
                 onClick={() => setActiveImage(img)}
-                className={`rounded-2xl overflow-hidden border border-[#ECE7DA] aspect-[4/3] relative ${
-                  activeImage === img ? "ring-2 ring-[#4C061D]" : ""
+                className={`rounded-card overflow-hidden border border-line aspect-[4/3] relative ${
+                  activeImage === img ? "ring-2 ring-primary" : ""
                 }`}
               >
                 <img src={img} alt="" className="w-full h-full object-cover" />
@@ -179,12 +179,12 @@ export default function PropertyDetailPage() {
           <div className="lg:col-span-8 space-y-8">
             
             {/* Infrastructure Specs */}
-            <div className="bg-white p-6 rounded-3xl border border-[#ECE7DA] space-y-4">
-              <h3 className="font-serif-display text-xl text-[#1c1b12]">
+            <div className="bg-surface p-6 rounded-panel border border-line space-y-4">
+              <h3 className="font-serif-display text-xl text-ink">
                 Verified Infrastructure Specs
               </h3>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs font-mono-label text-[#736F4E]">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs font-mono-label text-muted">
                 <div>🛏️ {property.bedrooms} Bedrooms</div>
                 <div>🚿 {property.bathrooms} Bathrooms</div>
                 <div>📐 {property.areaSqm} sqm</div>
@@ -193,11 +193,11 @@ export default function PropertyDetailPage() {
             </div>
 
             {/* Description */}
-            <div className="bg-white p-6 rounded-3xl border border-[#ECE7DA] space-y-3">
-              <h3 className="font-serif-display text-xl text-[#1c1b12]">
+            <div className="bg-surface p-6 rounded-panel border border-line space-y-3">
+              <h3 className="font-serif-display text-xl text-ink">
                 Property Overview
               </h3>
-              <p className="text-sm text-[#736F4E] leading-relaxed">
+              <p className="text-sm text-muted leading-relaxed">
                 {property.description}
               </p>
             </div>
@@ -206,17 +206,17 @@ export default function PropertyDetailPage() {
 
           {/* Right Property Lister Contact Card */}
           <div className="lg:col-span-4 space-y-6">
-            <div className="bg-white p-6 rounded-3xl border border-[#ECE7DA] shadow-md space-y-6 sticky top-24">
+            <div className="bg-surface p-6 rounded-panel border border-line shadow-md space-y-6 sticky top-24">
               
               <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-full bg-[#4C061D] text-white flex items-center justify-center font-serif-display text-xl font-light border border-[#ECE7DA]">
+                <div className="w-14 h-14 rounded-full bg-primary text-white flex items-center justify-center font-serif-display text-xl font-light border border-line">
                   {(property.broker?.name || "Verified Owner").slice(0, 2).toUpperCase()}
                 </div>
                 <div>
-                  <h4 className="font-serif-display text-lg text-[#1c1b12]">{property.broker?.name || "Verified Owner"}</h4>
-                  <p className="text-xs font-mono-label text-[#4C061D]">LISTED PROPERTY OWNER</p>
+                  <h4 className="font-serif-display text-lg text-ink">{property.broker?.name || "Verified Owner"}</h4>
+                  <p className="text-xs font-mono-label text-primary">LISTED PROPERTY OWNER</p>
                   {(property.phone || property.broker?.phone) && (
-                    <p className="text-xs font-mono-label text-[#736F4E] font-bold mt-0.5">{property.phone || property.broker?.phone}</p>
+                    <p className="text-xs font-mono-label text-muted font-bold mt-0.5">{property.phone || property.broker?.phone}</p>
                   )}
                 </div>
               </div>
@@ -226,9 +226,9 @@ export default function PropertyDetailPage() {
                   <>
                     <a
                       href={`tel:${(property.phone || property.broker?.phone).replace(/\s+/g, "")}`}
-                      className="w-full py-3.5 rounded-full bg-[#4C061D] text-white font-mono-label text-xs font-bold hover:bg-[#3B0416] transition-colors shadow-md flex items-center justify-center gap-2"
+                      className="w-full py-3.5 rounded-full bg-primary text-white font-mono-label text-xs font-bold hover:bg-primary-hover transition-colors shadow-md flex items-center justify-center gap-2"
                     >
-                      <Phone className="w-4 h-4 text-[#B4C292]" />
+                      <Phone className="w-4 h-4 text-accent" />
                       <span>CALL {property.phone || property.broker?.phone}</span>
                     </a>
 
@@ -246,9 +246,9 @@ export default function PropertyDetailPage() {
 
                 <button
                   onClick={() => setIsScheduleOpen(true)}
-                  className="w-full py-3 rounded-full bg-[#FAF8F4] text-[#1C1B12] font-mono-label text-xs font-bold hover:bg-[#ECE7DA] transition-colors border border-[#ECE7DA] flex items-center justify-center gap-2"
+                  className="w-full py-3 rounded-full bg-canvas text-ink font-mono-label text-xs font-bold hover:bg-line transition-colors border border-line flex items-center justify-center gap-2"
                 >
-                  <Calendar className="w-4 h-4 text-[#4C061D]" />
+                  <Calendar className="w-4 h-4 text-primary" />
                   <span>SCHEDULE WALKTHROUGH</span>
                 </button>
               </div>
@@ -259,8 +259,8 @@ export default function PropertyDetailPage() {
 
         {/* Similar Listings */}
         {similarListings.length > 0 && (
-          <div className="mt-16 pt-8 border-t border-[#ECE7DA]">
-            <h3 className="font-serif-display text-2xl text-[#1c1b12] mb-6">
+          <div className="mt-16 pt-8 border-t border-line">
+            <h3 className="font-serif-display text-2xl text-ink mb-6">
               Similar Verified Listings in {property.city}
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">

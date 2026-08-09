@@ -40,27 +40,27 @@ function SignInContent() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-80px)] bg-[#FAF8F4] flex items-center justify-center p-4 sm:p-8">
+    <div className="min-h-[calc(100vh-80px)] bg-canvas flex items-center justify-center p-4 sm:p-8">
       <div className="w-full max-w-md">
         {/* Top Logo / Brand Header */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2 mb-3">
-            <span className="font-serif-display font-light text-3xl tracking-tight text-[#4C061D]">
+            <span className="font-serif-display font-light text-3xl tracking-tight text-primary">
               DELALA
             </span>
           </Link>
-          <h1 className="font-serif-display text-3xl font-light text-[#1C1B12]">
+          <h1 className="font-serif-display text-3xl font-light text-ink">
             Sign in to your account
           </h1>
-          <p className="text-xs text-[#736F4E] mt-1.5 font-medium">
+          <p className="text-xs text-muted mt-1.5 font-medium">
             Welcome back! Access your saved properties, messages, and listings.
           </p>
         </div>
 
         {/* Sign In Card */}
-        <div className="bg-white rounded-3xl border border-[#ECE7DA] shadow-xl p-6 sm:p-8 space-y-6">
+        <div className="bg-surface rounded-panel border border-line shadow-xl p-6 sm:p-8 space-y-6">
           {error && (
-            <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium flex items-center gap-2">
+            <div className="p-4 rounded-card bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium flex items-center gap-2">
               <span className="shrink-0 font-bold">⚠️</span>
               <span>{error}</span>
             </div>
@@ -69,7 +69,7 @@ function SignInContent() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Email Field */}
             <div>
-              <label className="block text-[10px] font-mono-label text-[#736F4E] font-bold uppercase mb-1.5">
+              <label className="block text-label font-mono-label text-muted font-bold uppercase mb-1.5">
                 EMAIL ADDRESS *
               </label>
               <div className="relative">
@@ -79,21 +79,21 @@ function SignInContent() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@example.et"
-                  className="w-full p-3.5 pl-11 rounded-2xl bg-[#FAF8F4] border border-[#ECE7DA] text-xs text-[#1C1B12] focus:outline-none focus:border-[#4C061D] transition-colors"
+                  className="w-full p-3.5 pl-11 rounded-card bg-canvas border border-line text-xs text-ink focus:outline-none focus:border-primary transition-colors"
                 />
-                <Mail className="w-4 h-4 text-[#736F4E] absolute left-4 top-3.5 pointer-events-none" />
+                <Mail className="w-4 h-4 text-muted absolute left-4 top-3.5 pointer-events-none" />
               </div>
             </div>
 
             {/* Password Field */}
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <label className="block text-[10px] font-mono-label text-[#736F4E] font-bold uppercase">
+                <label className="block text-label font-mono-label text-muted font-bold uppercase">
                   PASSWORD *
                 </label>
                 <Link
                   href="/auth/forgot-password"
-                  className="text-[11px] font-mono-label text-[#4C061D] font-bold hover:underline"
+                  className="text-micro font-mono-label text-primary font-bold hover:underline"
                 >
                   Forgot password?
                 </Link>
@@ -105,13 +105,13 @@ function SignInContent() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full p-3.5 pl-11 pr-11 rounded-2xl bg-[#FAF8F4] border border-[#ECE7DA] text-xs text-[#1C1B12] focus:outline-none focus:border-[#4C061D] transition-colors"
+                  className="w-full p-3.5 pl-11 pr-11 rounded-card bg-canvas border border-line text-xs text-ink focus:outline-none focus:border-primary transition-colors"
                 />
-                <Lock className="w-4 h-4 text-[#736F4E] absolute left-4 top-3.5 pointer-events-none" />
+                <Lock className="w-4 h-4 text-muted absolute left-4 top-3.5 pointer-events-none" />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-3.5 text-[#736F4E] hover:text-[#1C1B12] transition-colors"
+                  className="absolute right-4 top-3.5 text-muted hover:text-ink transition-colors"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -122,18 +122,18 @@ function SignInContent() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-4 rounded-full bg-[#4C061D] text-white font-mono-label text-xs font-bold hover:bg-[#3B0416] transition-colors shadow-lg flex items-center justify-center gap-2 pt-4"
+              className="w-full py-4 rounded-full bg-primary text-white font-mono-label text-xs font-bold hover:bg-primary-hover transition-colors shadow-lg flex items-center justify-center gap-2 pt-4"
             >
               <span>{loading ? "Signing in..." : "Sign In →"}</span>
             </button>
           </form>
 
-          <div className="pt-2 border-t border-[#ECE7DA] text-center">
-            <p className="text-xs text-[#736F4E]">
+          <div className="pt-2 border-t border-line text-center">
+            <p className="text-xs text-muted">
               Don't have an account?{" "}
               <Link
                 href="/auth/signup"
-                className="font-mono-label text-[#4C061D] font-bold hover:underline"
+                className="font-mono-label text-primary font-bold hover:underline"
               >
                 Create Account
               </Link>
@@ -142,8 +142,8 @@ function SignInContent() {
         </div>
 
         {/* Security Footer Note */}
-        <div className="mt-6 text-center text-xs text-[#736F4E] flex items-center justify-center gap-1.5">
-          <ShieldCheck className="w-4 h-4 text-[#4C061D]" />
+        <div className="mt-6 text-center text-xs text-muted flex items-center justify-center gap-1.5">
+          <ShieldCheck className="w-4 h-4 text-primary" />
           <span>Encrypted SSL Connection — Supabase PostgreSQL Verified</span>
         </div>
       </div>
@@ -153,7 +153,7 @@ function SignInContent() {
 
 export default function SignInPage() {
   return (
-    <Suspense fallback={<div className="min-h-[calc(100vh-80px)] bg-[#FAF8F4] flex items-center justify-center text-xs text-[#736F4E]">Loading...</div>}>
+    <Suspense fallback={<div className="min-h-[calc(100vh-80px)] bg-canvas flex items-center justify-center text-xs text-muted">Loading...</div>}>
       <SignInContent />
     </Suspense>
   );

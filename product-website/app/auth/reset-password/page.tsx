@@ -46,39 +46,39 @@ function ResetPasswordContent() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-80px)] bg-[#FAF8F4] flex items-center justify-center p-4 sm:p-8">
+    <div className="min-h-[calc(100vh-80px)] bg-canvas flex items-center justify-center p-4 sm:p-8">
       <div className="w-full max-w-md">
         {/* Brand Header */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2 mb-3">
-            <span className="font-serif-display font-light text-3xl tracking-tight text-[#4C061D]">
+            <span className="font-serif-display font-light text-3xl tracking-tight text-primary">
               DELALA
             </span>
           </Link>
-          <h1 className="font-serif-display text-3xl font-light text-[#1C1B12]">
+          <h1 className="font-serif-display text-3xl font-light text-ink">
             Create New Password
           </h1>
-          <p className="text-xs text-[#736F4E] mt-1.5 font-medium">
+          <p className="text-xs text-muted mt-1.5 font-medium">
             Set a new secure password for your Delala account.
           </p>
         </div>
 
         {/* Reset Password Card */}
-        <div className="bg-white rounded-3xl border border-[#ECE7DA] shadow-xl p-6 sm:p-8 space-y-6">
+        <div className="bg-surface rounded-panel border border-line shadow-xl p-6 sm:p-8 space-y-6">
           {completed ? (
             <div className="text-center py-4 space-y-4">
-              <div className="w-12 h-12 rounded-full bg-[#B4C292]/20 text-[#4C061D] flex items-center justify-center mx-auto">
-                <CheckCircle2 className="w-6 h-6 text-[#4C061D]" />
+              <div className="w-12 h-12 rounded-full bg-accent/20 text-primary flex items-center justify-center mx-auto">
+                <CheckCircle2 className="w-6 h-6 text-primary" />
               </div>
-              <h3 className="font-serif-display text-xl text-[#1C1B12]">
+              <h3 className="font-serif-display text-xl text-ink">
                 Password Reset Successfully
               </h3>
-              <p className="text-xs text-[#736F4E]">
+              <p className="text-xs text-muted">
                 Your password has been updated. You can now sign in with your new password.
               </p>
               <Link
                 href="/auth/signin"
-                className="inline-flex items-center justify-center gap-2 w-full py-3.5 rounded-full bg-[#4C061D] text-white font-mono-label text-xs font-bold hover:bg-[#3B0416] transition-colors"
+                className="inline-flex items-center justify-center gap-2 w-full py-3.5 rounded-full bg-primary text-white font-mono-label text-xs font-bold hover:bg-primary-hover transition-colors"
               >
                 <span>Proceed to Sign In →</span>
               </Link>
@@ -86,13 +86,13 @@ function ResetPasswordContent() {
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
               {error && (
-                <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium">
+                <div className="p-4 rounded-card bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium">
                   {error}
                 </div>
               )}
 
               <div>
-                <label className="block text-[10px] font-mono-label text-[#736F4E] font-bold uppercase mb-1.5">
+                <label className="block text-label font-mono-label text-muted font-bold uppercase mb-1.5">
                   NEW PASSWORD *
                 </label>
                 <div className="relative">
@@ -102,13 +102,13 @@ function ResetPasswordContent() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Min 6 characters"
-                    className="w-full p-3.5 pl-11 pr-11 rounded-2xl bg-[#FAF8F4] border border-[#ECE7DA] text-xs text-[#1C1B12] focus:outline-none focus:border-[#4C061D] transition-colors"
+                    className="w-full p-3.5 pl-11 pr-11 rounded-card bg-canvas border border-line text-xs text-ink focus:outline-none focus:border-primary transition-colors"
                   />
-                  <Lock className="w-4 h-4 text-[#736F4E] absolute left-4 top-3.5 pointer-events-none" />
+                  <Lock className="w-4 h-4 text-muted absolute left-4 top-3.5 pointer-events-none" />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-3.5 text-[#736F4E] hover:text-[#1C1B12] transition-colors"
+                    className="absolute right-4 top-3.5 text-muted hover:text-ink transition-colors"
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -116,7 +116,7 @@ function ResetPasswordContent() {
               </div>
 
               <div>
-                <label className="block text-[10px] font-mono-label text-[#736F4E] font-bold uppercase mb-1.5">
+                <label className="block text-label font-mono-label text-muted font-bold uppercase mb-1.5">
                   CONFIRM NEW PASSWORD *
                 </label>
                 <div className="relative">
@@ -126,16 +126,16 @@ function ResetPasswordContent() {
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="Re-enter new password"
-                    className="w-full p-3.5 pl-11 rounded-2xl bg-[#FAF8F4] border border-[#ECE7DA] text-xs text-[#1C1B12] focus:outline-none focus:border-[#4C061D] transition-colors"
+                    className="w-full p-3.5 pl-11 rounded-card bg-canvas border border-line text-xs text-ink focus:outline-none focus:border-primary transition-colors"
                   />
-                  <Lock className="w-4 h-4 text-[#736F4E] absolute left-4 top-3.5 pointer-events-none" />
+                  <Lock className="w-4 h-4 text-muted absolute left-4 top-3.5 pointer-events-none" />
                 </div>
               </div>
 
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-4 rounded-full bg-[#4C061D] text-white font-mono-label text-xs font-bold hover:bg-[#3B0416] transition-colors shadow-lg flex items-center justify-center gap-2"
+                className="w-full py-4 rounded-full bg-primary text-white font-mono-label text-xs font-bold hover:bg-primary-hover transition-colors shadow-lg flex items-center justify-center gap-2"
               >
                 <span>{loading ? "Updating Password..." : "Update Password →"}</span>
               </button>
@@ -149,7 +149,7 @@ function ResetPasswordContent() {
 
 export default function ResetPasswordPage() {
   return (
-    <Suspense fallback={<div className="min-h-[calc(100vh-80px)] bg-[#FAF8F4] flex items-center justify-center text-xs text-[#736F4E]">Loading...</div>}>
+    <Suspense fallback={<div className="min-h-[calc(100vh-80px)] bg-canvas flex items-center justify-center text-xs text-muted">Loading...</div>}>
       <ResetPasswordContent />
     </Suspense>
   );

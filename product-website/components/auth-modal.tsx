@@ -50,25 +50,25 @@ export function AuthModal({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-white rounded-3xl border border-[#ECE7DA] shadow-2xl max-w-md w-full p-6 sm:p-8 relative overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+      <div className="bg-surface rounded-panel border border-line shadow-2xl max-w-md w-full p-6 sm:p-8 relative overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-6 right-6 p-2 rounded-full bg-[#FAF8F4] border border-[#ECE7DA] text-[#736F4E] hover:text-[#4C061D] transition-colors"
+          className="absolute top-6 right-6 p-2 rounded-full bg-canvas border border-line text-muted hover:text-primary transition-colors"
         >
           <X className="w-4 h-4" />
         </button>
 
         <div className="text-center max-w-sm mx-auto space-y-2 mb-6">
-          <span className="font-mono-label text-[10px] text-[#4C061D] bg-[#FAF8F4] border border-[#ECE7DA] px-3.5 py-1 rounded-full inline-flex items-center gap-1.5 shadow-xs">
-            <ShieldCheck className="w-3.5 h-3.5 text-[#4C061D]" />
+          <span className="font-mono-label text-label text-primary bg-canvas border border-line px-3.5 py-1 rounded-full inline-flex items-center gap-1.5 shadow-xs">
+            <ShieldCheck className="w-3.5 h-3.5 text-primary" />
             <span>AUTHENTICATION</span>
           </span>
-          <h2 className="font-serif-display text-3xl text-[#1C1B12]">
+          <h2 className="font-serif-display text-3xl text-ink">
             {isSignUp ? "Create Your Account" : "Sign In to Delala"}
           </h2>
-          <p className="text-xs text-[#736F4E]">
+          <p className="text-xs text-muted">
             {isSignUp
               ? "Create a seller/broker account to list properties on Supabase PostgreSQL database."
               : "Sign in with your verified email and password."}
@@ -76,7 +76,7 @@ export function AuthModal({
         </div>
 
         {error && (
-          <div className="mb-4 p-3 rounded-2xl bg-red-50 border border-red-200 text-red-600 text-xs font-medium">
+          <div className="mb-4 p-3 rounded-card bg-red-50 border border-red-200 text-red-600 text-xs font-medium">
             {error}
           </div>
         )}
@@ -84,7 +84,7 @@ export function AuthModal({
         <form onSubmit={handleSubmit} className="space-y-4">
           {isSignUp && (
             <div>
-              <label className="block text-[10px] font-mono-label text-[#736F4E] font-bold uppercase mb-1">
+              <label className="block text-label font-mono-label text-muted font-bold uppercase mb-1">
                 FULL NAME / AGENCY NAME *
               </label>
               <div className="relative">
@@ -94,15 +94,15 @@ export function AuthModal({
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   placeholder="e.g. Bole Premier Real Estate"
-                  className="w-full p-3.5 pl-10 rounded-2xl bg-[#FAF8F4] border border-[#ECE7DA] text-xs text-[#1C1B12] focus:outline-none focus:border-[#4C061D]"
+                  className="w-full p-3.5 pl-10 rounded-card bg-canvas border border-line text-xs text-ink focus:outline-none focus:border-primary"
                 />
-                <User className="w-4 h-4 text-[#736F4E] absolute left-3.5 top-3.5" />
+                <User className="w-4 h-4 text-muted absolute left-3.5 top-3.5" />
               </div>
             </div>
           )}
 
           <div>
-            <label className="block text-[10px] font-mono-label text-[#736F4E] font-bold uppercase mb-1">
+            <label className="block text-label font-mono-label text-muted font-bold uppercase mb-1">
               EMAIL ADDRESS *
             </label>
             <div className="relative">
@@ -112,14 +112,14 @@ export function AuthModal({
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="name@example.et"
-                className="w-full p-3.5 pl-10 rounded-2xl bg-[#FAF8F4] border border-[#ECE7DA] text-xs text-[#1C1B12] focus:outline-none focus:border-[#4C061D]"
+                className="w-full p-3.5 pl-10 rounded-card bg-canvas border border-line text-xs text-ink focus:outline-none focus:border-primary"
               />
-              <Mail className="w-4 h-4 text-[#736F4E] absolute left-3.5 top-3.5" />
+              <Mail className="w-4 h-4 text-muted absolute left-3.5 top-3.5" />
             </div>
           </div>
 
           <div>
-            <label className="block text-[10px] font-mono-label text-[#736F4E] font-bold uppercase mb-1">
+            <label className="block text-label font-mono-label text-muted font-bold uppercase mb-1">
               PASSWORD *
             </label>
             <div className="relative">
@@ -129,29 +129,29 @@ export function AuthModal({
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full p-3.5 pl-10 rounded-2xl bg-[#FAF8F4] border border-[#ECE7DA] text-xs text-[#1C1B12] focus:outline-none focus:border-[#4C061D]"
+                className="w-full p-3.5 pl-10 rounded-card bg-canvas border border-line text-xs text-ink focus:outline-none focus:border-primary"
               />
-              <KeyRound className="w-4 h-4 text-[#736F4E] absolute left-3.5 top-3.5" />
+              <KeyRound className="w-4 h-4 text-muted absolute left-3.5 top-3.5" />
             </div>
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-4 rounded-full bg-[#4C061D] text-white font-mono-label text-xs font-bold hover:bg-[#3B0416] transition-colors shadow-md flex items-center justify-center gap-2 mt-2"
+            className="w-full py-4 rounded-full bg-primary text-white font-mono-label text-xs font-bold hover:bg-primary-hover transition-colors shadow-md flex items-center justify-center gap-2 mt-2"
           >
-            <CheckCircle2 className="w-4 h-4 text-[#B4C292]" />
+            <CheckCircle2 className="w-4 h-4 text-accent" />
             <span>{loading ? "Authenticating..." : isSignUp ? "Create Account →" : "Sign In →"}</span>
           </button>
         </form>
 
-        <div className="mt-6 pt-4 border-t border-[#ECE7DA] text-center">
+        <div className="mt-6 pt-4 border-t border-line text-center">
           <button
             onClick={() => {
               setIsSignUp(!isSignUp);
               setError("");
             }}
-            className="text-xs text-[#4C061D] font-mono-label font-bold hover:underline"
+            className="text-xs text-primary font-mono-label font-bold hover:underline"
           >
             {isSignUp ? "Already have an account? Sign In" : "Need an account to list property? Sign Up"}
           </button>

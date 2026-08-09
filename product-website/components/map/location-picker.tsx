@@ -87,7 +87,7 @@ export function LocationPicker({
 
   return (
     <div className={`space-y-2 ${className}`}>
-      <div className="relative w-full h-[300px] sm:h-[360px] rounded-2xl overflow-hidden border border-[#ECE7DA]">
+      <div className="relative w-full h-[300px] sm:h-[360px] rounded-card overflow-hidden border border-line">
         <DelalaMap
           center={initialCenter}
           zoom={initialZoom}
@@ -111,20 +111,20 @@ export function LocationPicker({
         </DelalaMap>
 
         {!value && (
-          <div className="absolute inset-x-3 bottom-7 z-[600] rounded-xl bg-white/95 backdrop-blur-md border border-[#ECE7DA] px-3 py-2 shadow-sm flex items-center gap-2 pointer-events-none">
-            <MapPin className="w-3.5 h-3.5 text-[#4C061D] shrink-0" aria-hidden="true" />
-            <span className="text-[11px] text-[#736F4E]">
+          <div className="absolute inset-x-3 bottom-7 z-[600] rounded-control bg-surface/95 backdrop-blur-md border border-line px-3 py-2 shadow-sm flex items-center gap-2 pointer-events-none">
+            <MapPin className="w-3.5 h-3.5 text-primary shrink-0" aria-hidden="true" />
+            <span className="text-micro text-muted">
               Tap the map to set the approximate location of the property.
             </span>
           </div>
         )}
       </div>
 
-      <p className="text-[10px] text-[#736F4E] leading-relaxed">
+      <p className="text-label text-muted leading-relaxed">
         {value ? (
           <>
             Approximate location set near{" "}
-            <span className="font-mono-label text-[#4C061D] font-bold">
+            <span className="font-mono-label text-primary font-bold">
               {formatApproximateCoordinates(value)}
             </span>
             . Drag the pin to adjust. This is shown to renters as a general area, not an exact address.

@@ -59,7 +59,7 @@ export default function RootLayout({
       lang="en"
       className={`${manrope.variable} ${inter.variable} ${serifDisplay.variable} ${monoLabel.variable} scroll-smooth`}
     >
-      <body className="bg-[#FAF8F4] text-[#2D2D2D] antialiased flex flex-col min-h-screen">
+      <body className="bg-canvas text-body antialiased flex flex-col min-h-screen">
         <Header />
         <main className="flex-1">{children}</main>
         <Footer />

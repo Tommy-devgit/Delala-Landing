@@ -83,7 +83,7 @@ export function DelalaMap({
         zoom={zoom}
         zoomControl={false}
         scrollWheelZoom={scrollWheelZoom}
-        className="w-full h-full min-h-[280px] z-0 bg-[#ECE7DA]"
+        className="w-full h-full min-h-[280px] z-0 bg-line"
       >
         <TileLayer
           url={OSM_TILE_URL}
@@ -109,10 +109,10 @@ export function DelalaMap({
       {tilesUnavailable && (
         <div
           role="status"
-          className="absolute inset-x-3 top-3 z-[500] flex items-center gap-2 rounded-xl bg-white/95 backdrop-blur-md border border-[#ECE7DA] px-3 py-2 shadow-sm"
+          className="absolute inset-x-3 top-3 z-[500] flex items-center gap-2 rounded-control bg-surface/95 backdrop-blur-md border border-line px-3 py-2 shadow-sm"
         >
-          <WifiOff className="w-3.5 h-3.5 text-[#4C061D] shrink-0" aria-hidden="true" />
-          <span className="text-[11px] text-[#736F4E]">
+          <WifiOff className="w-3.5 h-3.5 text-primary shrink-0" aria-hidden="true" />
+          <span className="text-micro text-muted">
             Map tiles could not be loaded. Listings below are unaffected.
           </span>
         </div>

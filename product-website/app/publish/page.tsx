@@ -24,8 +24,8 @@ interface SelectedImage {
 }
 
 const INPUT_CLASS =
-  "w-full p-3.5 rounded-2xl bg-[#FAF8F4] border border-[#ECE7DA] text-xs text-[#1C1B12] focus:outline-none focus:border-[#4C061D]";
-const LABEL_CLASS = "block text-[10px] font-mono-label text-[#736F4E] font-bold uppercase mb-1";
+  "w-full p-3.5 rounded-card bg-canvas border border-line text-xs text-ink focus:outline-none focus:border-primary";
+const LABEL_CLASS = "block text-label font-mono-label text-muted font-bold uppercase mb-1";
 
 export default function PublishListingPage() {
   const router = useRouter();
@@ -206,14 +206,14 @@ export default function PublishListingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF8F4] text-[#1C1B12] font-sans pb-24">
+    <div className="min-h-screen bg-canvas text-ink font-sans pb-24">
       {/* Simple Clean Header */}
-      <div className="bg-[#4C061D] text-white py-10 border-b border-[#3B0416]">
+      <div className="bg-primary text-white py-10 border-b border-primary-hover">
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
           <h1 className="font-serif-display text-3xl sm:text-4xl text-white font-light">
             List Your Property
           </h1>
-          <p className="mt-1 text-sm text-[#ECE7DA]/80">
+          <p className="mt-1 text-sm text-line/80">
             Photos, details and location — everything on one page.
           </p>
         </div>
@@ -221,26 +221,26 @@ export default function PublishListingPage() {
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 -mt-4">
         {!session?.user ? (
-          <div className="bg-white rounded-3xl border border-[#ECE7DA] shadow-xl p-8 sm:p-12 text-center space-y-5 max-w-xl mx-auto">
-            <div className="w-16 h-16 rounded-full bg-[#4C061D]/10 text-[#4C061D] flex items-center justify-center mx-auto shadow-xs">
+          <div className="bg-surface rounded-panel border border-line shadow-xl p-8 sm:p-12 text-center space-y-5 max-w-xl mx-auto">
+            <div className="w-16 h-16 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto shadow-xs">
               <Lock className="w-8 h-8" aria-hidden="true" />
             </div>
-            <h2 className="font-serif-display text-3xl text-[#1C1B12]">
+            <h2 className="font-serif-display text-3xl text-ink">
               Sign in or Create an Account to List a Property
             </h2>
-            <p className="text-xs sm:text-sm text-[#736F4E] max-w-md mx-auto leading-relaxed">
+            <p className="text-xs sm:text-sm text-muted max-w-md mx-auto leading-relaxed">
               To post a property on Delala, you have to sign in with an existing account or create a new account first.
             </p>
             <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
               <Link
                 href="/auth/signin?callbackUrl=/publish"
-                className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-[#4C061D] text-white font-mono-label text-xs font-bold hover:bg-[#3B0416] transition-colors shadow-md text-center"
+                className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-primary text-white font-mono-label text-xs font-bold hover:bg-primary-hover transition-colors shadow-md text-center"
               >
                 Sign In / Create Account →
               </Link>
               <Link
                 href="/"
-                className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-[#FAF8F4] border border-[#ECE7DA] text-[#1C1B12] font-mono-label text-xs hover:bg-[#ECE7DA] transition-colors"
+                className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-canvas border border-line text-ink font-mono-label text-xs hover:bg-line transition-colors"
               >
                 Explore Marketplace
               </Link>
@@ -249,12 +249,12 @@ export default function PublishListingPage() {
         ) : (
           <form
             onSubmit={handleSubmit}
-            className="bg-white rounded-3xl border border-[#ECE7DA] shadow-xl p-6 sm:p-10 space-y-9"
+            className="bg-surface rounded-panel border border-line shadow-xl p-6 sm:p-10 space-y-9"
           >
             {error && (
               <div
                 role="alert"
-                className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium"
+                className="p-4 rounded-card bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium"
               >
                 {error}
               </div>
@@ -263,8 +263,8 @@ export default function PublishListingPage() {
             {/* PHOTOS */}
             <section className="space-y-4">
               <div>
-                <h2 className="font-serif-display text-2xl text-[#1C1B12]">Photos</h2>
-                <p className="text-xs text-[#736F4E]">
+                <h2 className="font-serif-display text-2xl text-ink">Photos</h2>
+                <p className="text-xs text-muted">
                   Add up to {MAX_IMAGES} photos. Use the star to choose the main photo.
                 </p>
               </div>
@@ -276,7 +276,7 @@ export default function PublishListingPage() {
                     e.preventDefault();
                     addFiles(e.dataTransfer.files);
                   }}
-                  className="relative aspect-square rounded-2xl border-2 border-dashed border-[#ECE7DA] bg-[#FAF8F4] flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-[#4C061D] transition-colors focus-within:border-[#4C061D]"
+                  className="relative aspect-square rounded-card border-2 border-dashed border-line bg-canvas flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-primary transition-colors focus-within:border-primary"
                 >
                   <input
                     type="file"
@@ -289,20 +289,20 @@ export default function PublishListingPage() {
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                     aria-label="Add property photos"
                   />
-                  <span className="w-10 h-10 rounded-2xl bg-[#4C061D] text-[#B4C292] flex items-center justify-center shadow-md">
+                  <span className="w-10 h-10 rounded-card bg-primary text-accent flex items-center justify-center shadow-md">
                     <Upload className="w-5 h-5" aria-hidden="true" />
                   </span>
-                  <span className="text-[11px] font-bold text-[#1C1B12]">Add photos</span>
-                  <span className="text-[9.5px] font-mono-label text-[#736F4E]">JPG • PNG • WEBP</span>
+                  <span className="text-micro font-bold text-ink">Add photos</span>
+                  <span className="text-label font-mono-label text-muted">JPG • PNG • WEBP</span>
                 </label>
 
                 {images.map((image, idx) => (
                   <div
                     key={image.previewUrl}
-                    className={`relative rounded-2xl overflow-hidden aspect-square border-2 transition-all ${
+                    className={`relative rounded-card overflow-hidden aspect-square border-2 transition-all ${
                       primaryIndex === idx
-                        ? "border-[#4C061D] ring-2 ring-[#4C061D]/20 shadow-md"
-                        : "border-[#ECE7DA]"
+                        ? "border-primary ring-2 ring-primary/20 shadow-md"
+                        : "border-line"
                     }`}
                   >
                     <img src={image.previewUrl} alt={`Property photo ${idx + 1}`} className="w-full h-full object-cover" />
@@ -311,7 +311,7 @@ export default function PublishListingPage() {
                       type="button"
                       onClick={() => setPrimaryIndex(idx)}
                       className={`absolute top-2 left-2 p-1.5 rounded-full backdrop-blur-md transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white ${
-                        primaryIndex === idx ? "bg-[#4C061D] text-white" : "bg-black/40 text-white/70 hover:text-white"
+                        primaryIndex === idx ? "bg-primary text-white" : "bg-black/40 text-white/70 hover:text-white"
                       }`}
                       aria-label={`Set photo ${idx + 1} as the main photo`}
                       aria-pressed={primaryIndex === idx}
@@ -320,7 +320,7 @@ export default function PublishListingPage() {
                     </button>
 
                     {primaryIndex === idx && (
-                      <span className="absolute bottom-2 left-2 bg-[#4C061D] text-white font-mono-label text-[9px] font-bold px-2 py-0.5 rounded-full shadow-xs">
+                      <span className="absolute bottom-2 left-2 bg-primary text-white font-mono-label text-label font-bold px-2 py-0.5 rounded-full shadow-xs">
                         MAIN
                       </span>
                     )}
@@ -338,11 +338,11 @@ export default function PublishListingPage() {
               </div>
             </section>
 
-            <hr className="border-[#ECE7DA]" />
+            <hr className="border-line" />
 
             {/* PROPERTY INFORMATION */}
             <section className="space-y-4">
-              <h2 className="font-serif-display text-2xl text-[#1C1B12]">Property information</h2>
+              <h2 className="font-serif-display text-2xl text-ink">Property information</h2>
 
               <div>
                 <label htmlFor="property-title" className={LABEL_CLASS}>
@@ -408,7 +408,7 @@ export default function PublishListingPage() {
                       placeholder="65000"
                       className={`${INPUT_CLASS} pl-12 font-mono-label`}
                     />
-                    <span className="absolute left-3.5 top-3 font-mono-label text-xs font-bold text-[#4C061D]">
+                    <span className="absolute left-3.5 top-3 font-mono-label text-xs font-bold text-primary">
                       ETB
                     </span>
                   </div>
@@ -461,13 +461,13 @@ export default function PublishListingPage() {
               </div>
             </section>
 
-            <hr className="border-[#ECE7DA]" />
+            <hr className="border-line" />
 
             {/* LOCATION */}
             <section className="space-y-4">
               <div>
-                <h2 className="font-serif-display text-2xl text-[#1C1B12]">Location</h2>
-                <p className="text-xs text-[#736F4E]">
+                <h2 className="font-serif-display text-2xl text-ink">Location</h2>
+                <p className="text-xs text-muted">
                   Choose the city, sub-city and neighborhood renters will search by.
                 </p>
               </div>
@@ -495,15 +495,15 @@ export default function PublishListingPage() {
               </div>
             </section>
 
-            <hr className="border-[#ECE7DA]" />
+            <hr className="border-line" />
 
             {/* APPROXIMATE MAP LOCATION */}
             <section className="space-y-4">
               <div>
-                <h2 className="font-serif-display text-2xl text-[#1C1B12]">
+                <h2 className="font-serif-display text-2xl text-ink">
                   Approximate location
                 </h2>
-                <p className="text-xs text-[#736F4E]">
+                <p className="text-xs text-muted">
                   Set the approximate location of the property on the map. You never have to share
                   the exact address of a private home.
                 </p>
@@ -517,7 +517,7 @@ export default function PublishListingPage() {
               />
             </section>
 
-            <hr className="border-[#ECE7DA]" />
+            <hr className="border-line" />
 
             {/* DESCRIPTION & CONTACT */}
             <section className="space-y-4">
@@ -549,9 +549,9 @@ export default function PublishListingPage() {
                     placeholder="+251 911 234 567"
                     className={`${INPUT_CLASS} pl-10 font-mono-label`}
                   />
-                  <Phone className="w-4 h-4 text-[#4C061D] absolute left-3.5 top-3.5" aria-hidden="true" />
+                  <Phone className="w-4 h-4 text-primary absolute left-3.5 top-3.5" aria-hidden="true" />
                 </div>
-                <p className="text-[10px] text-[#736F4E] mt-1">
+                <p className="text-label text-muted mt-1">
                   This phone number appears directly on the front of property cards for instant calls.
                 </p>
               </div>
@@ -559,16 +559,16 @@ export default function PublishListingPage() {
 
             {/* PUBLISH */}
             <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="text-xs text-[#736F4E]">
+              <div className="text-xs text-muted">
                 By publishing, your property will immediately be posted on the marketplace.
               </div>
 
               <button
                 type="submit"
                 disabled={isPublishing}
-                className="w-full sm:w-auto px-10 py-4 rounded-full bg-[#4C061D] text-white font-mono-label text-xs font-bold hover:bg-[#3B0416] disabled:opacity-60 transition-colors shadow-lg flex items-center justify-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4C061D] focus-visible:ring-offset-2"
+                className="w-full sm:w-auto px-10 py-4 rounded-full bg-primary text-white font-mono-label text-xs font-bold hover:bg-primary-hover disabled:opacity-60 transition-colors shadow-lg flex items-center justify-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
               >
-                <CheckCircle2 className="w-4 h-4 text-[#B4C292]" aria-hidden="true" />
+                <CheckCircle2 className="w-4 h-4 text-accent" aria-hidden="true" />
                 <span>{isPublishing ? "Publishing…" : "Publish Property"}</span>
               </button>
             </div>

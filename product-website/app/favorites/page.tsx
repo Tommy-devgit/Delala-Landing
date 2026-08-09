@@ -44,36 +44,36 @@ export default function FavoritesPage() {
   };
 
   return (
-    <div className="bg-[#FAF8F4] min-h-screen py-12">
+    <div className="bg-canvas min-h-screen py-12">
       <div className="max-w-[1440px] mx-auto px-4 sm:px-8">
         
         <div className="max-w-3xl mb-12">
-          <span className="font-mono-label text-[10px] text-[#4C061D] bg-white border border-[#ECE7DA] px-3.5 py-1.5 rounded-full inline-flex items-center gap-1.5 mb-4 shadow-xs">
+          <span className="font-mono-label text-label text-primary bg-surface border border-line px-3.5 py-1.5 rounded-full inline-flex items-center gap-1.5 mb-4 shadow-xs">
             <Heart className="w-3.5 h-3.5 fill-rose-500 text-rose-500" />
             <span>SAVED WISHLIST</span>
           </span>
 
-          <h1 className="font-serif-display text-4xl sm:text-5xl font-light text-[#4C061D] mb-3">
+          <h1 className="font-serif-display text-4xl sm:text-5xl font-light text-primary mb-3">
             Your Saved Properties
           </h1>
 
-          <p className="text-base text-[#736F4E] font-medium">
+          <p className="text-base text-muted font-medium">
             Keep track of physically verified Ethiopian residences, compare monthly Birr prices, and schedule walkthrough visits.
           </p>
         </div>
 
         {!session?.user ? (
-          <div className="py-20 text-center bg-white rounded-3xl border border-[#ECE7DA] p-8 max-w-xl mx-auto space-y-4 shadow-sm">
-            <Lock className="w-12 h-12 text-[#4C061D] mx-auto opacity-70" />
-            <h2 className="font-serif-display text-2xl font-light text-[#1c1b12]">
+          <div className="py-20 text-center bg-surface rounded-panel border border-line p-8 max-w-xl mx-auto space-y-4 shadow-sm">
+            <Lock className="w-12 h-12 text-primary mx-auto opacity-70" />
+            <h2 className="font-serif-display text-2xl font-light text-ink">
               Sign in to save properties
             </h2>
-            <p className="text-xs text-[#736F4E]">
+            <p className="text-xs text-muted">
               Sign in with your account to save listings across devices.
             </p>
             <Link
               href="/auth/signin?callbackUrl=/favorites"
-              className="inline-block px-8 py-3.5 rounded-full bg-[#4C061D] text-white font-mono-label text-xs font-bold shadow-md hover:bg-[#3B0416] transition-colors"
+              className="inline-block px-8 py-3.5 rounded-full bg-primary text-white font-mono-label text-xs font-bold shadow-md hover:bg-primary-hover transition-colors"
             >
               Sign In →
             </Link>
@@ -81,7 +81,7 @@ export default function FavoritesPage() {
         ) : loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-80 rounded-3xl bg-white border border-[#ECE7DA] animate-pulse" />
+              <div key={i} className="h-80 rounded-panel bg-surface border border-line animate-pulse" />
             ))}
           </div>
         ) : savedListings.length > 0 ? (
@@ -96,17 +96,17 @@ export default function FavoritesPage() {
             ))}
           </div>
         ) : (
-          <div className="py-20 text-center bg-white rounded-3xl border border-[#ECE7DA] p-8 max-w-xl mx-auto">
-            <Heart className="w-12 h-12 text-[#736F4E] mx-auto mb-4" />
-            <h2 className="font-serif-display text-2xl font-light text-[#1c1b12] mb-2">
+          <div className="py-20 text-center bg-surface rounded-panel border border-line p-8 max-w-xl mx-auto">
+            <Heart className="w-12 h-12 text-muted mx-auto mb-4" />
+            <h2 className="font-serif-display text-2xl font-light text-ink mb-2">
               Your wishlist is empty
             </h2>
-            <p className="text-xs text-[#736F4E] mb-6">
+            <p className="text-xs text-muted mb-6">
               Browse homes in Addis Ababa, Hawassa, Adama, or Bahir Dar and click the heart icon to save listings.
             </p>
             <Link
               href="/search"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#4C061D] text-white font-mono-label text-xs font-bold shadow-md hover:bg-[#3B3923] transition-colors"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-control bg-primary text-white font-mono-label text-xs font-bold shadow-md hover:bg-primary-hover transition-colors"
             >
               <Search className="w-4 h-4" />
               <span>Explore Marketplace →</span>

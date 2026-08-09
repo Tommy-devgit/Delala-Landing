@@ -5,10 +5,10 @@ import { City } from "@/lib/types";
 import { LocationSelection, getNeighborhoods, getSubCities } from "@/lib/locations";
 
 const FIELD_CLASS =
-  "w-full p-3.5 rounded-2xl bg-[#FAF8F4] border border-[#ECE7DA] text-xs text-[#1C1B12] focus:outline-none focus:border-[#4C061D] disabled:opacity-60 disabled:cursor-not-allowed";
+  "w-full p-3.5 rounded-card bg-canvas border border-line text-xs text-ink focus:outline-none focus:border-primary disabled:opacity-60 disabled:cursor-not-allowed";
 
 const LABEL_CLASS =
-  "block text-[10px] font-mono-label text-[#736F4E] font-bold uppercase mb-1";
+  "block text-label font-mono-label text-muted font-bold uppercase mb-1";
 
 /**
  * Cascading City > Sub-city > Neighborhood selector. The options come entirely
@@ -40,11 +40,11 @@ export function LocationSelector({
 
   if (error) {
     return (
-      <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 flex items-start gap-2">
+      <div className="p-4 rounded-card bg-rose-50 border border-rose-200 flex items-start gap-2">
         <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" aria-hidden="true" />
         <div className="text-xs text-rose-700">
           <p className="font-bold">Locations could not be loaded.</p>
-          <p className="text-[11px] mt-0.5">{error}</p>
+          <p className="text-micro mt-0.5">{error}</p>
         </div>
       </div>
     );
@@ -61,7 +61,7 @@ export function LocationSelector({
           type="text"
           disabled
           value="Ethiopia"
-          className="w-full p-3.5 rounded-2xl bg-[#FAF8F4] border border-[#ECE7DA] text-xs font-bold text-[#1C1B12]"
+          className="w-full p-3.5 rounded-card bg-canvas border border-line text-xs font-bold text-ink"
         />
       </div>
 
@@ -142,7 +142,7 @@ export function LocationSelector({
       </div>
 
       {loading && (
-        <p className="sm:col-span-2 lg:col-span-4 flex items-center gap-1.5 text-[10px] text-[#736F4E]">
+        <p className="sm:col-span-2 lg:col-span-4 flex items-center gap-1.5 text-label text-muted">
           <Loader2 className="w-3 h-3 animate-spin" aria-hidden="true" />
           Loading Ethiopian locations from the Delala database…
         </p>

@@ -29,21 +29,21 @@ export function SearchBarCapsule({
     return (
       <form
         onSubmit={handleSearch}
-        className="w-full flex items-center bg-white rounded-full border border-[#ECE7DA] px-4 py-2 shadow-xs"
+        className="w-full flex items-center bg-surface rounded-full border border-line px-4 py-2 shadow-xs"
       >
-        <Search className="w-4 h-4 text-[#4C061D] shrink-0 mr-2.5" />
+        <Search className="w-4 h-4 text-primary shrink-0 mr-2.5" />
         <input
           type="text"
           value={subCity}
           onChange={(e) => setSubCity(e.target.value)}
           placeholder="Search sub-city e.g. Bole, Kazanchis..."
-          className="w-full bg-transparent text-xs text-[#2D2D2D] placeholder-[#736F4E] focus:outline-none font-sans"
+          className="w-full bg-transparent text-xs text-body placeholder-muted focus:outline-none font-sans"
         />
         {onOpenFilters && (
           <button
             type="button"
             onClick={onOpenFilters}
-            className="p-1.5 rounded-full bg-[#FAF8F4] border border-[#ECE7DA] text-[#4C061D] shrink-0 ml-2"
+            className="p-1.5 rounded-full bg-canvas border border-line text-primary shrink-0 ml-2"
           >
             <SlidersHorizontal className="w-3.5 h-3.5" />
           </button>
@@ -55,11 +55,11 @@ export function SearchBarCapsule({
   return (
     <form
       onSubmit={handleSearch}
-      className="w-full bg-white rounded-full search-capsule-shadow p-1.5 flex items-center divide-x divide-[#ECE7DA]"
+      className="w-full bg-surface rounded-full search-capsule-shadow p-1.5 flex items-center divide-x divide-line"
     >
       {/* Field 1: City & Sub-City */}
       <div className="flex-1 px-4 py-1.5 flex flex-col text-left">
-        <label className="font-mono-label text-[9px] text-[#4C061D] font-bold">
+        <label className="font-mono-label text-label text-primary font-bold">
           LOCATION
         </label>
         <input
@@ -67,19 +67,19 @@ export function SearchBarCapsule({
           value={subCity}
           onChange={(e) => setSubCity(e.target.value)}
           placeholder="Sub-city e.g. Bole, Kazanchis"
-          className="w-full bg-transparent text-xs text-[#2D2D2D] placeholder-[#736F4E] focus:outline-none font-medium truncate"
+          className="w-full bg-transparent text-xs text-body placeholder-muted focus:outline-none font-medium truncate"
         />
       </div>
 
       {/* Field 2: Property Type */}
       <div className="flex-1 px-4 py-1.5 flex flex-col text-left">
-        <label className="font-mono-label text-[9px] text-[#4C061D] font-bold">
+        <label className="font-mono-label text-label text-primary font-bold">
           PROPERTY TYPE
         </label>
         <select
           value={propertyType}
           onChange={(e) => setPropertyType(e.target.value)}
-          className="w-full bg-transparent text-xs text-[#2D2D2D] focus:outline-none font-medium appearance-none cursor-pointer"
+          className="w-full bg-transparent text-xs text-body focus:outline-none font-medium appearance-none cursor-pointer"
         >
           <option value="">Any Type</option>
           <option value="Apartment">Apartment</option>
@@ -92,13 +92,13 @@ export function SearchBarCapsule({
 
       {/* Field 3: City Selector */}
       <div className="flex-1 px-4 py-1.5 flex flex-col text-left hidden lg:flex">
-        <label className="font-mono-label text-[9px] text-[#4C061D] font-bold">
+        <label className="font-mono-label text-label text-primary font-bold">
           CITY
         </label>
         <select
           value={city}
           onChange={(e) => setCity(e.target.value)}
-          className="w-full bg-transparent text-xs text-[#2D2D2D] focus:outline-none font-medium appearance-none cursor-pointer"
+          className="w-full bg-transparent text-xs text-body focus:outline-none font-medium appearance-none cursor-pointer"
         >
           <option value="Addis Ababa">Addis Ababa</option>
           <option value="Hawassa">Hawassa</option>
@@ -113,7 +113,7 @@ export function SearchBarCapsule({
           <button
             type="button"
             onClick={onOpenFilters}
-            className="p-2.5 rounded-full bg-[#FAF8F4] border border-[#ECE7DA] text-[#4C061D] hover:bg-[#ECE7DA] transition-colors"
+            className="p-2.5 rounded-full bg-canvas border border-line text-primary hover:bg-line transition-colors"
             title="Open detailed filters"
           >
             <SlidersHorizontal className="w-4 h-4" />
@@ -122,7 +122,7 @@ export function SearchBarCapsule({
 
         <button
           type="submit"
-          className="w-10 h-10 rounded-full bg-[#4C061D] text-white flex items-center justify-center hover:bg-[#3B3923] transition-all shrink-0 active:scale-95 shadow-sm"
+          className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center hover:bg-primary-hover transition-all shrink-0 active:scale-95 shadow-sm"
           aria-label="Search Marketplace"
         >
           <Search className="w-4 h-4" />

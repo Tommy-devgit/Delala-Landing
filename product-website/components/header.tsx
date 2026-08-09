@@ -44,13 +44,13 @@ export function Header({ onOpenFilters }: { onOpenFilters?: () => void }) {
   const user = session?.user;
 
   return (
-    <header className="sticky top-0 z-40 glass-nav transition-all duration-300 border-b border-[#ECE7DA]/80">
+    <header className="sticky top-0 z-40 glass-nav transition-all duration-300 border-b border-line/80">
       <div className="max-w-[1440px] mx-auto px-4 sm:px-8">
         <div className="flex items-center justify-between h-20 gap-6">
 
           {/* LEFT: Brand Logomark */}
           <Link href="/" className="flex items-center gap-2.5 shrink-0 group">
-            <span className="font-serif-display font-light text-2xl tracking-tight text-[#4C061D] group-hover:text-[#3B3923] transition-colors">
+            <span className="font-serif-display font-light text-2xl tracking-tight text-primary group-hover:text-primary-hover transition-colors">
               DELALA
             </span>
           </Link>
@@ -65,8 +65,8 @@ export function Header({ onOpenFilters }: { onOpenFilters?: () => void }) {
                   key={item.href}
                   href={item.href}
                   className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-mono-label tracking-wide transition-all ${isActive
-                    ? "bg-[#4C061D] text-white font-bold shadow-xs"
-                    : "text-[#736F4E] hover:text-[#4C061D] hover:bg-[#FAF8F4]"
+                    ? "bg-primary text-white font-bold shadow-xs"
+                    : "text-muted hover:text-primary hover:bg-canvas"
                     }`}
                 >
                   <Icon className="w-3.5 h-3.5" />
@@ -82,9 +82,9 @@ export function Header({ onOpenFilters }: { onOpenFilters?: () => void }) {
             {/* List Property CTA Button */}
             <Link
               href={user ? "/publish" : "/auth/signin?callbackUrl=/publish"}
-              className="flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-[#4C061D] text-white font-mono-label text-xs font-bold hover:bg-[#3B0416] transition-colors shadow-sm"
+              className="flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-primary text-white font-mono-label text-xs font-bold hover:bg-primary-hover transition-colors shadow-sm"
             >
-              <Plus className="w-3.5 h-3.5 text-[#B4C292]" />
+              <Plus className="w-3.5 h-3.5 text-accent" />
               <span className="hidden sm:inline">LIST PROPERTY</span>
               <span className="sm:hidden">LIST</span>
             </Link>
@@ -92,7 +92,7 @@ export function Header({ onOpenFilters }: { onOpenFilters?: () => void }) {
             {/* Notifications Bell */}
             <Link
               href="/notifications"
-              className="p-2.5 rounded-full bg-white border border-[#ECE7DA] text-[#736F4E] hover:text-[#4C061D] hover:border-[#4C061D] transition-colors relative"
+              className="p-2.5 rounded-full bg-surface border border-line text-muted hover:text-primary hover:border-primary transition-colors relative"
               title="Notifications"
             >
               <Bell className="w-4 h-4" />
@@ -101,9 +101,9 @@ export function Header({ onOpenFilters }: { onOpenFilters?: () => void }) {
             {/* Saved Wishlist */}
             <Link
               href="/favorites"
-              className={`p-2.5 rounded-full border border-[#ECE7DA] transition-colors ${pathname === "/favorites"
-                ? "bg-[#4C061D] text-white border-[#4C061D]"
-                : "bg-white text-[#736F4E] hover:border-[#4C061D]"
+              className={`p-2.5 rounded-full border border-line transition-colors ${pathname === "/favorites"
+                ? "bg-primary text-white border-primary"
+                : "bg-surface text-muted hover:border-primary"
                 }`}
               title="Saved Wishlist"
             >
@@ -115,27 +115,27 @@ export function Header({ onOpenFilters }: { onOpenFilters?: () => void }) {
               <div className="relative">
                 <button
                   onClick={() => setAvatarOpen(!avatarOpen)}
-                  className="flex items-center gap-1.5 p-1.5 pl-3 pr-2 rounded-full bg-white border border-[#ECE7DA] hover:border-[#4C061D] transition-all shadow-xs text-[#1C1B12]"
+                  className="flex items-center gap-1.5 p-1.5 pl-3 pr-2 rounded-full bg-surface border border-line hover:border-primary transition-all shadow-xs text-ink"
                 >
-                  <div className="w-7 h-7 rounded-full bg-[#4C061D] text-white flex items-center justify-center text-[10px] font-bold">
+                  <div className="w-7 h-7 rounded-full bg-primary text-white flex items-center justify-center text-label font-bold">
                     {user.fullName.slice(0, 2).toUpperCase()}
                   </div>
-                  <ChevronDown className="w-3.5 h-3.5 text-[#736F4E]" />
+                  <ChevronDown className="w-3.5 h-3.5 text-muted" />
                 </button>
 
                 {avatarOpen && (
-                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl border border-[#ECE7DA] shadow-xl py-2 z-50 text-xs font-sans animate-in fade-in-50">
-                    <div className="px-4 py-2.5 border-b border-[#ECE7DA]">
-                      <div className="font-bold text-[#1C1B12]">{user.fullName}</div>
-                      <div className="text-[10px] font-mono-label text-[#736F4E] uppercase">{user.role} ACCOUNT</div>
+                  <div className="absolute right-0 mt-2 w-56 bg-surface rounded-card border border-line shadow-xl py-2 z-50 text-xs font-sans animate-in fade-in-50">
+                    <div className="px-4 py-2.5 border-b border-line">
+                      <div className="font-bold text-ink">{user.fullName}</div>
+                      <div className="text-label font-mono-label text-muted uppercase">{user.role} ACCOUNT</div>
                     </div>
 
                     <Link
                       href="/profile"
                       onClick={() => setAvatarOpen(false)}
-                      className="flex items-center gap-2.5 px-4 py-2.5 text-[#1C1B12] hover:bg-[#FAF8F4] transition-colors font-medium"
+                      className="flex items-center gap-2.5 px-4 py-2.5 text-ink hover:bg-canvas transition-colors font-medium"
                     >
-                      <User className="w-4 h-4 text-[#4C061D]" />
+                      <User className="w-4 h-4 text-primary" />
                       <span>My Profile</span>
                     </Link>
 
@@ -144,7 +144,7 @@ export function Header({ onOpenFilters }: { onOpenFilters?: () => void }) {
                         setAvatarOpen(false);
                         authClient.signOut();
                       }}
-                      className="w-full flex items-center gap-2.5 px-4 py-2.5 text-red-600 hover:bg-red-50 transition-colors border-t border-[#ECE7DA] mt-1 text-left font-bold"
+                      className="w-full flex items-center gap-2.5 px-4 py-2.5 text-red-600 hover:bg-red-50 transition-colors border-t border-line mt-1 text-left font-bold"
                     >
                       <LogOut className="w-4 h-4" />
                       <span>Sign Out</span>
@@ -156,13 +156,13 @@ export function Header({ onOpenFilters }: { onOpenFilters?: () => void }) {
               <div className="flex items-center gap-2">
                 <Link
                   href="/auth/signin"
-                  className="px-4 py-2.5 rounded-full bg-[#FAF8F4] border border-[#ECE7DA] text-xs font-mono-label font-bold text-[#4C061D] hover:bg-[#ECE7DA] transition-colors"
+                  className="px-4 py-2.5 rounded-full bg-canvas border border-line text-xs font-mono-label font-bold text-primary hover:bg-line transition-colors"
                 >
                   SIGN IN
                 </Link>
                 <Link
                   href="/auth/signup"
-                  className="hidden sm:inline-block px-4 py-2.5 rounded-full bg-[#B4C292] text-[#4C061D] text-xs font-mono-label font-bold hover:bg-white transition-colors"
+                  className="hidden sm:inline-block px-4 py-2.5 rounded-full bg-accent text-primary text-xs font-mono-label font-bold hover:bg-surface transition-colors"
                 >
                   CREATE ACCOUNT
                 </Link>

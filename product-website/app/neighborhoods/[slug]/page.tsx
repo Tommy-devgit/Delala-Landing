@@ -30,29 +30,29 @@ export default function NeighborhoodDetailPage() {
   }, [nhName]);
 
   return (
-    <div className="bg-[#FAF8F4] min-h-screen py-8">
+    <div className="bg-canvas min-h-screen py-8">
       <div className="max-w-[1440px] mx-auto px-4 sm:px-8">
         
         {/* Neighborhood Guide Banner */}
-        <div className="bg-white p-8 rounded-3xl border border-[#ECE7DA] shadow-xs mb-12">
-          <span className="font-mono-label text-[10px] text-[#4C061D] bg-[#FAF8F4] border border-[#ECE7DA] px-3.5 py-1 rounded-full inline-block mb-3 uppercase">
+        <div className="bg-surface p-8 rounded-panel border border-line shadow-xs mb-12">
+          <span className="font-mono-label text-label text-primary bg-canvas border border-line px-3.5 py-1 rounded-full inline-block mb-3 uppercase">
             NEIGHBORHOOD DIRECTORY
           </span>
-          <h1 className="font-serif-display text-4xl sm:text-5xl font-light text-[#1c1b12] mb-3 capitalize">
+          <h1 className="font-serif-display text-4xl sm:text-5xl font-light text-ink mb-3 capitalize">
             {nhName} Neighborhood Guide
           </h1>
-          <p className="text-sm text-[#736F4E] leading-relaxed mb-6 font-normal">
+          <p className="text-sm text-muted leading-relaxed mb-6 font-normal">
             Verified residential compounds, serviced apartments, and diplomatic residences in {nhName}.
           </p>
         </div>
 
         {/* Verified Neighborhood Listings */}
-        <div className="mb-8 flex items-center justify-between border-b border-[#ECE7DA] pb-4">
+        <div className="mb-8 flex items-center justify-between border-b border-line pb-4">
           <div>
-            <span className="font-mono-label text-[10px] text-[#4C061D] block mb-1">
+            <span className="font-mono-label text-label text-primary block mb-1">
               FIELD VERIFIED MARKETPLACE
             </span>
-            <h2 className="font-serif-display text-3xl font-light text-[#1c1b12] capitalize">
+            <h2 className="font-serif-display text-3xl font-light text-ink capitalize">
               Available Homes in {nhName} ({nhProperties.length})
             </h2>
           </div>
@@ -61,18 +61,18 @@ export default function NeighborhoodDetailPage() {
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-80 rounded-3xl bg-white border border-[#ECE7DA] animate-pulse" />
+              <div key={i} className="h-80 rounded-panel bg-surface border border-line animate-pulse" />
             ))}
           </div>
         ) : nhProperties.length === 0 ? (
           <div className="py-16 text-center space-y-4 max-w-md mx-auto">
-            <div className="w-16 h-16 rounded-full bg-[#4C061D]/10 text-[#4C061D] flex items-center justify-center mx-auto">
+            <div className="w-16 h-16 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto">
               <Building2 className="w-8 h-8" />
             </div>
-            <h2 className="font-serif-display text-2xl text-[#1C1B12] capitalize">
+            <h2 className="font-serif-display text-2xl text-ink capitalize">
               No Homes Listed in {nhName}
             </h2>
-            <p className="text-xs text-[#736F4E]">
+            <p className="text-xs text-muted">
               There are currently no active properties listed in {nhName} in your database.
             </p>
           </div>

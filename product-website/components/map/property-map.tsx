@@ -83,35 +83,35 @@ function PropertyMarkers({
 /** Quick preview card shown when a marker is selected. */
 function PropertyPreview({ property, onClose }: { property: Property; onClose: () => void }) {
   return (
-    <div className="absolute bottom-7 left-3 right-3 z-[600] rounded-2xl bg-white/97 backdrop-blur-md border border-[#ECE7DA] shadow-lg p-3">
+    <div className="absolute bottom-7 left-3 right-3 z-[600] rounded-card bg-surface/97 backdrop-blur-md border border-line shadow-lg p-3">
       <div className="flex items-center gap-3">
         <img
           src={property.heroImage}
           alt=""
-          className="w-16 h-16 rounded-xl object-cover shrink-0 bg-[#ECE7DA]"
+          className="w-16 h-16 rounded-control object-cover shrink-0 bg-line"
         />
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 mb-0.5">
-            <span className="font-mono-label text-[9px] text-[#736F4E] truncate">
+            <span className="font-mono-label text-label text-muted truncate">
               {[property.subCity, property.city].filter(Boolean).join(" • ").toUpperCase()}
             </span>
             {property.verified && (
-              <ShieldCheck className="w-3 h-3 text-[#4C061D] shrink-0" aria-label="Field verified" />
+              <ShieldCheck className="w-3 h-3 text-primary shrink-0" aria-label="Field verified" />
             )}
           </div>
 
-          <h4 className="font-serif-display text-sm font-medium text-[#1c1b12] truncate">
+          <h4 className="font-serif-display text-sm font-medium text-ink truncate">
             {property.title}
           </h4>
 
-          <p className="text-[11px] text-[#736F4E]">
+          <p className="text-micro text-muted">
             {property.bedrooms} Bed • {property.bathrooms} Bath • {property.areaSqm}m²
           </p>
 
-          <p className="text-xs font-bold text-[#4C061D] mt-0.5">
+          <p className="text-xs font-bold text-primary mt-0.5">
             ETB {property.rentETB.toLocaleString()}
-            <span className="font-normal text-[#736F4E]"> /mo</span>
+            <span className="font-normal text-muted"> /mo</span>
           </p>
         </div>
 
@@ -119,7 +119,7 @@ function PropertyPreview({ property, onClose }: { property: Property; onClose: (
           <button
             type="button"
             onClick={onClose}
-            className="p-1 rounded-full text-[#736F4E] hover:text-[#4C061D] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4C061D]"
+            className="p-1 rounded-full text-muted hover:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             aria-label="Close property preview"
           >
             <X className="w-3.5 h-3.5" aria-hidden="true" />
@@ -127,7 +127,7 @@ function PropertyPreview({ property, onClose }: { property: Property; onClose: (
 
           <Link
             href={`/property/${property.slug}`}
-            className="px-3 py-1.5 rounded-lg bg-[#4C061D] text-white font-mono-label text-[10px] font-bold hover:bg-[#3B0416] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4C061D] focus-visible:ring-offset-1"
+            className="px-3 py-1.5 rounded-lg bg-primary text-white font-mono-label text-label font-bold hover:bg-primary-hover transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1"
           >
             VIEW
           </Link>
@@ -192,10 +192,10 @@ export function PropertyMap({
 
       {entries.length === 0 && (
         <div className="absolute inset-0 z-[550] flex items-center justify-center pointer-events-none p-6">
-          <div className="pointer-events-auto max-w-xs text-center rounded-2xl bg-white/95 backdrop-blur-md border border-[#ECE7DA] shadow-sm px-5 py-4 space-y-1.5">
-            <Building2 className="w-6 h-6 text-[#736F4E] mx-auto opacity-60" aria-hidden="true" />
-            <p className="font-mono-label text-[10px] text-[#4C061D] font-bold">NO MAPPED LISTINGS</p>
-            <p className="text-[11px] text-[#736F4E]">
+          <div className="pointer-events-auto max-w-xs text-center rounded-card bg-surface/95 backdrop-blur-md border border-line shadow-sm px-5 py-4 space-y-1.5">
+            <Building2 className="w-6 h-6 text-muted mx-auto opacity-60" aria-hidden="true" />
+            <p className="font-mono-label text-label text-primary font-bold">NO MAPPED LISTINGS</p>
+            <p className="text-micro text-muted">
               {properties.length > 0
                 ? "These listings have no location pin yet. Browse them in the list."
                 : "No properties match your filters."}
@@ -205,8 +205,8 @@ export function PropertyMap({
       )}
 
       {entries.length > 0 && unmappedCount > 0 && (
-        <div className="absolute left-3 top-3 z-[500] rounded-lg bg-white/95 backdrop-blur-md border border-[#ECE7DA] px-2.5 py-1 shadow-sm">
-          <span className="font-mono-label text-[9.5px] text-[#736F4E]">
+        <div className="absolute left-3 top-3 z-[500] rounded-lg bg-surface/95 backdrop-blur-md border border-line px-2.5 py-1 shadow-sm">
+          <span className="font-mono-label text-label text-muted">
             {entries.length} OF {properties.length} MAPPED
           </span>
         </div>
