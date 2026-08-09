@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { authClient, UserSession } from "@/lib/auth-client";
+import { authClient } from "@/lib/auth-client";
+import { useSession } from "@/lib/use-session";
 import {
   Heart,
   User,
@@ -22,18 +23,7 @@ import {
 export function Header({ onOpenFilters }: { onOpenFilters?: () => void }) {
   const pathname = usePathname();
   const [avatarOpen, setAvatarOpen] = useState(false);
-  const [session, setSession] = useState<{ user: UserSession; token: string } | null>(null);
-
-  useEffect(() => {
-    function loadSession() {
-      const activeSession = authClient.getSession();
-      setSession(activeSession);
-    }
-    loadSession();
-
-    window.addEventListener("delala_auth_change", loadSession);
-    return () => window.removeEventListener("delala_auth_change", loadSession);
-  }, []);
+  const session = useSession();
 
   const navLinks = [
     { label: "EXPLORE", href: "/search", icon: Compass },

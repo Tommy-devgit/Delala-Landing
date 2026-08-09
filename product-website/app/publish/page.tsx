@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { authClient, UserSession } from "@/lib/auth-client";
+import { useSession } from "@/lib/use-session";
 import { apiClient } from "@/lib/api-client";
 import { LocationSelector } from "@/components/location-selector";
 import { LocationPicker } from "@/components/map";
@@ -27,14 +27,7 @@ interface SelectedImage {
 
 export default function PublishListingPage() {
   const router = useRouter();
-  const [session, setSession] = useState<{ user: UserSession; token: string } | null>(null);
-
-  useEffect(() => {
-    setSession(authClient.getSession());
-    const onAuthChange = () => setSession(authClient.getSession());
-    window.addEventListener("delala_auth_change", onAuthChange);
-    return () => window.removeEventListener("delala_auth_change", onAuthChange);
-  }, []);
+  const session = useSession();
 
   // Ethiopian locations come from the API — never from a hardcoded frontend list.
   const [cities, setCities] = useState<City[]>([]);

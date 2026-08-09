@@ -7,14 +7,13 @@ import { CategoryBar } from "@/components/category-bar";
 import { PropertyCard } from "@/components/property-card";
 import { FilterModal } from "@/components/filter-modal";
 import { apiClient } from "@/lib/api-client";
-import { authClient, UserSession } from "@/lib/auth-client";
 import { Property, City, FilterState } from "@/lib/types";
 import { ShieldCheck, MapPin, Building2, ArrowRight } from "lucide-react";
+import { Skeleton } from "@/components/ui";
 
 export default function HomePage() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
-  const [session, setSession] = useState<{ user: UserSession; token: string } | null>(null);
   const [properties, setProperties] = useState<Property[]>([]);
   const [cities, setCities] = useState<City[]>([]);
   const [loading, setLoading] = useState(true);
@@ -37,7 +36,6 @@ export default function HomePage() {
 
   useEffect(() => {
     async function loadData() {
-      setSession(authClient.getSession());
       setLoading(true);
       const [fetchedProperties, fetchedCities] = await Promise.all([
         apiClient.getProperties(),
@@ -48,8 +46,6 @@ export default function HomePage() {
       setLoading(false);
     }
     loadData();
-
-    window.addEventListener("delala_auth_change", () => setSession(authClient.getSession()));
   }, []);
 
   const filteredListings = properties.filter((item) => {
@@ -139,7 +135,7 @@ export default function HomePage() {
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
             {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
-              <div key={n} className="h-72 rounded-card bg-gray-100 animate-pulse" />
+              <Skeleton key={n} className="h-72" />
             ))}
           </div>
         ) : filteredListings.length === 0 ? (
