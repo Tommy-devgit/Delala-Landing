@@ -5,6 +5,23 @@ import Link from "next/link";
 import { Heart, ShieldCheck, Zap, Droplets, Car, Phone, MapPin } from "lucide-react";
 import { Property } from "@/lib/types";
 
+/** Overlay chip used for the badges that sit on top of the photo. */
+function PhotoChip({
+  children,
+  className = "",
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <span
+      className={`inline-flex items-center gap-1 px-2 py-1 rounded-full font-mono-label text-label font-bold shadow-sm ${className}`}
+    >
+      {children}
+    </span>
+  );
+}
+
 export function PropertyCard({
   property,
   isFavorite = false,
@@ -23,14 +40,13 @@ export function PropertyCard({
   const [fav, setFav] = useState(isFavorite);
 
   const contactPhone = property.phone || property.broker?.phone;
+  const location = [property.subCity, property.city].filter(Boolean).join(" • ");
 
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setFav(!fav);
-    if (onToggleFavorite) {
-      onToggleFavorite(property.id);
-    }
+    onToggleFavorite?.(property.id);
   };
 
   const handlePhoneCall = (e: React.MouseEvent) => {
@@ -47,110 +63,109 @@ export function PropertyCard({
       onMouseEnter={() => onActivate?.(property.id)}
       onFocus={() => onActivate?.(property.id)}
       aria-current={isSelected ? "true" : undefined}
-      className={`group flex flex-col h-full bg-white rounded-xl overflow-hidden listing-card-shadow border transition-all duration-300 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4C061D] focus-visible:ring-offset-1 ${
-        isSelected
-          ? "border-[#4C061D] ring-2 ring-[#4C061D]/25 shadow-md"
-          : "border-[#ECE7DA] hover:border-[#4C061D]/30"
+      className={`group flex flex-col h-full bg-surface rounded-card overflow-hidden border transition-shadow duration-200 hover:shadow-md ${
+        isSelected ? "border-primary ring-2 ring-primary/25 shadow-md" : "border-line listing-card-shadow"
       }`}
     >
-      {/* Full Bleed Compact Image Frame */}
-      <div className="relative aspect-[16/11] w-full overflow-hidden bg-[#1c1b12] rounded-t-xl shrink-0">
+      {/* Photo */}
+      <div className="relative aspect-[16/11] w-full overflow-hidden bg-ink shrink-0">
         <img
           src={property.heroImage}
           alt={property.title}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          loading="lazy"
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
         />
 
-        {/* Selected-on-map indicator: text + icon, never colour alone */}
-        {isSelected && (
-          <div className="absolute bottom-2 right-2 z-10 bg-[#4C061D] text-white px-2 py-0.5 rounded-full text-[9px] font-mono-label font-bold shadow-xs flex items-center gap-1">
-            <MapPin className="w-3 h-3 text-[#B4C292]" aria-hidden="true" />
-            <span>ON MAP</span>
-          </div>
-        )}
-
-        {/* Top-Left Verified Badge */}
-        {property.verified && (
-          <div className="absolute top-2.5 left-2.5 z-10 bg-white/95 backdrop-blur-md text-[#4C061D] px-2 py-0.5 rounded-full text-[9px] font-mono-label font-bold border border-[#ECE7DA] shadow-xs flex items-center gap-1">
-            <ShieldCheck className="w-3 h-3 text-[#4C061D]" />
-            <span>VERIFIED</span>
-          </div>
-        )}
-
-        {/* Top-Right Wishlist Heart Button */}
-        <button
-          type="button"
-          onClick={handleFavoriteClick}
-          className="absolute top-2.5 right-2.5 z-10 w-7 h-7 rounded-full bg-black/40 backdrop-blur-md text-white flex items-center justify-center hover:bg-black/60 transition-colors"
-          aria-label="Save to favorites"
-        >
-          <Heart
-            className={`w-3.5 h-3.5 transition-colors ${
-              fav ? "fill-rose-500 text-rose-500" : "text-white"
-            }`}
-          />
-        </button>
-
-        {/* Bottom Amenities Badge Overlay */}
-        <div className="absolute bottom-2 left-2 right-2 z-10 flex items-center gap-1 text-[9px] text-white">
-          {property.generator && (
-            <span className="bg-black/60 backdrop-blur-md px-1.5 py-0.5 rounded flex items-center gap-0.5">
-              <Zap className="w-2.5 h-2.5 text-[#B4C292]" /> Gen
-            </span>
+        {/* Top row: verification + save */}
+        <div className="absolute inset-x-3 top-3 flex items-start justify-between gap-2">
+          {property.verified ? (
+            <PhotoChip className="bg-surface/95 backdrop-blur-md text-primary border border-line">
+              <ShieldCheck className="w-3 h-3" aria-hidden="true" />
+              <span>Verified</span>
+            </PhotoChip>
+          ) : (
+            <span />
           )}
-          {property.waterTank && (
-            <span className="bg-black/60 backdrop-blur-md px-1.5 py-0.5 rounded flex items-center gap-0.5">
-              <Droplets className="w-2.5 h-2.5 text-cyan-300" /> Tank
-            </span>
-          )}
-          {property.parking && (
-            <span className="bg-black/60 backdrop-blur-md px-1.5 py-0.5 rounded flex items-center gap-0.5">
-              <Car className="w-2.5 h-2.5 text-amber-300" /> Park
-            </span>
+
+          <button
+            type="button"
+            onClick={handleFavoriteClick}
+            className="w-8 h-8 rounded-full bg-black/45 backdrop-blur-md text-white flex items-center justify-center hover:bg-black/65 transition-colors shrink-0"
+            aria-label={fav ? `Remove ${property.title} from favourites` : `Save ${property.title} to favourites`}
+            aria-pressed={fav}
+          >
+            <Heart className={`w-4 h-4 ${fav ? "fill-rose-500 text-rose-500" : "text-white"}`} aria-hidden="true" />
+          </button>
+        </div>
+
+        {/* Bottom row: amenities + map selection state */}
+        <div className="absolute inset-x-3 bottom-3 flex items-end justify-between gap-2">
+          <div className="flex flex-wrap items-center gap-1.5">
+            {property.generator && (
+              <PhotoChip className="bg-black/60 backdrop-blur-md text-white">
+                <Zap className="w-3 h-3 text-accent" aria-hidden="true" /> Gen
+              </PhotoChip>
+            )}
+            {property.waterTank && (
+              <PhotoChip className="bg-black/60 backdrop-blur-md text-white">
+                <Droplets className="w-3 h-3 text-cyan-300" aria-hidden="true" /> Tank
+              </PhotoChip>
+            )}
+            {property.parking && (
+              <PhotoChip className="bg-black/60 backdrop-blur-md text-white">
+                <Car className="w-3 h-3 text-amber-300" aria-hidden="true" /> Park
+              </PhotoChip>
+            )}
+          </div>
+
+          {isSelected && (
+            <PhotoChip className="bg-primary text-white shrink-0">
+              <MapPin className="w-3 h-3 text-accent" aria-hidden="true" />
+              <span>On map</span>
+            </PhotoChip>
           )}
         </div>
       </div>
 
-      {/* Content Area */}
-      <div className="p-3 flex-1 flex flex-col justify-between">
-        <div>
-          <div className="flex items-center justify-between gap-1.5 mb-1">
-            <span className="font-mono-label text-[9.5px] text-[#736F4E] truncate">
-              {[property.subCity, property.city].filter(Boolean).join(" • ").toUpperCase()}
-            </span>
-            <span className="font-mono-label text-[8.5px] text-[#4C061D] bg-[#FAF8F4] px-1.5 py-0.5 rounded border border-[#ECE7DA] font-bold">
-              {property.propertyType.toUpperCase()}
+      {/* Body */}
+      <div className="p-4 flex-1 flex flex-col gap-3">
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between gap-2">
+            <span className="font-mono-label text-label text-muted truncate">{location}</span>
+            <span className="font-mono-label text-label font-bold text-primary bg-canvas px-2 py-0.5 rounded-full border border-line shrink-0">
+              {property.propertyType}
             </span>
           </div>
 
-          <h3 className="font-serif-display text-sm font-medium text-[#1c1b12] line-clamp-1 group-hover:text-[#4C061D] transition-colors mb-1">
+          <h3 className="font-serif-display text-base font-medium text-ink line-clamp-1 transition-colors group-hover:text-primary">
             {property.title}
           </h3>
 
-          <p className="text-[11px] text-[#736F4E] font-medium mb-2">
-            {property.bedrooms} Bed • {property.bathrooms} Bath • {property.areaSqm}m² • {property.furnished ? "Furnished" : "Unfurnished"}
+          <p className="text-micro text-muted">
+            {property.bedrooms} Bed · {property.bathrooms} Bath · {property.areaSqm}m²
+            {property.furnished ? " · Furnished" : ""}
           </p>
         </div>
 
-        {/* Price & Direct Contact Phone Button */}
-        <div className="pt-2 border-t border-[#ECE7DA] flex items-center justify-between gap-1.5 mt-auto">
-          <div>
-            <span className="text-[9px] font-mono-label text-[#736F4E] block">RENTAL</span>
-            <span className="text-sm font-bold text-[#4C061D]">
-              ETB {property.rentETB.toLocaleString()} <span className="text-[10px] font-normal text-[#736F4E]">/mo</span>
+        {/* Price + direct call. A button, not an anchor, to avoid nesting links. */}
+        <div className="mt-auto pt-3 border-t border-line flex items-end justify-between gap-2">
+          <div className="min-w-0">
+            <span className="font-mono-label text-label text-muted block mb-0.5">Monthly rent</span>
+            <span className="text-base font-bold text-primary">
+              ETB {property.rentETB.toLocaleString()}
+              <span className="text-micro font-normal text-muted"> /mo</span>
             </span>
           </div>
 
-          {/* Front Contact Phone Button (using button element to avoid nested <a> tags) */}
           {contactPhone && (
             <button
               type="button"
               onClick={handlePhoneCall}
-              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[#4C061D] text-white hover:bg-[#3B0416] transition-colors text-[10px] font-mono-label font-bold shadow-xs shrink-0"
-              title="Call Property Owner Directly"
+              className="inline-flex items-center gap-1.5 h-9 px-3 rounded-control bg-primary text-white hover:bg-primary-hover transition-colors font-mono-label text-label font-bold shrink-0"
+              aria-label={`Call ${contactPhone} about ${property.title}`}
             >
-              <Phone className="w-3 h-3 text-[#B4C292]" />
-              <span>{contactPhone}</span>
+              <Phone className="w-3.5 h-3.5 text-accent" aria-hidden="true" />
+              <span className="hidden sm:inline">Call</span>
             </button>
           )}
         </div>
