@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Settings as SettingsIcon, Globe, Bell, ShieldCheck, Check } from "lucide-react";
+import { buttonClasses } from "@/components/ui";
 
 export default function SettingsPage() {
   const [currency, setCurrency] = useState("ETB");
@@ -76,7 +77,7 @@ export default function SettingsPage() {
           <div className="pt-4 flex items-center justify-between">
             <button
               type="submit"
-              className="px-6 py-3 rounded-control bg-primary text-white font-mono-label text-xs font-bold shadow-md hover:bg-primary-hover transition-colors"
+              className={buttonClasses({ size: "md" })}
             >
               Save Settings →
             </button>

@@ -21,6 +21,7 @@ import {
   Sparkles,
   Loader2
 } from "lucide-react";
+import { buttonClasses } from "@/components/ui";
 
 export default function ProfilePage() {
   const [session, setSession] = useState<{ user: UserSession; token: string } | null>(null);
@@ -108,8 +109,8 @@ export default function ProfilePage() {
         setTimeout(() => setSaveSuccess(false), 4000);
         setIsEditing(false);
       }
-    } catch (err: any) {
-      setErrorMsg(err.message || "Failed to update profile details.");
+    } catch (err) {
+      setErrorMsg((err instanceof Error ? err.message : "") || "Failed to update profile details.");
     } finally {
       setLoading(false);
     }
@@ -176,7 +177,7 @@ export default function ProfilePage() {
 
                 {user.bio && (
                   <p className="text-xs text-ink/80 max-w-2xl bg-canvas p-3 rounded-card border border-line mt-2">
-                    "{user.bio}"
+                    “{user.bio}”
                   </p>
                 )}
               </div>
@@ -214,7 +215,7 @@ export default function ProfilePage() {
             </p>
             <Link
               href="/auth/signin?callbackUrl=/profile"
-              className="inline-block px-8 py-3.5 rounded-full bg-primary text-white font-mono-label text-xs font-bold shadow-md hover:bg-primary-hover transition-colors"
+              className={buttonClasses({ size: "lg" })}
             >
               Sign In / Sign Up →
             </Link>
@@ -270,7 +271,7 @@ export default function ProfilePage() {
                   <Building className="w-10 h-10 text-muted/40 mx-auto" />
                   <h3 className="font-serif-display text-xl text-ink">No Properties Posted Yet</h3>
                   <p className="text-xs text-muted">
-                    You haven't listed any properties yet. Post your house or apartment directly on Delala to reach thousands of buyers across Ethiopia.
+                    You haven’t listed any properties yet. Post your house or apartment directly on Delala to reach thousands of buyers across Ethiopia.
                   </p>
                   <Link
                     href="/publish"

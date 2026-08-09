@@ -15,6 +15,7 @@ import {
   Trash2,
   Filter,
 } from "lucide-react";
+import { Skeleton } from "@/components/ui";
 
 export default function MyListingsPage() {
   const [activeTab, setActiveTab] = useState<"all" | "approved" | "pending" | "archived">("all");
@@ -107,14 +108,14 @@ export default function MyListingsPage() {
           {loading ? (
             <div className="space-y-4">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="h-24 rounded-card bg-canvas animate-pulse" />
+                <Skeleton key={i} className="h-24" />
               ))}
             </div>
           ) : filteredProperties.length === 0 ? (
             <div className="py-16 text-center space-y-3">
               <Building2 className="w-12 h-12 text-muted mx-auto opacity-50" />
               <h3 className="font-serif-display text-xl text-ink">No Property Listings Found</h3>
-              <p className="text-xs text-muted">You haven't submitted any properties yet. Click "Publish New Listing" above to get started.</p>
+              <p className="text-xs text-muted">You haven’t submitted any properties yet. Use “Publish New Listing” above to get started.</p>
             </div>
           ) : (
             <div className="space-y-4">

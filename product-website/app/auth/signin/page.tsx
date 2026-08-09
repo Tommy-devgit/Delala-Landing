@@ -33,8 +33,8 @@ function SignInContent() {
     try {
       await authClient.signIn({ email, password });
       router.push(callbackUrl);
-    } catch (err: any) {
-      setError(err.message || "Failed to sign in. Please check your credentials.");
+    } catch (err) {
+      setError((err instanceof Error ? err.message : "") || "Failed to sign in. Please check your credentials.");
     } finally {
       setLoading(false);
     }
@@ -132,7 +132,7 @@ function SignInContent() {
 
           <div className="pt-2 border-t border-line text-center">
             <p className="text-xs text-muted">
-              Don't have an account?{" "}
+              Don’t have an account?{" "}
               <Link
                 href="/auth/signup"
                 className="font-mono-label text-primary font-bold hover:underline"

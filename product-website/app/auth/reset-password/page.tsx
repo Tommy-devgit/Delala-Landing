@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import { Lock, Eye, EyeOff, CheckCircle2, ArrowRight } from "lucide-react";
-import { Button, Input } from "@/components/ui";
+import { Button, Input, buttonClasses } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 
@@ -39,8 +39,8 @@ function ResetPasswordContent() {
     try {
       await authClient.resetPassword(password, token);
       setCompleted(true);
-    } catch (err: any) {
-      setError(err.message || "Failed to reset password.");
+    } catch (err) {
+      setError((err instanceof Error ? err.message : "") || "Failed to reset password.");
     } finally {
       setLoading(false);
     }
@@ -79,7 +79,7 @@ function ResetPasswordContent() {
               </p>
               <Link
                 href="/auth/signin"
-                className="inline-flex items-center justify-center gap-2 w-full py-3.5 rounded-full bg-primary text-white font-mono-label text-xs font-bold hover:bg-primary-hover transition-colors"
+                className={buttonClasses({ size: "lg", className: "w-full" })}
               >
                 <span>Proceed to Sign In →</span>
               </Link>

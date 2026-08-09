@@ -5,6 +5,7 @@ import Link from "next/link";
 import { apiClient } from "@/lib/api-client";
 import { City } from "@/lib/types";
 import { MapPin, ArrowRight, Building2 } from "lucide-react";
+import { Skeleton } from "@/components/ui";
 
 export default function CitiesPage() {
   const [cities, setCities] = useState<City[]>([]);
@@ -39,7 +40,7 @@ export default function CitiesPage() {
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-64 rounded-card bg-surface border border-line animate-pulse" />
+              <Skeleton key={i} className="h-64" />
             ))}
           </div>
         ) : cities.length === 0 ? (

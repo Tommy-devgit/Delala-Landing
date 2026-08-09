@@ -45,8 +45,8 @@ function SignUpContent() {
     try {
       await authClient.signUp({ fullName, email, password, role });
       router.push(callbackUrl);
-    } catch (err: any) {
-      setError(err.message || "Failed to create account.");
+    } catch (err) {
+      setError((err instanceof Error ? err.message : "") || "Failed to create account.");
     } finally {
       setLoading(false);
     }
@@ -66,7 +66,7 @@ function SignUpContent() {
             Create Your Account
           </h1>
           <p className="text-xs text-muted mt-1.5 font-medium">
-            Join Ethiopia's verified real estate marketplace.
+            Join Ethiopia’s verified real estate marketplace.
           </p>
         </div>
 

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { X, Calendar, Clock, Phone, CheckCircle2, ShieldCheck, User } from "lucide-react";
+import { buttonClasses } from "@/components/ui";
 import { Property } from "@/lib/types";
 import { apiClient } from "@/lib/api-client";
 
@@ -141,7 +142,7 @@ export function ScheduleModal({
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full py-3.5 rounded-full bg-primary text-white font-mono-label text-xs font-bold hover:bg-primary-hover transition-colors shadow-md flex items-center justify-center gap-2"
+              className={buttonClasses({ size: "lg", className: "w-full" })}
             >
               <span>{isSubmitting ? "Transmitting Request..." : "Confirm Walkthrough Booking →"}</span>
             </button>

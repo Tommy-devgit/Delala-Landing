@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Search, Home } from "lucide-react";
+import { buttonClasses } from "@/components/ui";
 
 export default function NotFound() {
   return (
@@ -19,7 +20,7 @@ export default function NotFound() {
       <div className="flex flex-wrap items-center justify-center gap-4">
         <Link
           href="/"
-          className="inline-flex items-center gap-2 px-6 py-3 rounded-control bg-primary text-white font-mono-label text-xs font-bold shadow-md hover:bg-primary-hover transition-colors"
+          className={buttonClasses({ size: "md" })}
         >
           <Home className="w-4 h-4" />
           <span>Back to Marketplace</span>

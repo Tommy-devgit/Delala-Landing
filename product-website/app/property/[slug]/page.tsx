@@ -27,6 +27,7 @@ import {
   Building,
   Building2,
 } from "lucide-react";
+import { Skeleton, buttonClasses } from "@/components/ui";
 
 export default function PropertyDetailPage() {
   const params = useParams();
@@ -58,7 +59,7 @@ export default function PropertyDetailPage() {
   if (loading) {
     return (
       <div className="bg-canvas min-h-screen py-16 px-8">
-        <div className="max-w-[1440px] mx-auto h-96 rounded-panel bg-surface border border-line animate-pulse" />
+        <Skeleton className="max-w-[1440px] mx-auto h-96 rounded-panel" />
       </div>
     );
   }
@@ -226,7 +227,7 @@ export default function PropertyDetailPage() {
                   <>
                     <a
                       href={`tel:${(property.phone || property.broker?.phone).replace(/\s+/g, "")}`}
-                      className="w-full py-3.5 rounded-full bg-primary text-white font-mono-label text-xs font-bold hover:bg-primary-hover transition-colors shadow-md flex items-center justify-center gap-2"
+                      className={buttonClasses({ size: "lg", className: "w-full" })}
                     >
                       <Phone className="w-4 h-4 text-accent" />
                       <span>CALL {property.phone || property.broker?.phone}</span>

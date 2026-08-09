@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { authClient, UserSession } from "@/lib/auth-client";
 import { ShieldCheck, User, Building2, CheckCircle2, X, Lock, Mail, Sparkles, KeyRound } from "lucide-react";
-import { Input } from "@/components/ui";
+import { Input, buttonClasses } from "@/components/ui";
 
 export function AuthModal({
   isOpen,
@@ -42,8 +42,8 @@ export function AuthModal({
           onClose();
         }
       }
-    } catch (err: any) {
-      setError(err.message || "Authentication failed. Make sure your NestJS server is running.");
+    } catch (err) {
+      setError((err instanceof Error ? err.message : "") || "Authentication failed. Make sure your NestJS server is running.");
     } finally {
       setLoading(false);
     }
@@ -139,7 +139,7 @@ export function AuthModal({
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-4 rounded-full bg-primary text-white font-mono-label text-xs font-bold hover:bg-primary-hover transition-colors shadow-md flex items-center justify-center gap-2 mt-2"
+            className={buttonClasses({ size: "lg", className: "w-full mt-2" })}
           >
             <CheckCircle2 className="w-4 h-4 text-accent" />
             <span>{loading ? "Authenticating..." : isSignUp ? "Create Account →" : "Sign In →"}</span>

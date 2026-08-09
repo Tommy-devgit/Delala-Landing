@@ -9,6 +9,7 @@ import { apiClient } from "@/lib/api-client";
 import { Property } from "@/lib/types";
 import { PropertyCard } from "@/components/property-card";
 import { ShieldCheck, Zap, Droplets, ArrowRight, Building2 } from "lucide-react";
+import { Skeleton } from "@/components/ui";
 
 export default function NeighborhoodDetailPage() {
   const params = useParams();
@@ -61,7 +62,7 @@ export default function NeighborhoodDetailPage() {
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-80 rounded-panel bg-surface border border-line animate-pulse" />
+              <Skeleton key={i} className="h-80 rounded-panel" />
             ))}
           </div>
         ) : nhProperties.length === 0 ? (

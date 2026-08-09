@@ -8,6 +8,7 @@ import { authClient, UserSession } from "@/lib/auth-client";
 import { Property } from "@/lib/types";
 import { PropertyCard } from "@/components/property-card";
 import { Heart, Search, Lock } from "lucide-react";
+import { Skeleton, buttonClasses } from "@/components/ui";
 
 export default function FavoritesPage() {
   const router = useRouter();
@@ -73,7 +74,7 @@ export default function FavoritesPage() {
             </p>
             <Link
               href="/auth/signin?callbackUrl=/favorites"
-              className="inline-block px-8 py-3.5 rounded-full bg-primary text-white font-mono-label text-xs font-bold shadow-md hover:bg-primary-hover transition-colors"
+              className={buttonClasses({ size: "lg" })}
             >
               Sign In →
             </Link>
@@ -81,7 +82,7 @@ export default function FavoritesPage() {
         ) : loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-80 rounded-panel bg-surface border border-line animate-pulse" />
+              <Skeleton key={i} className="h-80 rounded-panel" />
             ))}
           </div>
         ) : savedListings.length > 0 ? (
@@ -106,7 +107,7 @@ export default function FavoritesPage() {
             </p>
             <Link
               href="/search"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-control bg-primary text-white font-mono-label text-xs font-bold shadow-md hover:bg-primary-hover transition-colors"
+              className={buttonClasses({ size: "md" })}
             >
               <Search className="w-4 h-4" />
               <span>Explore Marketplace →</span>

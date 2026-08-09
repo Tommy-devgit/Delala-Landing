@@ -130,8 +130,8 @@ export const authClient = {
       }
 
       return { success: true, user: data };
-    } catch (err: any) {
-      throw new Error(err.message || "Failed to update user profile.");
+    } catch (err) {
+      throw new Error((err instanceof Error ? err.message : "") || "Failed to update user profile.");
     }
   },
 

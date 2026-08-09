@@ -3,13 +3,24 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Bell, CheckCircle2, Calendar, ShieldCheck, Tag, Lock } from "lucide-react";
+import { Skeleton } from "@/components/ui";
 import { authClient, UserSession } from "@/lib/auth-client";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1";
 
+/** Row shape returned by GET /api/v1/notifications. */
+interface AppNotification {
+  id: string;
+  title?: string;
+  message?: string;
+  type?: string;
+  read?: boolean;
+  createdAt?: string;
+}
+
 export default function NotificationsPage() {
   const [session, setSession] = useState<{ user: UserSession; token: string } | null>(null);
-  const [notifications, setNotifications] = useState<any[]>([]);
+  const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -66,7 +77,7 @@ export default function NotificationsPage() {
         ) : loading ? (
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-20 rounded-panel bg-surface border border-line animate-pulse" />
+              <Skeleton key={i} className="h-20 rounded-panel" />
             ))}
           </div>
         ) : notifications.length === 0 ? (

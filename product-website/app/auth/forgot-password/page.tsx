@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
 import { Mail, ArrowLeft, CheckCircle2, ShieldCheck } from "lucide-react";
-import { Button, Input } from "@/components/ui";
+import { Button, Input, buttonClasses } from "@/components/ui";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -25,8 +25,8 @@ export default function ForgotPasswordPage() {
     try {
       await authClient.forgotPassword(email);
       setSubmitted(true);
-    } catch (err: any) {
-      setError(err.message || "Failed to process password reset.");
+    } catch (err) {
+      setError((err instanceof Error ? err.message : "") || "Failed to process password reset.");
     } finally {
       setLoading(false);
     }
@@ -65,7 +65,7 @@ export default function ForgotPasswordPage() {
               </p>
               <Link
                 href="/auth/signin"
-                className="inline-flex items-center justify-center gap-2 w-full py-3.5 rounded-full bg-primary text-white font-mono-label text-xs font-bold hover:bg-primary-hover transition-colors"
+                className={buttonClasses({ size: "lg", className: "w-full" })}
               >
                 <ArrowLeft className="w-4 h-4" />
                 <span>Return to Sign In</span>
