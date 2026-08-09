@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import { Building2, Lock, Mail, User, Eye, EyeOff, ShieldCheck, CheckCircle2 } from "lucide-react";
+import { Button, Input } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 
@@ -85,13 +86,13 @@ function SignUpContent() {
                 FULL NAME *
               </label>
               <div className="relative">
-                <input
+                <Input
                   type="text"
                   required
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   placeholder="e.g. Abebe Tesfaye"
-                  className="w-full p-3.5 pl-11 rounded-card bg-canvas border border-line text-xs text-ink focus:outline-none focus:border-primary transition-colors"
+                  className="pl-11"
                 />
                 <User className="w-4 h-4 text-muted absolute left-4 top-3.5 pointer-events-none" />
               </div>
@@ -103,13 +104,13 @@ function SignUpContent() {
                 EMAIL ADDRESS *
               </label>
               <div className="relative">
-                <input
+                <Input
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@example.et"
-                  className="w-full p-3.5 pl-11 rounded-card bg-canvas border border-line text-xs text-ink focus:outline-none focus:border-primary transition-colors"
+                  className="pl-11"
                 />
                 <Mail className="w-4 h-4 text-muted absolute left-4 top-3.5 pointer-events-none" />
               </div>
@@ -123,7 +124,7 @@ function SignUpContent() {
               <select
                 value={role}
                 onChange={(e) => setRole(e.target.value)}
-                className="w-full p-3.5 rounded-card bg-canvas border border-line text-xs text-ink focus:outline-none focus:border-primary"
+                className=""
               >
                 <option value="user">Explore & Rent / Buy Properties</option>
                 <option value="owner">Post & Manage My Properties</option>
@@ -142,7 +143,7 @@ function SignUpContent() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Min 6 characters"
-                  className="w-full p-3.5 pl-11 pr-11 rounded-card bg-canvas border border-line text-xs text-ink focus:outline-none focus:border-primary transition-colors"
+                  className="pl-11 pr-11"
                 />
                 <Lock className="w-4 h-4 text-muted absolute left-4 top-3.5 pointer-events-none" />
                 <button
@@ -156,13 +157,14 @@ function SignUpContent() {
             </div>
 
             {/* Submit Button */}
-            <button
+            <Button
               type="submit"
+              size="lg"
               disabled={loading}
-              className="w-full py-4 rounded-full bg-primary text-white font-mono-label text-xs font-bold hover:bg-primary-hover transition-colors shadow-lg flex items-center justify-center gap-2 pt-4"
+              className="w-full"
             >
               <span>{loading ? "Creating Account..." : "Create Account →"}</span>
-            </button>
+            </Button>
           </form>
 
           <div className="pt-2 border-t border-line text-center">

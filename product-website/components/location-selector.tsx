@@ -1,14 +1,9 @@
 "use client";
 
 import { AlertCircle, Loader2 } from "lucide-react";
+import { FieldLabel, Input, Select } from "@/components/ui";
 import { City } from "@/lib/types";
 import { LocationSelection, getNeighborhoods, getSubCities } from "@/lib/locations";
-
-const FIELD_CLASS =
-  "w-full p-3.5 rounded-card bg-canvas border border-line text-xs text-ink focus:outline-none focus:border-primary disabled:opacity-60 disabled:cursor-not-allowed";
-
-const LABEL_CLASS =
-  "block text-label font-mono-label text-muted font-bold uppercase mb-1";
 
 /**
  * Cascading City > Sub-city > Neighborhood selector. The options come entirely
@@ -53,29 +48,30 @@ export function LocationSelector({
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       <div>
-        <label htmlFor="location-country" className={LABEL_CLASS}>
+        <FieldLabel htmlFor="location-country" >
           Country
-        </label>
-        <input
+        </FieldLabel>
+        <Input
           id="location-country"
           type="text"
           disabled
+          readOnly
           value="Ethiopia"
-          className="w-full p-3.5 rounded-card bg-canvas border border-line text-xs font-bold text-ink"
+          className="font-bold"
         />
       </div>
 
       <div>
-        <label htmlFor="location-city" className={LABEL_CLASS}>
+        <FieldLabel htmlFor="location-city" >
           City {required && "*"}
-        </label>
-        <select
+        </FieldLabel>
+        <Select
           id="location-city"
           required={required}
           value={value.city}
           disabled={loading || cities.length === 0}
           onChange={(e) => handleCityChange(e.target.value)}
-          className={FIELD_CLASS}
+          
         >
           <option value="">
             {loading ? "Loading cities…" : cities.length === 0 ? "No cities available" : "Select a city"}
@@ -85,20 +81,20 @@ export function LocationSelector({
               {city.name}
             </option>
           ))}
-        </select>
+        </Select>
       </div>
 
       <div>
-        <label htmlFor="location-sub-city" className={LABEL_CLASS}>
+        <FieldLabel htmlFor="location-sub-city" >
           Sub City {required && "*"}
-        </label>
-        <select
+        </FieldLabel>
+        <Select
           id="location-sub-city"
           required={required}
           value={value.subCity}
           disabled={!value.city || subCities.length === 0}
           onChange={(e) => handleSubCityChange(e.target.value)}
-          className={FIELD_CLASS}
+          
         >
           <option value="">
             {!value.city
@@ -112,19 +108,19 @@ export function LocationSelector({
               {subCity.name}
             </option>
           ))}
-        </select>
+        </Select>
       </div>
 
       <div>
-        <label htmlFor="location-neighborhood" className={LABEL_CLASS}>
+        <FieldLabel htmlFor="location-neighborhood" >
           Neighborhood
-        </label>
-        <select
+        </FieldLabel>
+        <Select
           id="location-neighborhood"
           value={value.neighborhood}
           disabled={!value.subCity || neighborhoods.length === 0}
           onChange={(e) => handleNeighborhoodChange(e.target.value)}
-          className={FIELD_CLASS}
+          
         >
           <option value="">
             {!value.subCity
@@ -138,7 +134,7 @@ export function LocationSelector({
               {neighborhood.name}
             </option>
           ))}
-        </select>
+        </Select>
       </div>
 
       {loading && (

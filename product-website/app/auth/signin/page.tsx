@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import { Building2, Lock, Mail, Eye, EyeOff, ArrowRight, ShieldCheck, CheckCircle2 } from "lucide-react";
+import { Button, Input } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 
@@ -73,13 +74,13 @@ function SignInContent() {
                 EMAIL ADDRESS *
               </label>
               <div className="relative">
-                <input
+                <Input
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@example.et"
-                  className="w-full p-3.5 pl-11 rounded-card bg-canvas border border-line text-xs text-ink focus:outline-none focus:border-primary transition-colors"
+                  className="pl-11"
                 />
                 <Mail className="w-4 h-4 text-muted absolute left-4 top-3.5 pointer-events-none" />
               </div>
@@ -105,7 +106,7 @@ function SignInContent() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full p-3.5 pl-11 pr-11 rounded-card bg-canvas border border-line text-xs text-ink focus:outline-none focus:border-primary transition-colors"
+                  className="pl-11 pr-11"
                 />
                 <Lock className="w-4 h-4 text-muted absolute left-4 top-3.5 pointer-events-none" />
                 <button
@@ -119,13 +120,14 @@ function SignInContent() {
             </div>
 
             {/* Submit Button */}
-            <button
+            <Button
               type="submit"
+              size="lg"
               disabled={loading}
-              className="w-full py-4 rounded-full bg-primary text-white font-mono-label text-xs font-bold hover:bg-primary-hover transition-colors shadow-lg flex items-center justify-center gap-2 pt-4"
+              className="w-full"
             >
               <span>{loading ? "Signing in..." : "Sign In →"}</span>
-            </button>
+            </Button>
           </form>
 
           <div className="pt-2 border-t border-line text-center">

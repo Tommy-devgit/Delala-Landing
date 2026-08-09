@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { authClient, UserSession } from "@/lib/auth-client";
 import { ShieldCheck, User, Building2, CheckCircle2, X, Lock, Mail, Sparkles, KeyRound } from "lucide-react";
+import { Input } from "@/components/ui";
 
 export function AuthModal({
   isOpen,
@@ -88,13 +89,13 @@ export function AuthModal({
                 FULL NAME / AGENCY NAME *
               </label>
               <div className="relative">
-                <input
+                <Input
                   type="text"
                   required
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   placeholder="e.g. Bole Premier Real Estate"
-                  className="w-full p-3.5 pl-10 rounded-card bg-canvas border border-line text-xs text-ink focus:outline-none focus:border-primary"
+                  className="pl-10"
                 />
                 <User className="w-4 h-4 text-muted absolute left-3.5 top-3.5" />
               </div>
@@ -106,13 +107,13 @@ export function AuthModal({
               EMAIL ADDRESS *
             </label>
             <div className="relative">
-              <input
+              <Input
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="name@example.et"
-                className="w-full p-3.5 pl-10 rounded-card bg-canvas border border-line text-xs text-ink focus:outline-none focus:border-primary"
+                className="pl-10"
               />
               <Mail className="w-4 h-4 text-muted absolute left-3.5 top-3.5" />
             </div>
@@ -123,13 +124,13 @@ export function AuthModal({
               PASSWORD *
             </label>
             <div className="relative">
-              <input
+              <Input
                 type="password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full p-3.5 pl-10 rounded-card bg-canvas border border-line text-xs text-ink focus:outline-none focus:border-primary"
+                className="pl-10"
               />
               <KeyRound className="w-4 h-4 text-muted absolute left-3.5 top-3.5" />
             </div>

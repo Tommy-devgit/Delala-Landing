@@ -10,6 +10,7 @@ import { LocationPicker } from "@/components/map";
 import { City, Coordinates } from "@/lib/types";
 import { EMPTY_LOCATION_SELECTION, LocationSelection, resolveLocationFocus } from "@/lib/locations";
 import { CheckCircle2, Lock, Phone, Star, Upload, X } from "lucide-react";
+import { Button, FieldHint, FieldLabel, Input, Panel, Select, Textarea, buttonClasses } from "@/components/ui";
 
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
@@ -23,9 +24,6 @@ interface SelectedImage {
   previewUrl: string;
 }
 
-const INPUT_CLASS =
-  "w-full p-3.5 rounded-card bg-canvas border border-line text-xs text-ink focus:outline-none focus:border-primary";
-const LABEL_CLASS = "block text-label font-mono-label text-muted font-bold uppercase mb-1";
 
 export default function PublishListingPage() {
   const router = useRouter();
@@ -221,7 +219,7 @@ export default function PublishListingPage() {
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 -mt-4">
         {!session?.user ? (
-          <div className="bg-surface rounded-panel border border-line shadow-xl p-8 sm:p-12 text-center space-y-5 max-w-xl mx-auto">
+          <div className="p-8 sm:p-12 text-center space-y-5 max-w-xl mx-auto">
             <div className="w-16 h-16 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto shadow-xs">
               <Lock className="w-8 h-8" aria-hidden="true" />
             </div>
@@ -234,22 +232,22 @@ export default function PublishListingPage() {
             <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
               <Link
                 href="/auth/signin?callbackUrl=/publish"
-                className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-primary text-white font-mono-label text-xs font-bold hover:bg-primary-hover transition-colors shadow-md text-center"
+                className={buttonClasses({ size: "lg", className: "w-full sm:w-auto" })}
               >
-                Sign In / Create Account →
+                Sign in or create account
               </Link>
               <Link
                 href="/"
-                className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-canvas border border-line text-ink font-mono-label text-xs hover:bg-line transition-colors"
+                className={buttonClasses({ variant: "secondary", size: "lg", className: "w-full sm:w-auto" })}
               >
-                Explore Marketplace
+                Explore marketplace
               </Link>
             </div>
           </div>
         ) : (
           <form
             onSubmit={handleSubmit}
-            className="bg-surface rounded-panel border border-line shadow-xl p-6 sm:p-10 space-y-9"
+            className="bg-surface rounded-panel border border-line shadow-sm p-6 sm:p-10 space-y-9"
           >
             {error && (
               <div
@@ -345,60 +343,60 @@ export default function PublishListingPage() {
               <h2 className="font-serif-display text-2xl text-ink">Property information</h2>
 
               <div>
-                <label htmlFor="property-title" className={LABEL_CLASS}>
+                <FieldLabel htmlFor="property-title" >
                   Property title *
-                </label>
-                <input
+                </FieldLabel>
+                <Input
                   id="property-title"
                   type="text"
                   required
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="e.g. Modern 3 Bedroom House in Bole"
-                  className={INPUT_CLASS}
+                  
                 />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
-                  <label htmlFor="property-type" className={LABEL_CLASS}>
+                  <FieldLabel htmlFor="property-type" >
                     Property type *
-                  </label>
-                  <select
+                  </FieldLabel>
+                  <Select
                     id="property-type"
                     value={propertyType}
                     onChange={(e) => setPropertyType(e.target.value)}
-                    className={INPUT_CLASS}
+                    
                   >
                     <option value="Apartment">Apartment</option>
                     <option value="House">House</option>
                     <option value="Villa">Villa</option>
                     <option value="Commercial">Commercial</option>
                     <option value="Land">Land</option>
-                  </select>
+                  </Select>
                 </div>
 
                 <div>
-                  <label htmlFor="listing-type" className={LABEL_CLASS}>
+                  <FieldLabel htmlFor="listing-type" >
                     Listing type *
-                  </label>
-                  <select
+                  </FieldLabel>
+                  <Select
                     id="listing-type"
                     value={listingType}
                     onChange={(e) => setListingType(e.target.value as "Rent" | "Sale")}
-                    className={INPUT_CLASS}
+                    
                   >
                     <option value="Rent">For Rent</option>
                     <option value="Sale">For Sale</option>
-                  </select>
+                  </Select>
                 </div>
 
                 <div>
-                  <label htmlFor="property-price" className={LABEL_CLASS}>
+                  <FieldLabel htmlFor="property-price" >
                     Price (ETB) *
-                  </label>
+                  </FieldLabel>
                   <div className="relative">
-                    <input
+                    <Input
                       id="property-price"
                       type="number"
                       min="0"
@@ -406,7 +404,7 @@ export default function PublishListingPage() {
                       value={price}
                       onChange={(e) => setPrice(e.target.value)}
                       placeholder="65000"
-                      className={`${INPUT_CLASS} pl-12 font-mono-label`}
+                      className="pl-12 font-mono-label"
                     />
                     <span className="absolute left-3.5 top-3 font-mono-label text-xs font-bold text-primary">
                       ETB
@@ -417,45 +415,45 @@ export default function PublishListingPage() {
 
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <label htmlFor="property-bedrooms" className={LABEL_CLASS}>
+                  <FieldLabel htmlFor="property-bedrooms" >
                     Bedrooms
-                  </label>
-                  <input
+                  </FieldLabel>
+                  <Input
                     id="property-bedrooms"
                     type="number"
                     min="0"
                     value={bedrooms}
                     onChange={(e) => setBedrooms(e.target.value)}
-                    className={`${INPUT_CLASS} font-mono-label`}
+                    className="font-mono-label"
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="property-bathrooms" className={LABEL_CLASS}>
+                  <FieldLabel htmlFor="property-bathrooms" >
                     Bathrooms
-                  </label>
-                  <input
+                  </FieldLabel>
+                  <Input
                     id="property-bathrooms"
                     type="number"
                     min="0"
                     step="0.5"
                     value={bathrooms}
                     onChange={(e) => setBathrooms(e.target.value)}
-                    className={`${INPUT_CLASS} font-mono-label`}
+                    className="font-mono-label"
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="property-area" className={LABEL_CLASS}>
+                  <FieldLabel htmlFor="property-area" >
                     Area (sqm)
-                  </label>
-                  <input
+                  </FieldLabel>
+                  <Input
                     id="property-area"
                     type="number"
                     min="0"
                     value={area}
                     onChange={(e) => setArea(e.target.value)}
-                    className={`${INPUT_CLASS} font-mono-label`}
+                    className="font-mono-label"
                   />
                 </div>
               </div>
@@ -481,16 +479,16 @@ export default function PublishListingPage() {
               />
 
               <div>
-                <label htmlFor="property-address" className={LABEL_CLASS}>
+                <FieldLabel htmlFor="property-address" >
                   Street address or landmark (optional)
-                </label>
-                <input
+                </FieldLabel>
+                <Input
                   id="property-address"
                   type="text"
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
                   placeholder="e.g. Near Atlas Hotel, Ring Road access"
-                  className={INPUT_CLASS}
+                  
                 />
               </div>
             </section>
@@ -522,38 +520,38 @@ export default function PublishListingPage() {
             {/* DESCRIPTION & CONTACT */}
             <section className="space-y-4">
               <div>
-                <label htmlFor="property-description" className={LABEL_CLASS}>
+                <FieldLabel htmlFor="property-description" >
                   Description
-                </label>
-                <textarea
+                </FieldLabel>
+                <Textarea
                   id="property-description"
                   rows={4}
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Describe the property layout, water tank, standby generator, and neighborhood features..."
-                  className={INPUT_CLASS}
+                  
                 />
               </div>
 
               <div>
-                <label htmlFor="property-phone" className={LABEL_CLASS}>
+                <FieldLabel htmlFor="property-phone" >
                   Contact phone *
-                </label>
+                </FieldLabel>
                 <div className="relative">
-                  <input
+                  <Input
                     id="property-phone"
                     type="tel"
                     required
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="+251 911 234 567"
-                    className={`${INPUT_CLASS} pl-10 font-mono-label`}
+                    className="pl-10 font-mono-label"
                   />
                   <Phone className="w-4 h-4 text-primary absolute left-3.5 top-3.5" aria-hidden="true" />
                 </div>
-                <p className="text-label text-muted mt-1">
-                  This phone number appears directly on the front of property cards for instant calls.
-                </p>
+                <FieldHint>
+                  This number appears on the front of your listing card so renters can call you directly.
+                </FieldHint>
               </div>
             </section>
 
@@ -563,14 +561,10 @@ export default function PublishListingPage() {
                 By publishing, your property will immediately be posted on the marketplace.
               </div>
 
-              <button
-                type="submit"
-                disabled={isPublishing}
-                className="w-full sm:w-auto px-10 py-4 rounded-full bg-primary text-white font-mono-label text-xs font-bold hover:bg-primary-hover disabled:opacity-60 transition-colors shadow-lg flex items-center justify-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-              >
+              <Button type="submit" size="lg" disabled={isPublishing} className="w-full sm:w-auto">
                 <CheckCircle2 className="w-4 h-4 text-accent" aria-hidden="true" />
-                <span>{isPublishing ? "Publishing…" : "Publish Property"}</span>
-              </button>
+                <span>{isPublishing ? "Publishing…" : "Publish property"}</span>
+              </Button>
             </div>
           </form>
         )}

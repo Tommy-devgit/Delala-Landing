@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import { Lock, Eye, EyeOff, CheckCircle2, ArrowRight } from "lucide-react";
+import { Button, Input } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 
@@ -102,7 +103,7 @@ function ResetPasswordContent() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Min 6 characters"
-                    className="w-full p-3.5 pl-11 pr-11 rounded-card bg-canvas border border-line text-xs text-ink focus:outline-none focus:border-primary transition-colors"
+                    className="pl-11 pr-11"
                   />
                   <Lock className="w-4 h-4 text-muted absolute left-4 top-3.5 pointer-events-none" />
                   <button
@@ -120,25 +121,26 @@ function ResetPasswordContent() {
                   CONFIRM NEW PASSWORD *
                 </label>
                 <div className="relative">
-                  <input
+                  <Input
                     type="password"
                     required
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="Re-enter new password"
-                    className="w-full p-3.5 pl-11 rounded-card bg-canvas border border-line text-xs text-ink focus:outline-none focus:border-primary transition-colors"
+                    className="pl-11"
                   />
                   <Lock className="w-4 h-4 text-muted absolute left-4 top-3.5 pointer-events-none" />
                 </div>
               </div>
 
-              <button
+              <Button
                 type="submit"
+                size="lg"
                 disabled={loading}
-                className="w-full py-4 rounded-full bg-primary text-white font-mono-label text-xs font-bold hover:bg-primary-hover transition-colors shadow-lg flex items-center justify-center gap-2"
+                className="w-full"
               >
                 <span>{loading ? "Updating Password..." : "Update Password →"}</span>
-              </button>
+              </Button>
             </form>
           )}
         </div>
