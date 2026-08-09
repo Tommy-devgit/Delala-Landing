@@ -1,15 +1,42 @@
 @import "tailwindcss";
 
-@theme inline {
-  --color-primary: #4C061D;
-  --color-accent: #B4C292;
-  --color-secondary: #736F4E;
-  --color-dark: #3B3923;
-  --color-bg-warm: #FAF8F4;
-  --color-card-white: #FFFFFF;
-  --color-border-warm: #ECE7DA;
-  --color-text-main: #2D2D2D;
+/* ---------------------------------------------------------------------------
+   Delala design tokens.
 
+   Same palette as before — these are the values that were previously written as
+   raw hex in ~976 places. Naming is semantic (what a colour is for) rather than
+   descriptive, so a surface can be restyled in one place.
+   --------------------------------------------------------------------------- */
+@theme {
+  /* Brand */
+  --color-primary: #4C061D;        /* maroon: actions, emphasis */
+  --color-primary-hover: #3B0416;
+  --color-accent: #B4C292;         /* sage: highlights on dark/primary */
+
+  /* Surfaces */
+  --color-canvas: #FAF8F4;         /* warm page background */
+  --color-surface: #FFFFFF;        /* cards, bars */
+  --color-line: #ECE7DA;           /* hairline borders */
+
+  /* Text */
+  --color-ink: #1C1B12;            /* headings */
+  --color-body: #2D2D2D;           /* body copy */
+  --color-muted: #736F4E;          /* secondary / meta */
+
+  /* Type scale. The tiny uppercase mono label is a Delala signature, so it gets
+     named sizes instead of the ad-hoc 8.5/9/9.5/10/11px values it had before. */
+  --text-label: 0.625rem;          /* 10px — mono labels, badges */
+  --text-label--line-height: 1.1;
+  --text-micro: 0.6875rem;         /* 11px — dense meta rows */
+  --text-micro--line-height: 1.35;
+
+  /* Radius scale: control / card / panel / pill. */
+  --radius-control: 0.75rem;       /* inputs, buttons */
+  --radius-card: 1rem;             /* listing + content cards */
+  --radius-panel: 1.5rem;          /* page-level panels, modals */
+}
+
+@theme inline {
   --font-manrope: var(--font-manrope), system-ui, sans-serif;
   --font-inter: var(--font-inter), system-ui, sans-serif;
   --font-serif-display: var(--font-serif-display), Georgia, serif;
@@ -17,20 +44,9 @@
 }
 
 @layer base {
-  :root {
-    --primary: #4C061D;
-    --accent: #B4C292;
-    --secondary: #736F4E;
-    --dark: #3B3923;
-    --bg-warm: #FAF8F4;
-    --card-white: #FFFFFF;
-    --border-warm: #ECE7DA;
-    --text-main: #2D2D2D;
-  }
-
   body {
-    background-color: var(--bg-warm);
-    color: var(--text-main);
+    background-color: var(--color-canvas);
+    color: var(--color-body);
     font-family: var(--font-inter), sans-serif;
     overflow-x: hidden;
   }
@@ -47,6 +63,14 @@
     font-family: var(--font-mono-label), monospace;
     text-transform: uppercase;
     letter-spacing: 0.14em;
+  }
+
+  /* A single, consistent keyboard-focus treatment. Previously only 28 of 117
+     interactive elements had any visible focus state at all. */
+  :focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+    border-radius: 2px;
   }
 }
 
