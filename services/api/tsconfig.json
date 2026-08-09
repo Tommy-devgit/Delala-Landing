@@ -20,5 +20,7 @@
     "paths": {
       "@/*": ["src/*"]
     }
-  }
+  },
+  "include": ["src/**/*", "api/**/*", "prisma/**/*"],
+  "exclude": ["node_modules", "dist"]
 }
