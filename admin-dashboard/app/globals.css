@@ -1,79 +1,95 @@
 @import "tailwindcss";
 
-@theme inline {
+/* ---------------------------------------------------------------------------
+   Delala design tokens — identical to the product website so the two apps do
+   not drift. The dashboard previously carried 250 raw hex values and used a
+   `font-mono-label` class it never defined.
+   --------------------------------------------------------------------------- */
+@theme {
+  /* Brand */
   --color-primary: #4C061D;
   --color-primary-hover: #3B0416;
   --color-accent: #B4C292;
-  --color-secondary: #736F4E;
-  --color-dark: #3B3923;
-  --color-bg-warm: #FAF8F4;
-  --color-card: #FFFFFF;
-  --color-border-warm: #ECE7DA;
-  --color-text-main: #1C1B12;
-  --color-text-muted: #736F4E;
 
-  --font-serif-display: var(--font-dm-serif), serif;
-  --font-heading: var(--font-manrope), sans-serif;
-  --font-sans: var(--font-inter), sans-serif;
-  --font-mono-label: var(--font-roboto-mono), monospace;
+  /* Surfaces */
+  --color-canvas: #FAF8F4;
+  --color-surface: #FFFFFF;
+  --color-line: #ECE7DA;
+
+  /* Text */
+  --color-ink: #1C1B12;
+  --color-body: #2D2D2D;
+  --color-muted: #736F4E;
+
+  /* Status — the dashboard is mostly state, so these are first-class tokens. */
+  --color-ok: #15803D;
+  --color-ok-soft: #F0FDF4;
+  --color-warn: #B45309;
+  --color-warn-soft: #FFFBEB;
+  --color-danger: #BE123C;
+  --color-danger-soft: #FFF1F2;
+
+  /* Type scale */
+  --text-label: 0.6875rem;
+  --text-label--line-height: 1.25;
+  --text-micro: 0.75rem;
+  --text-micro--line-height: 1.4;
+
+  /* Radius scale */
+  --radius-control: 0.625rem;
+  --radius-card: 0.875rem;
+  --radius-panel: 1.25rem;
+}
+
+@theme inline {
+  --font-inter: var(--font-inter), system-ui, sans-serif;
+  --font-serif-display: var(--font-serif-display), Georgia, serif;
 }
 
 @layer base {
   body {
-    background-color: #FAF8F4;
-    color: #1C1B12;
-    font-family: var(--font-inter), sans-serif;
-    overflow-x: hidden;
+    background-color: var(--color-canvas);
+    color: var(--color-body);
+    font-family: var(--font-inter), system-ui, sans-serif;
   }
 
-  /* Admin Table Styling in Delala Brand Palette */
-  table {
-    width: 100%;
-    border-collapse: collapse;
+  .font-serif-display {
+    font-family: var(--font-serif-display), Georgia, serif;
+    font-weight: 300;
+    line-height: 1;
+    letter-spacing: -0.02em;
   }
 
-  th {
-    text-transform: uppercase;
-    font-size: 10px;
-    letter-spacing: 0.08em;
-    font-weight: 700;
-    color: #736F4E;
-    background-color: #F4EFE6;
-    padding: 12px 16px;
-    border-bottom: 1px solid #ECE7DA;
-    text-align: left;
-    font-family: var(--font-roboto-mono), monospace;
+  /* Was used 92 times but never defined, so it did nothing. It now means
+     "quiet supporting text" — and does not shout. */
+  .font-mono-label {
+    font-family: var(--font-inter), system-ui, sans-serif;
+    letter-spacing: 0.01em;
   }
 
-  td {
-    font-size: 13px;
-    color: #1C1B12;
-    padding: 14px 16px;
-    border-bottom: 1px solid #ECE7DA;
+  /* Tabular figures keep metric columns from jittering as numbers change. */
+  .tabular {
+    font-variant-numeric: tabular-nums;
   }
 
-  tr {
-    background-color: #FFFFFF;
-    transition: background-color 0.15s ease;
-  }
-
-  tr:hover {
-    background-color: #FAF8F4;
+  :focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+    border-radius: 2px;
   }
 }
 
-/* Custom Scrollbar in Delala Warm Palette */
 ::-webkit-scrollbar {
-  height: 6px;
-  width: 6px;
+  height: 8px;
+  width: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #FAF8F4;
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #D9D2C3;
+  background: #DCD6C6;
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #736F4E;
+  background: var(--color-muted);
 }
