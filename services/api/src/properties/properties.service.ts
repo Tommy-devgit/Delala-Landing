@@ -21,10 +21,19 @@ const toCoordinate = (value: unknown, max: number): number | null => {
 export class PropertiesService {
   constructor(private prisma: PrismaService) {}
 
-  async findAll(query: { city?: string; subCity?: string; propertyType?: string; verifiedOnly?: boolean }) {
+  async findAll(query: {
+    city?: string;
+    subCity?: string;
+    propertyType?: string;
+    verifiedOnly?: boolean;
+    status?: string;
+  }) {
+    const status = query.status?.toLowerCase();
     const list = await this.prisma.property.findMany({
       where: {
         ...(query.propertyType ? { propertyType: query.propertyType.toLowerCase() } : {}),
+        ...(status && status !== "all" ? { status } : {}),
+        ...(query.verifiedOnly ? { status: "approved" } : {}),
       },
       include: {
         location: {
@@ -224,7 +233,9 @@ export class PropertiesService {
         latitude: toCoordinate(createDto.latitude, 90) as any,
         longitude: toCoordinate(createDto.longitude, 180) as any,
         contactPhone: createDto.phone || null,
-        status: "approved",
+        // New submissions enter the moderation queue. Auto-approving on create
+        // meant the approvals screen could never have anything in it.
+        status: "pending",
         images: {
           create: imageRecords,
         },

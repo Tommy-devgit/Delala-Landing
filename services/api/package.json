@@ -10,7 +10,8 @@
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
     "prisma:generate": "prisma generate",
-    "prisma:migrate": "ts-node prisma/add-contact-phone.ts && ts-node prisma/add-bio.ts && ts-node prisma/alter-avatar-url.ts && ts-node prisma/add-coordinates.ts",
+    "prisma:migrate": "ts-node prisma/add-contact-phone.ts && ts-node prisma/add-bio.ts && ts-node prisma/alter-avatar-url.ts && ts-node prisma/add-coordinates.ts && ts-node prisma/add-profile-status.ts",
+    "make-admin": "ts-node prisma/make-admin.ts",
     "prisma:seed": "ts-node prisma/seed.ts"
   },
   "dependencies": {

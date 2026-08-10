@@ -34,6 +34,7 @@ model Profile {
   avatarUrl String?   @map("avatar_url") @db.Text
   bio       String?
   role      String?   @default("user") @db.VarChar(20)
+  status    String?   @default("active") @db.VarChar(20)
   createdAt DateTime? @default(now()) @map("created_at") @db.Timestamp(6)
   updatedAt DateTime? @default(now()) @map("updated_at") @db.Timestamp(6)
 

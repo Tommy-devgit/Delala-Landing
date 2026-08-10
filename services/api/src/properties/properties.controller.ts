@@ -7,6 +7,7 @@ import {
   Param,
   Query,
   Headers,
+  Req,
   UseGuards,
   UseInterceptors,
   UploadedFiles,
@@ -19,6 +20,8 @@ import { CreatePropertyDto, ModeratePropertyDto } from "./dto/create-property.dt
 import { R2StorageService } from "../storage/r2-storage.service";
 import { Roles } from "../common/decorators/roles.decorator";
 import { RolesGuard } from "../common/guards/roles.guard";
+import { SessionAuthGuard } from "../common/guards/session-auth.guard";
+import { AdminService } from "../admin/admin.service";
 
 /**
  * Session tokens are issued as `betterauth-session-<uuid>-<timestamp>`, so the
@@ -39,7 +42,8 @@ const userIdFromAuthHeader = (authorization?: string): string | undefined => {
 export class PropertiesController {
   constructor(
     private readonly propertiesService: PropertiesService,
-    private readonly r2StorageService: R2StorageService
+    private readonly r2StorageService: R2StorageService,
+    private readonly adminService: AdminService
   ) {}
 
   @Get()
@@ -90,11 +94,22 @@ export class PropertiesController {
   }
 
   @Patch(":id/moderate")
-  @UseGuards(RolesGuard)
+  @UseGuards(SessionAuthGuard, RolesGuard)
   @Roles("ADMIN", "MODERATOR")
   @ApiBearerAuth()
   @ApiOperation({ summary: "Moderate property submission (Approve / Reject)" })
-  moderate(@Param("id") id: string, @Body() moderateDto: ModeratePropertyDto) {
-    return this.propertiesService.moderate(id, moderateDto);
+  async moderate(
+    @Param("id") id: string,
+    @Body() moderateDto: ModeratePropertyDto,
+    @Req() req?: any
+  ) {
+    const result = await this.propertiesService.moderate(id, moderateDto);
+    await this.adminService.recordAudit(
+      req?.user?.id,
+      `property.${moderateDto.status.toLowerCase()}`,
+      "properties",
+      id
+    );
+    return result;
   }
 }
