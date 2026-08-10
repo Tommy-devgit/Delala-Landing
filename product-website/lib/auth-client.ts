@@ -87,8 +87,15 @@ export const authClient = {
       if (res.ok) {
         const user = await res.json();
         if (typeof window !== "undefined") {
-          localStorage.setItem("delala_user", JSON.stringify(user));
-          window.dispatchEvent(new Event("delala_auth_change"));
+          // Only announce a change when something actually changed. This is a
+          // read: firing the event unconditionally made any listener that
+          // re-reads the profile trigger another fetch, and another event, in a
+          // loop that also reset whatever the user was typing.
+          const next = JSON.stringify(user);
+          if (localStorage.getItem("delala_user") !== next) {
+            localStorage.setItem("delala_user", next);
+            window.dispatchEvent(new Event("delala_auth_change"));
+          }
         }
         return user;
       }
