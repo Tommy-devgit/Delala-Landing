@@ -41,7 +41,7 @@ export function Header({ onOpenFilters }: { onOpenFilters?: () => void }) {
           {/* LEFT: Brand Logomark */}
           <Link href="/" className="flex items-center gap-2.5 shrink-0 group">
             <span className="font-serif-display font-light text-2xl tracking-tight text-primary group-hover:text-primary-hover transition-colors">
-              DELALA
+              ደላላ
             </span>
           </Link>
 
