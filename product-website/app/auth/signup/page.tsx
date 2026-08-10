@@ -53,10 +53,10 @@ function SignUpContent() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-80px)] bg-canvas flex items-center justify-center p-4 sm:p-8">
+    <div className="min-h-[calc(100vh-80px)] bg-canvas flex items-center justify-center p-4 sm:p-6">
       <div className="w-full max-w-md">
         {/* Top Logo / Brand Header */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-5">
           <Link href="/" className="inline-flex items-center gap-2 mb-3">
             <span className="font-serif-display font-light text-3xl tracking-tight text-primary">
               DELALA
@@ -71,7 +71,7 @@ function SignUpContent() {
         </div>
 
         {/* Sign Up Card */}
-        <div className="bg-surface rounded-panel border border-line shadow-xl p-6 sm:p-8 space-y-6">
+        <div className="bg-surface rounded-panel border border-line shadow-xl p-6 sm:p-6 space-y-4">
           {error && (
             <div className="p-4 rounded-card bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium flex items-center gap-2">
               <span className="shrink-0 font-bold">⚠️</span>

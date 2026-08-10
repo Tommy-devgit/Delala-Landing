@@ -4,5 +4,7 @@ export declare class R2StorageService {
     private bucketName;
     private publicUrl;
     constructor();
+    private static readonly MAX_INLINE_BYTES;
+    get isConfigured(): boolean;
     uploadImage(file: Express.Multer.File): Promise<string>;
 }

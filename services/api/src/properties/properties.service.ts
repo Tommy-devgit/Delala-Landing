@@ -131,7 +131,11 @@ export class PropertiesService {
     return created.id;
   }
 
-  async create(createDto: CreatePropertyDto, uploadedImageUrls: string[] = []) {
+  async create(
+    createDto: CreatePropertyDto,
+    uploadedImageUrls: string[] = [],
+    authenticatedUserId?: string
+  ) {
     // 1. Resolve or create valid UUID location record in locations table
     let locationId: string = "";
 
@@ -149,10 +153,20 @@ export class PropertiesService {
       locationId = (neighborhoodId ?? subCityId ?? cityId)!;
     }
 
-    // 2. Resolve or fallback owner user with a valid UUID
+    // 2. Resolve the owner. The session token is the trusted source — falling
+    // back to "the first user in the table" silently filed every listing under
+    // whichever account happened to be created first.
     let ownerId: string = "";
-    if (isValidUuid(createDto.brokerId)) {
+    if (isValidUuid(authenticatedUserId)) {
+      ownerId = authenticatedUserId!;
+    } else if (isValidUuid(createDto.brokerId)) {
       ownerId = createDto.brokerId!;
+    }
+
+    if (ownerId) {
+      // Never attach a listing to an id that is not a real user.
+      const exists = await this.prisma.user.findUnique({ where: { id: ownerId } });
+      if (!exists) ownerId = "";
     }
 
     if (!ownerId) {

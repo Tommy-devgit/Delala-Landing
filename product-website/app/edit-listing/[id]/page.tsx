@@ -49,15 +49,15 @@ export default function EditListingPage() {
       </div>
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 mt-8">
-        <div className="bg-surface rounded-panel border border-line shadow-xl p-6 sm:p-10">
+        <div className="bg-surface rounded-panel border border-line shadow-xl p-6 sm:p-8">
           {saved ? (
-            <div className="py-12 text-center space-y-4">
+            <div className="py-8 text-center space-y-4">
               <CheckCircle2 className="w-12 h-12 text-emerald-600 mx-auto" />
               <h2 className="font-serif-display text-2xl">Listing Changes Saved!</h2>
               <p className="text-xs text-muted">Redirecting to your listings dashboard...</p>
             </div>
           ) : (
-            <form onSubmit={handleSave} className="space-y-6">
+            <form onSubmit={handleSave} className="space-y-4">
               <div>
                 <label className="block text-micro font-mono-label text-muted font-bold uppercase mb-1">
                   PROPERTY TITLE

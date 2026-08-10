@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Heart, ShieldCheck, Zap, Droplets, Car, Phone, MapPin } from "lucide-react";
 import { Property } from "@/lib/types";
+import { formatPostedAt, formatPostedDate } from "@/lib/format";
 
 /** Overlay chip used for the badges that sit on top of the photo. */
 function PhotoChip({
@@ -40,6 +41,7 @@ export function PropertyCard({
   const [fav, setFav] = useState(isFavorite);
 
   const contactPhone = property.phone || property.broker?.phone;
+  const postedAt = formatPostedAt(property.createdAt);
   const location = [property.subCity, property.city].filter(Boolean).join(" • ");
 
   const handleFavoriteClick = (e: React.MouseEvent) => {
@@ -145,6 +147,12 @@ export function PropertyCard({
             {property.bedrooms} Bed · {property.bathrooms} Bath · {property.areaSqm}m²
             {property.furnished ? " · Furnished" : ""}
           </p>
+
+          {postedAt && (
+            <p className="text-label text-muted/80" title={formatPostedDate(property.createdAt)}>
+              Posted {postedAt}
+            </p>
+          )}
         </div>
 
         {/* Price + direct call. A button, not an anchor, to avoid nesting links. */}

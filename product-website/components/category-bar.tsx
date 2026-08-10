@@ -1,17 +1,25 @@
 "use client";
 
-import { Building2, Home, Sparkles, ShieldCheck, Flame, BedDouble, Landmark } from "lucide-react";
+import { Building2, Home, Hotel, LayoutGrid, BedDouble, Landmark, Store } from "lucide-react";
 
+/**
+ * Property categories. Plain names on purpose — these are the actual listing
+ * types, not marketing labels.
+ */
 const CATEGORIES = [
-  { id: "all", label: "All Verified", icon: Flame },
+  { id: "all", label: "All", icon: LayoutGrid },
   { id: "Apartment", label: "Apartments", icon: Building2 },
-  { id: "Villa", label: "Villas & Compounds", icon: Home },
-  { id: "Studio", label: "Executive Studios", icon: BedDouble },
-  { id: "G+1 Residence", label: "G+1 Residences", icon: Landmark },
-  { id: "Penthouse", label: "Penthouses", icon: Sparkles },
-  { id: "diplomatic", label: "Diplomatic Enclave", icon: ShieldCheck },
+  { id: "Villa", label: "Villas", icon: Home },
+  { id: "Studio", label: "Studios", icon: BedDouble },
+  { id: "G+1 Residence", label: "G+1", icon: Landmark },
+  { id: "Penthouse", label: "Penthouses", icon: Hotel },
+  { id: "Commercial Space", label: "Commercial", icon: Store },
 ];
 
+/**
+ * Horizontal category strip. Reads as a set of tabs — icon above a short label,
+ * the active one marked by weight and an underline rather than a filled pill.
+ */
 export function CategoryBar({
   selected,
   onSelect,
@@ -20,8 +28,12 @@ export function CategoryBar({
   onSelect: (catId: string) => void;
 }) {
   return (
-    <div className="w-full bg-canvas border-b border-line py-3.5 px-4 sm:px-8">
-      <div className="max-w-[1440px] mx-auto flex items-center gap-3 overflow-x-auto no-scrollbar scroll-smooth">
+    <div className="w-full bg-surface border-b border-line">
+      <div
+        className="max-w-[1440px] mx-auto px-4 sm:px-8 flex items-stretch gap-7 overflow-x-auto no-scrollbar"
+        role="tablist"
+        aria-label="Property categories"
+      >
         {CATEGORIES.map((cat) => {
           const Icon = cat.icon;
           const isActive = selected === cat.id;
@@ -29,15 +41,25 @@ export function CategoryBar({
           return (
             <button
               key={cat.id}
+              type="button"
+              role="tab"
+              aria-selected={isActive}
               onClick={() => onSelect(cat.id)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-medium transition-all shrink-0 border select-none ${
-                isActive
-                  ? "bg-primary text-white border-primary shadow-xs font-bold"
-                  : "bg-surface text-body border-line hover:border-primary/50 hover:text-primary"
+              className={`group relative flex shrink-0 flex-col items-center gap-1.5 pt-3 pb-2.5 transition-colors ${
+                isActive ? "text-ink" : "text-muted hover:text-ink"
               }`}
             >
-              <Icon className={`w-3.5 h-3.5 ${isActive ? "text-accent" : "text-muted"}`} />
-              <span>{cat.label}</span>
+              <Icon className="w-5 h-5" aria-hidden="true" />
+              <span className={`text-micro whitespace-nowrap ${isActive ? "font-bold" : "font-medium"}`}>
+                {cat.label}
+              </span>
+              {/* Underline marks the active tab; hover previews it faintly. */}
+              <span
+                aria-hidden="true"
+                className={`absolute inset-x-0 -bottom-px h-0.5 rounded-full transition-colors ${
+                  isActive ? "bg-ink" : "bg-transparent group-hover:bg-line"
+                }`}
+              />
             </button>
           );
         })}

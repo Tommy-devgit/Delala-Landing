@@ -15,10 +15,10 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="bg-canvas min-h-screen py-12 font-sans">
+    <div className="bg-canvas min-h-screen py-8 font-sans">
       <div className="max-w-3xl mx-auto px-4 sm:px-8">
         
-        <div className="mb-10">
+        <div className="mb-6">
           <span className="font-mono-label text-label text-primary bg-surface border border-line px-3.5 py-1.5 rounded-full inline-flex items-center gap-1.5 mb-4 shadow-xs">
             <SettingsIcon className="w-3.5 h-3.5 text-primary" />
             <span>MARKETPLACE PREFERENCES</span>
@@ -32,7 +32,7 @@ export default function SettingsPage() {
           </p>
         </div>
 
-        <form onSubmit={handleSave} className="space-y-6 bg-surface p-8 rounded-panel border border-line shadow-xs">
+        <form onSubmit={handleSave} className="space-y-4 bg-surface p-6 rounded-panel border border-line shadow-xs">
           
           {/* Currency Display */}
           <div>

@@ -123,7 +123,7 @@ export declare class PropertiesService {
         images: any;
     }>;
     private resolveLocationLevel;
-    create(createDto: CreatePropertyDto, uploadedImageUrls?: string[]): Promise<{
+    create(createDto: CreatePropertyDto, uploadedImageUrls?: string[], authenticatedUserId?: string): Promise<{
         id: any;
         slug: string;
         title: any;

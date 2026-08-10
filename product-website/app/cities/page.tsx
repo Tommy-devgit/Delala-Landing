@@ -22,10 +22,10 @@ export default function CitiesPage() {
   }, []);
 
   return (
-    <div className="bg-canvas min-h-screen py-12">
+    <div className="bg-canvas min-h-screen py-8">
       <div className="max-w-[1440px] mx-auto px-4 sm:px-8">
         
-        <div className="max-w-3xl mb-12">
+        <div className="max-w-3xl mb-6">
           <span className="font-mono-label text-label text-primary bg-surface border border-line px-3.5 py-1.5 rounded-full inline-block mb-4 shadow-xs">
             REGIONAL REAL ESTATE MARKETPLACES
           </span>
@@ -38,13 +38,13 @@ export default function CitiesPage() {
         </div>
 
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {[1, 2, 3, 4].map((i) => (
               <Skeleton key={i} className="h-64" />
             ))}
           </div>
         ) : cities.length === 0 ? (
-          <div className="py-20 text-center space-y-4 max-w-md mx-auto">
+          <div className="py-14 text-center space-y-4 max-w-md mx-auto">
             <div className="w-16 h-16 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto">
               <MapPin className="w-8 h-8" />
             </div>
@@ -56,7 +56,7 @@ export default function CitiesPage() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {cities.map((city) => (
               <Link
                 key={city.id}

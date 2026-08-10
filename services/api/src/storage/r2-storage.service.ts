@@ -1,4 +1,4 @@
-import { Injectable, Logger } from "@nestjs/common";
+import { Injectable, Logger, ServiceUnavailableException } from "@nestjs/common";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 
 @Injectable()
@@ -32,12 +32,35 @@ export class R2StorageService {
     }
   }
 
+  /** Largest file the development data-URL fallback will inline (256 KB). */
+  private static readonly MAX_INLINE_BYTES = 256 * 1024;
+
+  /** True when Cloudflare R2 credentials are present and uploads are real. */
+  get isConfigured(): boolean {
+    return this.s3Client !== null;
+  }
+
   async uploadImage(file: Express.Multer.File): Promise<string> {
     if (!this.s3Client) {
-      this.logger.log(`R2 disabled: Converting uploaded file ${file.originalname} to Base64 Data URL`);
+      // Base64 data URLs are a development convenience only. Inlining a full
+      // photo puts megabytes into a database column and into every API response
+      // that returns it, so anything but a small file is refused outright.
+      if (file.buffer.length > R2StorageService.MAX_INLINE_BYTES) {
+        this.logger.error(
+          `R2 is not configured and ${file.originalname} is ${Math.round(file.buffer.length / 1024)}KB, ` +
+            `above the ${R2StorageService.MAX_INLINE_BYTES / 1024}KB inline limit. ` +
+            `Set R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY and R2_PUBLIC_URL.`
+        );
+        throw new ServiceUnavailableException(
+          "Image storage is not configured on the server, so this photo could not be saved."
+        );
+      }
+
+      this.logger.warn(
+        `R2 disabled: inlining ${file.originalname} as a Base64 data URL. This is a development fallback.`
+      );
       const mime = file.mimetype || "image/jpeg";
-      const base64 = file.buffer.toString("base64");
-      return `data:${mime};base64,${base64}`;
+      return `data:${mime};base64,${file.buffer.toString("base64")}`;
     }
 
     const fileExt = file.originalname.split(".").pop() || "jpg";

@@ -25,7 +25,7 @@ export default function HelpPage() {
   return (
     <div className="min-h-screen bg-canvas text-ink font-sans pb-24">
       {/* Header */}
-      <div className="bg-primary text-white py-12 border-b border-primary-hover">
+      <div className="bg-primary text-white py-8 border-b border-primary-hover">
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-canvas/10 text-accent text-xs font-mono-label mb-3">
             <HelpCircle className="w-3.5 h-3.5" />
@@ -40,7 +40,7 @@ export default function HelpPage() {
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 mt-8 space-y-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 mt-8 space-y-5">
         
         {/* Scam Warning Callout */}
         <div className="p-6 rounded-panel bg-amber-50 border border-amber-200 text-amber-900 flex items-start gap-4">

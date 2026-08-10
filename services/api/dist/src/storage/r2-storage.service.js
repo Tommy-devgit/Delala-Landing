@@ -37,12 +37,20 @@ let R2StorageService = R2StorageService_1 = class R2StorageService {
             this.logger.warn("Cloudflare R2 environment variables missing. Falling back to local placeholder images for development.");
         }
     }
+    get isConfigured() {
+        return this.s3Client !== null;
+    }
     async uploadImage(file) {
         if (!this.s3Client) {
-            this.logger.log(`R2 disabled: Converting uploaded file ${file.originalname} to Base64 Data URL`);
+            if (file.buffer.length > R2StorageService_1.MAX_INLINE_BYTES) {
+                this.logger.error(`R2 is not configured and ${file.originalname} is ${Math.round(file.buffer.length / 1024)}KB, ` +
+                    `above the ${R2StorageService_1.MAX_INLINE_BYTES / 1024}KB inline limit. ` +
+                    `Set R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY and R2_PUBLIC_URL.`);
+                throw new common_1.ServiceUnavailableException("Image storage is not configured on the server, so this photo could not be saved.");
+            }
+            this.logger.warn(`R2 disabled: inlining ${file.originalname} as a Base64 data URL. This is a development fallback.`);
             const mime = file.mimetype || "image/jpeg";
-            const base64 = file.buffer.toString("base64");
-            return `data:${mime};base64,${base64}`;
+            return `data:${mime};base64,${file.buffer.toString("base64")}`;
         }
         const fileExt = file.originalname.split(".").pop() || "jpg";
         const uniqueId = Date.now().toString(36) + Math.random().toString(36).substring(2, 7);
@@ -67,6 +75,7 @@ let R2StorageService = R2StorageService_1 = class R2StorageService {
     }
 };
 exports.R2StorageService = R2StorageService;
+R2StorageService.MAX_INLINE_BYTES = 256 * 1024;
 exports.R2StorageService = R2StorageService = R2StorageService_1 = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [])

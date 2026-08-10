@@ -120,7 +120,7 @@ let PropertiesService = class PropertiesService {
         });
         return created.id;
     }
-    async create(createDto, uploadedImageUrls = []) {
+    async create(createDto, uploadedImageUrls = [], authenticatedUserId) {
         let locationId = "";
         if (isValidUuid(createDto.location_id)) {
             locationId = createDto.location_id;
@@ -132,8 +132,16 @@ let PropertiesService = class PropertiesService {
             locationId = (neighborhoodId ?? subCityId ?? cityId);
         }
         let ownerId = "";
-        if (isValidUuid(createDto.brokerId)) {
+        if (isValidUuid(authenticatedUserId)) {
+            ownerId = authenticatedUserId;
+        }
+        else if (isValidUuid(createDto.brokerId)) {
             ownerId = createDto.brokerId;
+        }
+        if (ownerId) {
+            const exists = await this.prisma.user.findUnique({ where: { id: ownerId } });
+            if (!exists)
+                ownerId = "";
         }
         if (!ownerId) {
             const firstUser = await this.prisma.user.findFirst();

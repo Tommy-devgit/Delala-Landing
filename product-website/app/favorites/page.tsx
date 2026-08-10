@@ -45,10 +45,10 @@ export default function FavoritesPage() {
   };
 
   return (
-    <div className="bg-canvas min-h-screen py-12">
+    <div className="bg-canvas min-h-screen py-8">
       <div className="max-w-[1440px] mx-auto px-4 sm:px-8">
         
-        <div className="max-w-3xl mb-12">
+        <div className="max-w-3xl mb-6">
           <span className="font-mono-label text-label text-primary bg-surface border border-line px-3.5 py-1.5 rounded-full inline-flex items-center gap-1.5 mb-4 shadow-xs">
             <Heart className="w-3.5 h-3.5 fill-rose-500 text-rose-500" />
             <span>SAVED WISHLIST</span>
@@ -64,7 +64,7 @@ export default function FavoritesPage() {
         </div>
 
         {!session?.user ? (
-          <div className="py-20 text-center bg-surface rounded-panel border border-line p-8 max-w-xl mx-auto space-y-4 shadow-sm">
+          <div className="py-14 text-center bg-surface rounded-panel border border-line p-6 max-w-xl mx-auto space-y-4 shadow-sm">
             <Lock className="w-12 h-12 text-primary mx-auto opacity-70" />
             <h2 className="font-serif-display text-2xl font-light text-ink">
               Sign in to save properties
@@ -97,7 +97,7 @@ export default function FavoritesPage() {
             ))}
           </div>
         ) : (
-          <div className="py-20 text-center bg-surface rounded-panel border border-line p-8 max-w-xl mx-auto">
+          <div className="py-14 text-center bg-surface rounded-panel border border-line p-6 max-w-xl mx-auto">
             <Heart className="w-12 h-12 text-muted mx-auto mb-4" />
             <h2 className="font-serif-display text-2xl font-light text-ink mb-2">
               Your wishlist is empty

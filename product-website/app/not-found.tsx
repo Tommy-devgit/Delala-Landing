@@ -13,7 +13,7 @@ export default function NotFound() {
         Page Not Found
       </h1>
 
-      <p className="text-base text-muted max-w-md mb-8 font-normal">
+      <p className="text-base text-muted max-w-md mb-5 font-normal">
         The property listing, neighborhood guide, or marketplace page you are looking for does not exist or has been moved.
       </p>
 

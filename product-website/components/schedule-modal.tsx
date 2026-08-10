@@ -65,7 +65,7 @@ export function ScheduleModal({
         </div>
 
         {submitted ? (
-          <div className="p-8 text-center space-y-4">
+          <div className="p-6 text-center space-y-4">
             <div className="w-14 h-14 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center mx-auto shadow-xs">
               <CheckCircle2 className="w-8 h-8" />
             </div>

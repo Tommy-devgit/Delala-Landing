@@ -180,6 +180,7 @@ export default function PublishListingPage() {
           bedrooms,
           bathrooms,
           areaSqm: area,
+          brokerId: session.user.id,
           ...DEFAULT_AMENITIES,
           latitude: pin?.latitude ?? null,
           longitude: pin?.longitude ?? null,
@@ -212,7 +213,7 @@ export default function PublishListingPage() {
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 -mt-4">
         {!session?.user ? (
-          <div className="p-8 sm:p-12 text-center space-y-5 max-w-xl mx-auto">
+          <div className="p-6 sm:p-8 text-center space-y-5 max-w-xl mx-auto">
             <div className="w-16 h-16 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto shadow-xs">
               <Lock className="w-8 h-8" aria-hidden="true" />
             </div>
@@ -240,7 +241,7 @@ export default function PublishListingPage() {
         ) : (
           <form
             onSubmit={handleSubmit}
-            className="bg-surface rounded-panel border border-line shadow-sm p-6 sm:p-10 space-y-9"
+            className="bg-surface rounded-panel border border-line shadow-sm p-6 sm:p-8 space-y-9"
           >
             {error && (
               <div

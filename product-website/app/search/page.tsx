@@ -13,7 +13,7 @@ import { SlidersHorizontal, Map, Grid, List, ArrowUpDown, Building2 } from "luci
 /** Shown in the results column when no listing matches the active filters. */
 function EmptyResults() {
   return (
-    <div className="col-span-full py-20 text-center space-y-3 max-w-sm mx-auto">
+    <div className="col-span-full py-14 text-center space-y-3 max-w-sm mx-auto">
       <div className="w-14 h-14 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto">
         <Building2 className="w-7 h-7" aria-hidden="true" />
       </div>
@@ -227,7 +227,7 @@ function SearchContent() {
       </div>
 
       {/* Results */}
-      <div className="flex-1 max-w-[1440px] w-full mx-auto p-4 sm:p-6 lg:p-8">
+      <div className="flex-1 max-w-[1440px] w-full mx-auto p-4 sm:p-6 lg:p-6">
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
             {Array.from({ length: 10 }, (_, i) => (

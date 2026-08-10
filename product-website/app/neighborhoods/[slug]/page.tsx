@@ -35,7 +35,7 @@ export default function NeighborhoodDetailPage() {
       <div className="max-w-[1440px] mx-auto px-4 sm:px-8">
         
         {/* Neighborhood Guide Banner */}
-        <div className="bg-surface p-8 rounded-panel border border-line shadow-xs mb-12">
+        <div className="bg-surface p-6 rounded-panel border border-line shadow-xs mb-6">
           <span className="font-mono-label text-label text-primary bg-canvas border border-line px-3.5 py-1 rounded-full inline-block mb-3 uppercase">
             NEIGHBORHOOD DIRECTORY
           </span>
@@ -48,7 +48,7 @@ export default function NeighborhoodDetailPage() {
         </div>
 
         {/* Verified Neighborhood Listings */}
-        <div className="mb-8 flex items-center justify-between border-b border-line pb-4">
+        <div className="mb-5 flex items-center justify-between border-b border-line pb-4">
           <div>
             <span className="font-mono-label text-label text-primary block mb-1">
               FIELD VERIFIED MARKETPLACE
@@ -66,7 +66,7 @@ export default function NeighborhoodDetailPage() {
             ))}
           </div>
         ) : nhProperties.length === 0 ? (
-          <div className="py-16 text-center space-y-4 max-w-md mx-auto">
+          <div className="py-10 text-center space-y-4 max-w-md mx-auto">
             <div className="w-16 h-16 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto">
               <Building2 className="w-8 h-8" />
             </div>

@@ -18,10 +18,12 @@ import {
   Mail,
   ShieldCheck,
   Building,
-  Sparkles,
   Loader2
 } from "lucide-react";
 import { buttonClasses } from "@/components/ui";
+
+const ACCEPTED_AVATAR_TYPES = ["image/jpeg", "image/png", "image/webp"];
+const MAX_AVATAR_BYTES = 4 * 1024 * 1024;
 
 export default function ProfilePage() {
   const [session, setSession] = useState<{ user: UserSession; token: string } | null>(null);
@@ -38,6 +40,7 @@ export default function ProfilePage() {
   const [bio, setBio] = useState("");
   const [role, setRole] = useState("user");
   const [errorMsg, setErrorMsg] = useState("");
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
   useEffect(() => {
     async function loadUserSession() {
@@ -77,6 +80,43 @@ export default function ProfilePage() {
     setBio(u.bio || "");
     setRole(u.role || "user");
   }
+
+  /**
+   * Uploads the chosen avatar and stores the returned URL.
+   *
+   * There is deliberately no base64 fallback here. When R2 was unconfigured the
+   * old fallback inlined the whole photo as a data: URL, which made the profile
+   * PATCH body several megabytes — so the request failed and took phone, bio and
+   * role down with it. A failed upload now reports itself and changes nothing.
+   */
+  const handleAvatarSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+
+    setErrorMsg("");
+
+    if (!ACCEPTED_AVATAR_TYPES.includes(file.type)) {
+      setErrorMsg("Choose a JPG, PNG or WEBP image.");
+      return;
+    }
+    if (file.size > MAX_AVATAR_BYTES) {
+      setErrorMsg(`That image is ${Math.round(file.size / 1024 / 1024)}MB. Please choose one under 4MB.`);
+      return;
+    }
+
+    setUploadingAvatar(true);
+    try {
+      const url = await apiClient.uploadImage(file);
+      setAvatarUrl(url);
+    } catch (err) {
+      setErrorMsg(
+        err instanceof Error ? err.message : "The photo could not be uploaded. Please try again."
+      );
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
 
   const handleLogOut = () => {
     authClient.signOut();
@@ -119,12 +159,12 @@ export default function ProfilePage() {
   const user = session?.user;
 
   return (
-    <div className="bg-canvas min-h-screen py-12">
+    <div className="bg-canvas min-h-screen py-8">
       <div className="max-w-[1440px] mx-auto px-4 sm:px-8">
         
         {/* User Profile Banner Header */}
         {user ? (
-          <div className="bg-surface p-6 sm:p-8 rounded-panel border border-line shadow-xs mb-12 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative overflow-hidden">
+          <div className="bg-surface p-6 sm:p-6 rounded-panel border border-line shadow-xs mb-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative overflow-hidden">
             
             {/* Top decorative gradient bar */}
             <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-primary via-muted to-accent" />
@@ -205,7 +245,7 @@ export default function ProfilePage() {
             </div>
           </div>
         ) : (
-          <div className="py-20 text-center bg-surface rounded-panel border border-line p-8 max-w-xl mx-auto mb-12 shadow-sm space-y-4">
+          <div className="py-14 text-center bg-surface rounded-panel border border-line p-6 max-w-xl mx-auto mb-6 shadow-sm space-y-4">
             <User className="w-12 h-12 text-primary mx-auto opacity-70" />
             <h2 className="font-serif-display text-2xl text-ink">
               Account Authentication Required
@@ -224,7 +264,7 @@ export default function ProfilePage() {
 
         {/* Save Success Alert Banner */}
         {saveSuccess && (
-          <div className="mb-8 bg-accent/20 border border-accent text-primary px-6 py-4 rounded-card flex items-center justify-between text-xs font-mono-label font-bold animate-in fade-in slide-in-from-top-2">
+          <div className="mb-5 bg-accent/20 border border-accent text-primary px-6 py-4 rounded-card flex items-center justify-between text-xs font-mono-label font-bold animate-in fade-in slide-in-from-top-2">
             <div className="flex items-center gap-2">
               <CheckCircle2 className="w-5 h-5 text-emerald-700" />
               <span>Your profile details have been saved successfully!</span>
@@ -237,7 +277,7 @@ export default function ProfilePage() {
 
         {/* User Listings & Activity Dashboard */}
         {user && (
-          <div className="space-y-12">
+          <div className="space-y-4">
             
             {/* Published Properties Section */}
             <div>
@@ -267,7 +307,7 @@ export default function ProfilePage() {
                   ))}
                 </div>
               ) : (
-                <div className="bg-surface p-8 rounded-panel border border-line text-center max-w-md mx-auto space-y-3">
+                <div className="bg-surface p-6 rounded-panel border border-line text-center max-w-md mx-auto space-y-3">
                   <Building className="w-10 h-10 text-muted/40 mx-auto" />
                   <h3 className="font-serif-display text-xl text-ink">No Properties Posted Yet</h3>
                   <p className="text-xs text-muted">
@@ -284,7 +324,7 @@ export default function ProfilePage() {
             </div>
 
             {/* Scheduled Walkthrough Appointments */}
-            <div className="space-y-6">
+            <div className="space-y-4">
               <div className="flex items-center justify-between border-b border-line pb-4">
                 <div>
                   <span className="font-mono-label text-label text-primary font-bold block mb-0.5">
@@ -296,7 +336,7 @@ export default function ProfilePage() {
                 </div>
               </div>
 
-              <div className="bg-surface p-6 sm:p-8 rounded-panel border border-line shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+              <div className="bg-surface p-6 sm:p-6 rounded-panel border border-line shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-card bg-canvas border border-line text-primary flex items-center justify-center font-bold">
                     <Calendar className="w-6 h-6" />
@@ -332,7 +372,7 @@ export default function ProfilePage() {
         {/* Edit Profile Modal */}
         {isEditing && (
           <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="bg-surface rounded-panel max-w-xl w-full p-6 sm:p-8 border border-line shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <div className="bg-surface rounded-panel max-w-xl w-full p-6 sm:p-6 border border-line shadow-2xl relative max-h-[90vh] overflow-y-auto">
               
               <button
                 onClick={() => setIsEditing(false)}
@@ -415,46 +455,24 @@ export default function ProfilePage() {
                   <input
                     id="avatar-file-input"
                     type="file"
-                    accept="image/*"
-                    onChange={async (e) => {
-                      const file = e.target.files?.[0];
-                      if (!file) return;
-
-                      try {
-                        const formData = new FormData();
-                        formData.append("file", file);
-                        const res = await fetch(
-                          `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1"}/properties/upload`,
-                          { method: "POST", body: formData }
-                        );
-                        if (res.ok) {
-                          const data = await res.json();
-                          if (data.url) {
-                            setAvatarUrl(data.url);
-                            return;
-                          }
-                        }
-                      } catch {
-                        // Fallback
-                      }
-
-                      const reader = new FileReader();
-                      reader.onload = (evt) => {
-                        if (evt.target?.result) setAvatarUrl(evt.target.result as string);
-                      };
-                      reader.readAsDataURL(file);
-                    }}
+                    accept={ACCEPTED_AVATAR_TYPES.join(",")}
+                    onChange={handleAvatarSelect}
                     className="hidden"
                   />
 
                   <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center mb-2">
                     <button
                       type="button"
+                      disabled={uploadingAvatar}
                       onClick={() => document.getElementById("avatar-file-input")?.click()}
-                      className="px-4 py-2.5 rounded-card bg-primary text-white text-xs font-mono-label font-bold flex items-center gap-2 hover:bg-primary-hover transition-colors shadow-xs"
+                      className="px-4 py-2.5 rounded-card bg-primary text-white text-xs font-mono-label font-bold flex items-center gap-2 hover:bg-primary-hover disabled:opacity-60 transition-colors shadow-xs"
                     >
-                      <Camera className="w-4 h-4" />
-                      <span>Choose Photo from Device</span>
+                      {uploadingAvatar ? (
+                        <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
+                      ) : (
+                        <Camera className="w-4 h-4" aria-hidden="true" />
+                      )}
+                      <span>{uploadingAvatar ? "Uploading…" : "Choose photo"}</span>
                     </button>
                     <span className="text-xs text-muted font-mono-label">or paste web URL below</span>
                   </div>

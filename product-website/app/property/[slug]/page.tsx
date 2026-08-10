@@ -7,6 +7,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { apiClient } from "@/lib/api-client";
 import { Property } from "@/lib/types";
+import { formatPostedAt, formatPostedDate } from "@/lib/format";
 import { ScheduleModal } from "@/components/schedule-modal";
 import { PropertyCard } from "@/components/property-card";
 import {
@@ -58,7 +59,7 @@ export default function PropertyDetailPage() {
 
   if (loading) {
     return (
-      <div className="bg-canvas min-h-screen py-16 px-8">
+      <div className="bg-canvas min-h-screen py-10 px-8">
         <Skeleton className="max-w-[1440px] mx-auto h-96 rounded-panel" />
       </div>
     );
@@ -66,7 +67,7 @@ export default function PropertyDetailPage() {
 
   if (!property) {
     return (
-      <div className="bg-canvas min-h-screen py-24 text-center space-y-4 max-w-md mx-auto">
+      <div className="bg-canvas min-h-screen py-10 text-center space-y-4 max-w-md mx-auto">
         <div className="w-16 h-16 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto">
           <Building2 className="w-8 h-8" />
         </div>
@@ -83,12 +84,22 @@ export default function PropertyDetailPage() {
     );
   }
 
+  const postedAt = formatPostedAt(property.createdAt);
+  const posterName = property.broker?.name || "Property owner";
+  const posterInitials = posterName
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join("")
+    .toUpperCase();
+
   return (
-    <div className="bg-canvas min-h-screen py-8">
+    <div className="bg-canvas min-h-screen py-6">
       <div className="max-w-[1440px] mx-auto px-4 sm:px-8">
-        
+
         {/* Top Breadcrumb & Actions Bar */}
-        <div className="flex items-center justify-between mb-6 pb-4 border-b border-line">
+        <div className="flex items-center justify-between mb-4 pb-3 border-b border-line">
           <div className="flex items-center gap-2 text-xs font-mono-label text-muted">
             <Link href="/" className="hover:text-primary">MARKETPLACE</Link>
             {property.city && (
@@ -123,22 +134,28 @@ export default function PropertyDetailPage() {
         </div>
 
         {/* Title Header */}
-        <div className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div className="mb-4 flex flex-col md:flex-row md:items-end justify-between gap-3">
           <div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="font-mono-label text-label text-primary bg-accent/30 border border-accent/50 px-2.5 py-0.5 rounded-full font-bold">
-                VERIFIED PROPERTY
-              </span>
-              <span className="text-xs font-mono-label text-muted">
-                {property.propertyType}
-              </span>
+            <div className="flex flex-wrap items-center gap-2 mb-1.5">
+              {property.verified && (
+                <span className="inline-flex items-center gap-1 font-mono-label text-label text-primary bg-accent/25 border border-accent/50 px-2 py-0.5 rounded-full font-bold">
+                  <ShieldCheck className="w-3 h-3" aria-hidden="true" />
+                  Verified
+                </span>
+              )}
+              <span className="font-mono-label text-label text-muted">{property.propertyType}</span>
+              {postedAt && (
+                <span className="font-mono-label text-label text-muted" title={formatPostedDate(property.createdAt)}>
+                  · Posted {postedAt}
+                </span>
+              )}
             </div>
 
-            <h1 className="font-serif-display text-3xl sm:text-4xl font-light text-ink">
+            <h1 className="font-serif-display text-2xl sm:text-3xl font-light text-ink">
               {property.title}
             </h1>
 
-            <p className="text-xs text-muted mt-1 flex items-center gap-1 font-mono-label">
+            <p className="text-xs text-muted mt-1.5 flex items-center gap-1 font-mono-label">
               <MapPin className="w-3.5 h-3.5 text-primary" />
               <span>
                 {property.address || [property.neighborhood, property.subCity, property.city].filter(Boolean).join(", ")}
@@ -155,12 +172,12 @@ export default function PropertyDetailPage() {
         </div>
 
         {/* Image Gallery */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 mb-6">
           <div className="lg:col-span-8 aspect-[16/10] rounded-panel overflow-hidden border border-line bg-ink relative shadow-md">
             <img src={activeImage} alt={property.title} className="w-full h-full object-cover" />
           </div>
 
-          <div className="lg:col-span-4 grid grid-cols-2 gap-4">
+          <div className="lg:col-span-4 grid grid-cols-2 gap-3">
             {property.galleryImages.slice(0, 4).map((img, idx) => (
               <button
                 key={idx}
@@ -176,12 +193,12 @@ export default function PropertyDetailPage() {
         </div>
 
         {/* Main Content Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          <div className="lg:col-span-8 space-y-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div className="lg:col-span-8 space-y-4">
             
             {/* Infrastructure Specs */}
-            <div className="bg-surface p-6 rounded-panel border border-line space-y-4">
-              <h3 className="font-serif-display text-xl text-ink">
+            <div className="bg-surface p-5 rounded-panel border border-line space-y-3">
+              <h3 className="font-serif-display text-lg text-ink">
                 Verified Infrastructure Specs
               </h3>
 
@@ -194,8 +211,8 @@ export default function PropertyDetailPage() {
             </div>
 
             {/* Description */}
-            <div className="bg-surface p-6 rounded-panel border border-line space-y-3">
-              <h3 className="font-serif-display text-xl text-ink">
+            <div className="bg-surface p-5 rounded-panel border border-line space-y-2">
+              <h3 className="font-serif-display text-lg text-ink">
                 Property Overview
               </h3>
               <p className="text-sm text-muted leading-relaxed">
@@ -206,18 +223,28 @@ export default function PropertyDetailPage() {
           </div>
 
           {/* Right Property Lister Contact Card */}
-          <div className="lg:col-span-4 space-y-6">
-            <div className="bg-surface p-6 rounded-panel border border-line shadow-md space-y-6 sticky top-24">
+          <div className="lg:col-span-4 space-y-4">
+            <div className="bg-surface p-5 rounded-panel border border-line shadow-sm space-y-4 sticky top-24">
               
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-full bg-primary text-white flex items-center justify-center font-serif-display text-xl font-light border border-line">
-                  {(property.broker?.name || "Verified Owner").slice(0, 2).toUpperCase()}
-                </div>
-                <div>
-                  <h4 className="font-serif-display text-lg text-ink">{property.broker?.name || "Verified Owner"}</h4>
-                  <p className="text-xs font-mono-label text-primary">LISTED PROPERTY OWNER</p>
+              <div className="flex items-center gap-3">
+                {property.broker?.avatar ? (
+                  <img
+                    src={property.broker.avatar}
+                    alt=""
+                    className="w-12 h-12 rounded-full object-cover border border-line shrink-0"
+                  />
+                ) : (
+                  <div className="w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center font-serif-display text-lg font-light border border-line shrink-0">
+                    {posterInitials}
+                  </div>
+                )}
+                <div className="min-w-0">
+                  <h4 className="font-serif-display text-base text-ink truncate">{posterName}</h4>
+                  <p className="text-label font-mono-label text-muted">Listed by owner</p>
                   {(property.phone || property.broker?.phone) && (
-                    <p className="text-xs font-mono-label text-muted font-bold mt-0.5">{property.phone || property.broker?.phone}</p>
+                    <p className="text-label font-mono-label text-primary font-bold mt-0.5">
+                      {property.phone || property.broker?.phone}
+                    </p>
                   )}
                 </div>
               </div>
@@ -260,11 +287,11 @@ export default function PropertyDetailPage() {
 
         {/* Similar Listings */}
         {similarListings.length > 0 && (
-          <div className="mt-16 pt-8 border-t border-line">
-            <h3 className="font-serif-display text-2xl text-ink mb-6">
+          <div className="mt-10 pt-6 border-t border-line">
+            <h3 className="font-serif-display text-xl text-ink mb-4">
               Similar Verified Listings in {property.city}
             </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {similarListings.map((p) => (
                 <PropertyCard key={p.id} property={p} />
               ))}

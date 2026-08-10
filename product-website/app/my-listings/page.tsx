@@ -41,7 +41,7 @@ export default function MyListingsPage() {
   return (
     <div className="min-h-screen bg-canvas text-ink font-sans pb-24">
       {/* Header */}
-      <div className="bg-primary text-white py-12 border-b border-primary-hover">
+      <div className="bg-primary text-white py-8 border-b border-primary-hover">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div>
             <h1 className="font-serif-display text-3xl sm:text-4xl text-white">
@@ -62,7 +62,7 @@ export default function MyListingsPage() {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 mt-8 space-y-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 mt-8 space-y-4">
         
         {/* Metric Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
@@ -89,7 +89,7 @@ export default function MyListingsPage() {
         </div>
 
         {/* Listings List */}
-        <div className="bg-surface rounded-panel border border-line shadow-sm p-6 sm:p-8">
+        <div className="bg-surface rounded-panel border border-line shadow-sm p-6 sm:p-6">
           
           <div className="flex items-center gap-2 mb-6 border-b border-line pb-4">
             {(["all", "approved", "pending"] as const).map((tab) => (
@@ -112,7 +112,7 @@ export default function MyListingsPage() {
               ))}
             </div>
           ) : filteredProperties.length === 0 ? (
-            <div className="py-16 text-center space-y-3">
+            <div className="py-10 text-center space-y-3">
               <Building2 className="w-12 h-12 text-muted mx-auto opacity-50" />
               <h3 className="font-serif-display text-xl text-ink">No Property Listings Found</h3>
               <p className="text-xs text-muted">You haven’t submitted any properties yet. Use “Publish New Listing” above to get started.</p>

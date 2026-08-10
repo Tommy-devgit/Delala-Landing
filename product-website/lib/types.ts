@@ -70,6 +70,8 @@ export interface Property {
   latitude: number | null;
   longitude: number | null;
   description: string;
+  /** ISO timestamp of when the listing was published. */
+  createdAt: string | null;
   availableDate: string;
 }
 

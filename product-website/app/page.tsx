@@ -48,14 +48,12 @@ export default function HomePage() {
     loadData();
   }, []);
 
-  const filteredListings = properties.filter((item) => {
-    if (selectedCategory === "all") return true;
-    if (selectedCategory === "diplomatic") return item.subCity.includes("Bole") || item.neighborhood.includes("Airport");
-    return item.propertyType === selectedCategory;
-  });
+  const filteredListings = properties.filter(
+    (item) => selectedCategory === "all" || item.propertyType === selectedCategory
+  );
 
   return (
-    <div className="space-y-12 pb-16">
+    <div className="space-y-5 pb-12">
 
       {/* 1. HERO DISCOVERY SECTION (Full 100vh Height Covering Down to Screen Bottom) */}
       <section className="relative w-full h-[calc(100vh-80px)] min-h-[580px] flex flex-col justify-center overflow-hidden border-b border-line">
@@ -73,7 +71,7 @@ export default function HomePage() {
 
         {/* Hero Content Container */}
         <div className="relative z-10 max-w-[1440px] w-full mx-auto px-4 sm:px-8 py-8">
-          <div className="max-w-3xl mb-8 space-y-4">
+          <div className="max-w-3xl mb-5 space-y-4">
             <h1 className="font-serif-display text-4xl sm:text-6xl lg:text-7xl font-light text-white tracking-tight leading-[0.95] drop-shadow-md">
               Find your next <span className="italic font-normal text-accent">home</span> in Ethiopia.
             </h1>
@@ -88,46 +86,30 @@ export default function HomePage() {
             <SearchBarCapsule onOpenFilters={() => setIsFilterModalOpen(true)} />
           </div>
 
-          {/* Quick Sub-City Tags
-          <div className="mt-6 flex flex-wrap items-center gap-2.5 text-xs text-line">
-            <span className="font-mono-label text-label text-accent font-bold tracking-wider">POPULAR SEARCHES:</span>
-            {["Bole Medhanialem", "Kazanchis UN", "Old Airport Villa", "CMC Apartment", "Hawassa Lake View"].map((tag) => (
-              <Link
-                key={tag}
-                href={`/search?subCity=${encodeURIComponent(tag.split(" ")[0])}`}
-                className="px-3.5 py-1.5 rounded-full bg-surface/10 backdrop-blur-md border border-white/20 text-white text-micro font-medium hover:bg-primary hover:border-primary hover:text-white transition-all shadow-xs"
-              >
-                {tag}
-              </Link>
-            ))}
-          </div> */}
 
         </div>
       </section>
 
-      {/* 2. CATEGORY SELECTION PILL BAR */}
+      {/* 2. CATEGORY STRIP */}
       <CategoryBar
         selected={selectedCategory}
         onSelect={(cat) => setSelectedCategory(cat)}
       />
 
-      {/* 3. FEATURED VERIFIED HOMES GRID */}
+      {/* 3. FEATURED HOMES */}
       <section className="max-w-[1440px] mx-auto px-4 sm:px-8">
-        <div className="flex items-end justify-between mb-8 border-b border-line pb-4">
+        <div className="flex items-end justify-between mb-5 border-b border-line pb-3">
           <div>
-            <span className="font-mono-label text-label text-primary block mb-1">
-              FIELD VERIFIED MARKETPLACE
-            </span>
-            <h2 className="font-serif-display text-3xl font-light text-ink">
-              Featured Verified Homes
+            <h2 className="font-serif-display text-2xl sm:text-3xl font-light text-ink">
+              Featured homes
             </h2>
           </div>
 
           <Link
             href="/search"
-            className="font-mono-label text-micro text-primary font-bold hover:underline flex items-center gap-1"
+            className="text-micro text-primary font-bold hover:underline flex items-center gap-1"
           >
-            <span>VIEW ALL LISTINGS</span>
+            <span>View all listings</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
@@ -139,7 +121,7 @@ export default function HomePage() {
             ))}
           </div>
         ) : filteredListings.length === 0 ? (
-          <div className="text-center py-16 bg-canvas rounded-panel border border-line p-8">
+          <div className="text-center py-10 bg-canvas rounded-panel border border-line p-6">
             <Building2 className="w-12 h-12 text-muted mx-auto mb-3 opacity-50" />
             <h3 className="font-serif-display text-xl text-ink mb-1">No Properties Found</h3>
             <p className="text-xs text-muted">Try selecting a different category or search term.</p>
@@ -153,15 +135,12 @@ export default function HomePage() {
         )}
       </section>
 
-      {/* 4. ETHIOPIAN CITIES EXPLORER */}
-      <section className="bg-canvas py-10 px-4 sm:px-8 border-y border-line">
+      {/* 4. CITIES */}
+      <section className="bg-canvas py-8 px-4 sm:px-8 border-y border-line">
         <div className="max-w-[1440px] mx-auto">
-          <div className="mb-6">
-            <span className="font-mono-label text-label text-primary block mb-1">
-              REGIONAL HUB DISCOVERY
-            </span>
+          <div className="mb-5">
             <h2 className="font-serif-display text-2xl sm:text-3xl font-light text-ink">
-              Explore Ethiopian Real Estate Markets
+              Explore cities
             </h2>
           </div>
 
@@ -178,17 +157,14 @@ export default function HomePage() {
                   className="w-full h-full object-cover opacity-80 group-hover:scale-105 group-hover:opacity-90 transition-all duration-500"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent p-3.5 flex flex-col justify-end text-white">
-                  <div className="font-mono-label text-label text-accent font-bold uppercase mb-0.5">
-                    {city.propertiesCount} LISTINGS
-                  </div>
                   <h3 className="font-serif-display text-lg font-light mb-0.5 leading-tight">
                     {city.name}
                   </h3>
                   <p className="text-label text-white/80 line-clamp-1 mb-2">
                     {city.tagline}
                   </p>
-                  <div className="text-label font-mono-label text-accent flex items-center justify-between border-t border-white/20 pt-1.5 font-bold">
-                    <span>FROM ETB {city.startingRentETB.toLocaleString()}/MO</span>
+                  <div className="text-label text-accent flex items-center justify-between border-t border-white/20 pt-1.5 font-bold">
+                    <span>From ETB {city.startingRentETB.toLocaleString()}/mo</span>
                     <span>→</span>
                   </div>
                 </div>

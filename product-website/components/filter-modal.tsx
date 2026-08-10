@@ -72,7 +72,7 @@ export function FilterModal({
         </div>
 
         {/* Scrollable Filter Form Body */}
-        <div className="p-6 overflow-y-auto space-y-6 flex-1 font-sans">
+        <div className="p-6 overflow-y-auto space-y-4 flex-1 font-sans">
           
           {/* Verified Only Toggle */}
           <div className="bg-surface p-4 rounded-card border border-line flex items-center justify-between">

@@ -9,7 +9,7 @@ export function Footer() {
       <div className="max-w-[1440px] mx-auto px-4 sm:px-8">
         
         {/* Marketplace Links Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-6">
           <div>
             <h4 className="font-mono-label text-label text-primary mb-4 font-bold">
               EXPLORE CITIES

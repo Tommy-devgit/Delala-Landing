@@ -6,6 +6,7 @@ import {
   Body,
   Param,
   Query,
+  Headers,
   UseGuards,
   UseInterceptors,
   UploadedFiles,
@@ -18,6 +19,20 @@ import { CreatePropertyDto, ModeratePropertyDto } from "./dto/create-property.dt
 import { R2StorageService } from "../storage/r2-storage.service";
 import { Roles } from "../common/decorators/roles.decorator";
 import { RolesGuard } from "../common/guards/roles.guard";
+
+/**
+ * Session tokens are issued as `betterauth-session-<uuid>-<timestamp>`, so the
+ * owning user can be read back out of the Authorization header instead of being
+ * taken from a client-supplied body field.
+ */
+const userIdFromAuthHeader = (authorization?: string): string | undefined => {
+  if (!authorization) return undefined;
+  const token = authorization.replace(/^Bearer\s+/i, "");
+  const match = token.match(
+    /^betterauth-session-([0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})-\d+$/i
+  );
+  return match?.[1];
+};
 
 @ApiTags("properties")
 @Controller("properties")
@@ -55,7 +70,8 @@ export class PropertiesController {
   @ApiOperation({ summary: "Submit a new property listing with optional Cloudflare R2 images" })
   async create(
     @Body() createDto: CreatePropertyDto,
-    @UploadedFiles() files?: Express.Multer.File[]
+    @UploadedFiles() files?: Express.Multer.File[],
+    @Headers("authorization") authorization?: string
   ) {
     const uploadedUrls: string[] = [];
 
@@ -66,7 +82,11 @@ export class PropertiesController {
       }
     }
 
-    return this.propertiesService.create(createDto, uploadedUrls);
+    return this.propertiesService.create(
+      createDto,
+      uploadedUrls,
+      userIdFromAuthHeader(authorization)
+    );
   }
 
   @Patch(":id/moderate")

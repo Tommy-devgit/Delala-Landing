@@ -35,7 +35,7 @@ export default function CityDetailPage() {
       <div className="max-w-[1440px] mx-auto px-4 sm:px-8">
         
         {/* City Hero */}
-        <div className="relative rounded-panel overflow-hidden bg-ink p-8 sm:p-12 mb-12 border border-line shadow-xl text-white">
+        <div className="relative rounded-panel overflow-hidden bg-ink p-6 sm:p-8 mb-6 border border-line shadow-xl text-white">
           <img
             src="/images/hero_property.png"
             alt={cityName}
@@ -59,7 +59,7 @@ export default function CityDetailPage() {
         </div>
 
         {/* Verified City Listings */}
-        <div className="mb-8 flex items-center justify-between border-b border-line pb-4">
+        <div className="mb-5 flex items-center justify-between border-b border-line pb-4">
           <div>
             <span className="font-mono-label text-label text-primary block mb-1">
               FIELD VERIFIED MARKETPLACE
@@ -77,7 +77,7 @@ export default function CityDetailPage() {
             ))}
           </div>
         ) : cityProperties.length === 0 ? (
-          <div className="py-16 text-center space-y-4 max-w-md mx-auto">
+          <div className="py-10 text-center space-y-4 max-w-md mx-auto">
             <div className="w-16 h-16 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto">
               <Building2 className="w-8 h-8" />
             </div>

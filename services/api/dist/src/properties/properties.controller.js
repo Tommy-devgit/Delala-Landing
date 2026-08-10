@@ -21,6 +21,13 @@ const create_property_dto_1 = require("./dto/create-property.dto");
 const r2_storage_service_1 = require("../storage/r2-storage.service");
 const roles_decorator_1 = require("../common/decorators/roles.decorator");
 const roles_guard_1 = require("../common/guards/roles.guard");
+const userIdFromAuthHeader = (authorization) => {
+    if (!authorization)
+        return undefined;
+    const token = authorization.replace(/^Bearer\s+/i, "");
+    const match = token.match(/^betterauth-session-([0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})-\d+$/i);
+    return match?.[1];
+};
 let PropertiesController = class PropertiesController {
     constructor(propertiesService, r2StorageService) {
         this.propertiesService = propertiesService;
@@ -38,7 +45,7 @@ let PropertiesController = class PropertiesController {
         const url = await this.r2StorageService.uploadImage(file);
         return { url };
     }
-    async create(createDto, files) {
+    async create(createDto, files, authorization) {
         const uploadedUrls = [];
         if (files && files.length > 0) {
             for (const file of files) {
@@ -46,7 +53,7 @@ let PropertiesController = class PropertiesController {
                 uploadedUrls.push(url);
             }
         }
-        return this.propertiesService.create(createDto, uploadedUrls);
+        return this.propertiesService.create(createDto, uploadedUrls, userIdFromAuthHeader(authorization));
     }
     moderate(id, moderateDto) {
         return this.propertiesService.moderate(id, moderateDto);
@@ -86,8 +93,9 @@ __decorate([
     (0, swagger_1.ApiOperation)({ summary: "Submit a new property listing with optional Cloudflare R2 images" }),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.UploadedFiles)()),
+    __param(2, (0, common_1.Headers)("authorization")),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [create_property_dto_1.CreatePropertyDto, Array]),
+    __metadata("design:paramtypes", [create_property_dto_1.CreatePropertyDto, Array, String]),
     __metadata("design:returntype", Promise)
 ], PropertiesController.prototype, "create", null);
 __decorate([

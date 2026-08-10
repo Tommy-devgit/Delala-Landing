@@ -126,7 +126,7 @@ export declare class PropertiesController {
     uploadImage(file: Express.Multer.File): Promise<{
         url: string;
     }>;
-    create(createDto: CreatePropertyDto, files?: Express.Multer.File[]): Promise<{
+    create(createDto: CreatePropertyDto, files?: Express.Multer.File[], authorization?: string): Promise<{
         id: any;
         slug: string;
         title: any;

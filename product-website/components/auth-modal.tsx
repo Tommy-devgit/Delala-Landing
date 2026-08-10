@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { authClient, UserSession } from "@/lib/auth-client";
-import { ShieldCheck, User, Building2, CheckCircle2, X, Lock, Mail, Sparkles, KeyRound } from "lucide-react";
+import { ShieldCheck, User, Building2, CheckCircle2, X, Lock, Mail, KeyRound } from "lucide-react";
 import { Input, buttonClasses } from "@/components/ui";
 
 export function AuthModal({
@@ -51,7 +51,7 @@ export function AuthModal({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-surface rounded-panel border border-line shadow-2xl max-w-md w-full p-6 sm:p-8 relative overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+      <div className="bg-surface rounded-panel border border-line shadow-2xl max-w-md w-full p-6 sm:p-6 relative overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         
         {/* Close Button */}
         <button

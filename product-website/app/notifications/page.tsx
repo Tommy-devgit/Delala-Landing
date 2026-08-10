@@ -46,7 +46,7 @@ export default function NotificationsPage() {
 
   return (
     <div className="min-h-screen bg-canvas text-ink font-sans pb-24">
-      <div className="bg-primary text-white py-12 border-b border-primary-hover">
+      <div className="bg-primary text-white py-8 border-b border-primary-hover">
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
           <h1 className="font-serif-display text-3xl sm:text-4xl text-white">
             Notifications & System Alerts
@@ -59,7 +59,7 @@ export default function NotificationsPage() {
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 mt-8 space-y-4">
         {!session?.user ? (
-          <div className="py-16 text-center bg-surface rounded-panel border border-line p-8 max-w-md mx-auto space-y-4 shadow-sm">
+          <div className="py-10 text-center bg-surface rounded-panel border border-line p-6 max-w-md mx-auto space-y-4 shadow-sm">
             <Lock className="w-12 h-12 text-primary mx-auto opacity-70" />
             <h2 className="font-serif-display text-2xl text-ink">
               Sign in to view alerts
@@ -81,7 +81,7 @@ export default function NotificationsPage() {
             ))}
           </div>
         ) : notifications.length === 0 ? (
-          <div className="py-16 text-center bg-surface rounded-panel border border-line p-8 max-w-md mx-auto space-y-3 shadow-xs">
+          <div className="py-10 text-center bg-surface rounded-panel border border-line p-6 max-w-md mx-auto space-y-3 shadow-xs">
             <CheckCircle2 className="w-10 h-10 text-emerald-600 mx-auto" />
             <h3 className="font-serif-display text-xl text-ink">All Caught Up</h3>
             <p className="text-xs text-muted">You have no new unread system notifications at this time.</p>

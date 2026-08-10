@@ -41,6 +41,7 @@ interface ApiProperty {
   bathrooms: number;
   areaSqm: number;
   status?: string;
+  createdAt?: string | null;
   city?: string | { name?: string };
   cityEntity?: { name?: string };
   subCity?: string;
@@ -148,7 +149,7 @@ const mapProperty = (p: ApiProperty): Property => {
       id: p.broker?.id || "b1",
       slug: p.broker?.slug || "property-owner",
       name: p.broker?.user?.profile?.fullName || p.broker?.agencyName || "Verified Owner",
-      avatar: "/images/hero_home_away.jpg",
+      avatar: p.broker?.user?.profile?.avatarUrl || "",
       agencyName: p.broker?.agencyName || "Verified Owner",
       verified: true,
       phone: propertyPhone,
@@ -164,6 +165,7 @@ const mapProperty = (p: ApiProperty): Property => {
     latitude: coordinates?.latitude ?? null,
     longitude: coordinates?.longitude ?? null,
     description: p.description,
+    createdAt: p.createdAt ?? null,
     availableDate: "Immediate",
   };
 };
@@ -186,6 +188,8 @@ export interface CreatePropertyInput {
   generator: boolean;
   waterTank: boolean;
   parking: boolean;
+  /** Owning user. The API prefers the id in the session token over this. */
+  brokerId?: string;
   /** Approximate map pin. Omitted from the request when the publisher set none. */
   latitude?: number | null;
   longitude?: number | null;
@@ -225,6 +229,27 @@ export const apiClient = {
   },
 
   /**
+   * Uploads a single image to Cloudflare R2 and returns its URL. Throws with a
+   * readable message when storage is unavailable, so callers can surface the
+   * failure rather than silently substituting something else.
+   */
+  async uploadImage(file: File): Promise<string> {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const res = await fetch(`${API_BASE}/properties/upload`, { method: "POST", body: formData });
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      throw new Error(data?.message || "The image could not be uploaded.");
+    }
+    if (!data?.url) {
+      throw new Error("The image upload did not return a URL.");
+    }
+    return data.url as string;
+  },
+
+  /**
    * Create a new property listing through the existing multipart endpoint, which
    * also pushes the attached images to Cloudflare R2.
    */
@@ -247,6 +272,7 @@ export const apiClient = {
     formData.append("generator", String(input.generator));
     formData.append("waterTank", String(input.waterTank));
     formData.append("parking", String(input.parking));
+    if (input.brokerId) formData.append("brokerId", input.brokerId);
 
     // Only send a pin when it is a genuine coordinate pair.
     const pin = toCoordinates(input.latitude, input.longitude);

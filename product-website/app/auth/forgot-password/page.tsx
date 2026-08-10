@@ -33,10 +33,10 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-80px)] bg-canvas flex items-center justify-center p-4 sm:p-8">
+    <div className="min-h-[calc(100vh-80px)] bg-canvas flex items-center justify-center p-4 sm:p-6">
       <div className="w-full max-w-md">
         {/* Brand Header */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-5">
           <Link href="/" className="inline-flex items-center gap-2 mb-3">
             <span className="font-serif-display font-light text-3xl tracking-tight text-primary">
               DELALA
@@ -51,7 +51,7 @@ export default function ForgotPasswordPage() {
         </div>
 
         {/* Forgot Password Card */}
-        <div className="bg-surface rounded-panel border border-line shadow-xl p-6 sm:p-8 space-y-6">
+        <div className="bg-surface rounded-panel border border-line shadow-xl p-6 sm:p-6 space-y-4">
           {submitted ? (
             <div className="text-center py-4 space-y-4">
               <div className="w-12 h-12 rounded-full bg-accent/20 text-primary flex items-center justify-center mx-auto">
