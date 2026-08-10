@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 import { Skeleton, buttonClasses } from "@/components/ui";
 import { PropertyMap } from "@/components/map";
+import { Avatar } from "@/components/avatar";
 
 export default function PropertyDetailPage() {
   const params = useParams();
@@ -99,14 +100,6 @@ export default function PropertyDetailPage() {
   ].filter((a) => a.has);
 
   const posterName = property.broker?.name || "Property owner";
-  const posterInitials = posterName
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0])
-    .join("")
-    .toUpperCase();
-
   return (
     <div className="bg-canvas min-h-screen py-6">
       <div className="max-w-[1440px] mx-auto px-4 sm:px-8">
@@ -278,17 +271,12 @@ export default function PropertyDetailPage() {
             <div className="bg-surface p-5 rounded-panel border border-line shadow-sm space-y-4 sticky top-24">
               
               <div className="flex items-center gap-3">
-                {property.broker?.avatar ? (
-                  <img
-                    src={property.broker.avatar}
-                    alt=""
-                    className="w-12 h-12 rounded-full object-cover border border-line shrink-0"
-                  />
-                ) : (
-                  <div className="w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center font-serif-display text-lg font-light border border-line shrink-0">
-                    {posterInitials}
-                  </div>
-                )}
+                <Avatar
+                  src={property.broker?.avatar}
+                  name={posterName}
+                  size={48}
+                  className="border border-line"
+                />
                 <div className="min-w-0">
                   <h4 className="font-serif-display text-base text-ink truncate">{posterName}</h4>
                   <p className="text-label font-mono-label text-muted">Listed by owner</p>

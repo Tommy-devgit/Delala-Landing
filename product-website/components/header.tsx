@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import { useSession } from "@/lib/use-session";
+import { Avatar } from "@/components/avatar";
 import {
   Heart,
   User,
@@ -107,17 +108,18 @@ export function Header({ onOpenFilters }: { onOpenFilters?: () => void }) {
                   onClick={() => setAvatarOpen(!avatarOpen)}
                   className="flex items-center gap-1.5 p-1.5 pl-3 pr-2 rounded-full bg-surface border border-line hover:border-primary transition-all shadow-xs text-ink"
                 >
-                  <div className="w-7 h-7 rounded-full bg-primary text-white flex items-center justify-center text-label font-bold">
-                    {user.fullName.slice(0, 2)}
-                  </div>
+                  <Avatar src={user.avatarUrl} name={user.fullName} size={28} />
                   <ChevronDown className="w-3.5 h-3.5 text-muted" />
                 </button>
 
                 {avatarOpen && (
                   <div className="absolute right-0 mt-2 w-56 bg-surface rounded-card border border-line shadow-xl py-2 z-50 text-xs font-sans animate-in fade-in-50">
-                    <div className="px-4 py-2.5 border-b border-line">
-                      <div className="font-bold text-ink">{user.fullName}</div>
-                      <div className="text-label font-mono-label text-muted uppercase">{user.role} account</div>
+                    <div className="px-4 py-2.5 border-b border-line flex items-center gap-2.5">
+                      <Avatar src={user.avatarUrl} name={user.fullName} size={36} />
+                      <div className="min-w-0">
+                      <div className="font-bold text-ink truncate">{user.fullName}</div>
+                      <div className="text-label text-muted">{user.role} account</div>
+                      </div>
                     </div>
 
                     <Link

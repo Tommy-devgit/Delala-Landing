@@ -21,6 +21,7 @@ import {
   Loader2
 } from "lucide-react";
 import { buttonClasses } from "@/components/ui";
+import { Avatar } from "@/components/avatar";
 
 const ACCEPTED_AVATAR_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const MAX_AVATAR_BYTES = 4 * 1024 * 1024;
@@ -185,17 +186,12 @@ export default function ProfilePage() {
 
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 z-10">
               <div className="relative group">
-                {user.avatarUrl && user.avatarUrl.startsWith("http") ? (
-                  <img
-                    src={user.avatarUrl}
-                    alt={user.fullName}
-                    className="w-24 h-24 rounded-full object-cover border-4 border-line shadow-sm"
-                  />
-                ) : (
-                  <div className="w-24 h-24 rounded-full bg-primary text-white font-serif-display text-3xl font-light flex items-center justify-center border-4 border-line shadow-sm">
-                    {user.fullName ? user.fullName.slice(0, 2).toUpperCase() : "US"}
-                  </div>
-                )}
+                <Avatar
+                  src={user.avatarUrl}
+                  name={user.fullName}
+                  size={96}
+                  className="border-4 border-line shadow-sm"
+                />
                 <button
                   onClick={() => setIsEditing(true)}
                   className="absolute bottom-0 right-0 bg-surface p-2 rounded-full border border-line text-primary shadow-xs hover:bg-canvas transition-colors"
