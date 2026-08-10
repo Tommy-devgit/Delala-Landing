@@ -1,31 +1,67 @@
 "use client";
 
-import { useState } from "react";
-import { BrokerTable } from "@/components/broker-table";
-import { ADMIN_BROKERS, AdminBroker } from "@/lib/mock-admin-data";
+import { BadgeCheck } from "lucide-react";
+import { adminApi, formatDate } from "@/lib/admin-api";
+import { useResource } from "@/lib/use-admin";
+import {
+  Badge,
+  DataTable,
+  EmptyState,
+  ErrorNotice,
+  PageHeader,
+  statusLabel,
+  statusTone,
+} from "@/components/ui";
 
-export default function AdminBrokersPage() {
-  const [brokers, setBrokers] = useState<AdminBroker[]>(ADMIN_BROKERS);
-
-  const handleToggleVerify = (id: string) => {
-    setBrokers((prev) => prev.map((b) => (b.id === id ? { ...b, verified: !b.verified } : b)));
-  };
+/**
+ * Brokers are a role rather than a separate table, so this is the users list
+ * narrowed to that role. The old screen invented licence numbers, ratings and
+ * specialisms that do not exist in the schema.
+ */
+export default function BrokersPage() {
+  const { data, loading, error, reload } = useResource(() => adminApi.getUsers(), []);
+  const brokers = (data ?? []).filter((u) => u.role === "BROKER");
 
   return (
-    <div className="space-y-8 font-sans">
-      <div className="border-b border-[#ECE7DA] pb-6">
-        <span className="text-[11px] font-mono-label font-bold text-[#736F4E] tracking-widest uppercase">
-          AGENCY DIRECTORY
-        </span>
-        <h1 className="text-3xl font-serif-display font-light text-[#1C1B12] tracking-tight mt-1">
-          Verified Broker Directory
-        </h1>
-        <p className="text-xs text-[#736F4E] font-mono-label mt-1">
-          Licensed agency compliance, real estate registration & listing performance
-        </p>
-      </div>
+    <div>
+      <PageHeader
+        title="Brokers"
+        description="Accounts holding the broker role"
+        actions={!loading && <Badge>{brokers.length} brokers</Badge>}
+      />
 
-      <BrokerTable brokers={brokers} onToggleVerify={handleToggleVerify} />
+      {error ? (
+        <ErrorNotice message={error} onRetry={reload} />
+      ) : (
+        <DataTable
+          columns={["Broker", "Contact", "Listings", "Status", "Joined"]}
+          loading={loading}
+          empty={
+            brokers.length === 0 ? (
+              <EmptyState
+                icon={<BadgeCheck className="w-6 h-6" aria-hidden="true" />}
+                title="No brokers yet"
+                description="Give an account the broker role from the Users screen and it will appear here."
+              />
+            ) : null
+          }
+        >
+          {brokers.map((b) => (
+            <tr key={b.id} className="hover:bg-canvas/60 transition-colors">
+              <td className="px-4 py-3">
+                <p className="text-micro font-semibold text-ink truncate max-w-56">{b.fullName}</p>
+                <p className="text-label text-muted truncate max-w-56">{b.email}</p>
+              </td>
+              <td className="px-4 py-3 text-micro text-body whitespace-nowrap">{b.phone || "—"}</td>
+              <td className="px-4 py-3 text-micro text-body tabular">{b.listingCount}</td>
+              <td className="px-4 py-3">
+                <Badge tone={statusTone(b.status)}>{statusLabel(b.status)}</Badge>
+              </td>
+              <td className="px-4 py-3 text-label text-muted whitespace-nowrap">{formatDate(b.joinedAt)}</td>
+            </tr>
+          ))}
+        </DataTable>
+      )}
     </div>
   );
 }

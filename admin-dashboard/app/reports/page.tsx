@@ -1,87 +1,94 @@
 "use client";
 
 import { useState } from "react";
-import { ADMIN_REPORTS, AdminReport } from "@/lib/mock-admin-data";
+import { Flag } from "lucide-react";
+import { adminApi, formatDate } from "@/lib/admin-api";
+import { useResource } from "@/lib/use-admin";
+import {
+  Badge,
+  Button,
+  DataTable,
+  EmptyState,
+  ErrorNotice,
+  PageHeader,
+  statusLabel,
+  statusTone,
+} from "@/components/ui";
 
-export default function AdminReportsPage() {
-  const [reports, setReports] = useState<AdminReport[]>(ADMIN_REPORTS);
+export default function ReportsPage() {
+  const { data, loading, error, reload } = useResource(() => adminApi.getReports(), []);
+  const [busyId, setBusyId] = useState<string | null>(null);
+  const [actionError, setActionError] = useState("");
 
-  const handleResolve = (id: string, status: "RESOLVED" | "DISMISSED") => {
-    setReports((prev) => prev.map((r) => (r.id === id ? { ...r, status } : r)));
+  const resolve = async (id: string, status: "RESOLVED" | "DISMISSED") => {
+    setBusyId(id);
+    setActionError("");
+    try {
+      await adminApi.resolveReport(id, status);
+      reload();
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : "The report could not be updated.");
+    } finally {
+      setBusyId(null);
+    }
   };
 
-  return (
-    <div className="space-y-8 font-sans">
-      <div className="border-b border-[#ECE7DA] pb-6">
-        <span className="text-[11px] font-mono-label font-bold text-[#736F4E] tracking-widest uppercase">
-          INCIDENT REVIEW
-        </span>
-        <h1 className="text-3xl font-serif-display font-light text-[#1C1B12] tracking-tight mt-1">
-          Abuse & Flagged Content Queue
-        </h1>
-        <p className="text-xs text-[#736F4E] font-mono-label mt-1">
-          User incident reports, price discrepancy flags & broker compliance investigations
-        </p>
-      </div>
+  const reports = data ?? [];
+  const open = reports.filter((r) => r.status === "OPEN").length;
 
-      <div className="bg-white rounded-2xl border border-[#ECE7DA] overflow-hidden shadow-xs">
-        <table>
-          <thead>
-            <tr>
-              <th>ID & Target Item</th>
-              <th>Reporter</th>
-              <th>Reason / Incident Details</th>
-              <th>Date Reported</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {reports.map((report) => (
-              <tr key={report.id}>
-                <td>
-                  <div className="font-bold text-[#1C1B12]">{report.targetTitle}</div>
-                  <div className="text-[10px] font-mono-label text-[#736F4E]">ID: {report.id}</div>
-                </td>
-                <td className="font-mono-label text-xs text-[#1C1B12]">{report.reporterName}</td>
-                <td className="text-xs text-rose-700 font-medium max-w-xs">{report.reason}</td>
-                <td className="font-mono-label text-xs text-[#736F4E]">{report.reportedAt}</td>
-                <td>
-                  <span
-                    className={`px-2.5 py-0.5 rounded-full text-[10px] font-mono-label font-bold ${
-                      report.status === "PENDING"
-                        ? "bg-amber-50 text-amber-700 border border-amber-200"
-                        : report.status === "RESOLVED"
-                        ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                        : "bg-slate-50 text-slate-700 border border-slate-200"
-                    }`}
-                  >
-                    {report.status}
+  return (
+    <div>
+      <PageHeader
+        title="Reports"
+        description="Listings flagged by users"
+        actions={!loading && <Badge tone={open > 0 ? "warn" : "ok"}>{open} open</Badge>}
+      />
+
+      {actionError && <div className="mb-3"><ErrorNotice message={actionError} /></div>}
+
+      {error ? (
+        <ErrorNotice message={error} onRetry={reload} />
+      ) : (
+        <DataTable
+          columns={["Listing", "Reported by", "Reason", "Status", "Received", ""]}
+          loading={loading}
+          empty={
+            reports.length === 0 ? (
+              <EmptyState
+                icon={<Flag className="w-6 h-6" aria-hidden="true" />}
+                title="No reports"
+                description="Nothing has been flagged by users."
+              />
+            ) : null
+          }
+        >
+          {reports.map((r) => (
+            <tr key={r.id} className="hover:bg-canvas/60 transition-colors">
+              <td className="px-4 py-3 text-micro font-semibold text-ink truncate max-w-56">{r.targetTitle}</td>
+              <td className="px-4 py-3 text-micro text-body truncate max-w-40">{r.reporterName}</td>
+              <td className="px-4 py-3 text-micro text-body max-w-72">{r.reason}</td>
+              <td className="px-4 py-3">
+                <Badge tone={statusTone(r.status)}>{statusLabel(r.status)}</Badge>
+              </td>
+              <td className="px-4 py-3 text-label text-muted whitespace-nowrap">{formatDate(r.reportedAt)}</td>
+              <td className="px-4 py-3 text-right whitespace-nowrap">
+                {r.status === "OPEN" ? (
+                  <span className="inline-flex gap-2">
+                    <Button variant="secondary" size="sm" disabled={busyId === r.id} onClick={() => resolve(r.id, "DISMISSED")}>
+                      Dismiss
+                    </Button>
+                    <Button size="sm" disabled={busyId === r.id} onClick={() => resolve(r.id, "RESOLVED")}>
+                      Resolve
+                    </Button>
                   </span>
-                </td>
-                <td>
-                  {report.status === "PENDING" && (
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => handleResolve(report.id, "RESOLVED")}
-                        className="px-3 py-1 rounded-xl bg-[#4C061D] text-white text-xs font-mono-label font-bold hover:bg-[#3B0416]"
-                      >
-                        RESOLVE
-                      </button>
-                      <button
-                        onClick={() => handleResolve(report.id, "DISMISSED")}
-                        className="px-3 py-1 rounded-xl bg-[#FAF8F4] border border-[#ECE7DA] text-xs font-mono-label text-[#736F4E] hover:text-[#1C1B12]"
-                      >
-                        DISMISS
-                      </button>
-                    </div>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+                ) : (
+                  <span className="text-label text-muted">Closed</span>
+                )}
+              </td>
+            </tr>
+          ))}
+        </DataTable>
+      )}
     </div>
   );
 }

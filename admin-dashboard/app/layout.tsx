@@ -1,33 +1,26 @@
 import type { Metadata } from "next";
-import { Manrope, Inter, DM_Serif_Display, Roboto_Mono } from "next/font/google";
+import { Inter, DM_Serif_Display } from "next/font/google";
 import "./globals.css";
-import { Sidebar } from "@/components/sidebar";
-import { Topbar } from "@/components/topbar";
-
-const manrope = Manrope({
-  subsets: ["latin"],
-  variable: "--font-manrope",
-});
+import { AdminShell } from "@/components/admin-shell";
 
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
+  display: "swap",
+  fallback: ["system-ui", "sans-serif"],
 });
 
-const dmSerif = DM_Serif_Display({
+const serifDisplay = DM_Serif_Display({
   weight: "400",
   subsets: ["latin"],
-  variable: "--font-dm-serif",
-});
-
-const robotoMono = Roboto_Mono({
-  subsets: ["latin"],
-  variable: "--font-roboto-mono",
+  variable: "--font-serif-display",
+  display: "swap",
+  fallback: ["Georgia", "serif"],
 });
 
 export const metadata: Metadata = {
-  title: "Delala Admin Platform | Enterprise Infrastructure",
-  description: "Administrative moderation, verification, and analytics platform for Delala Ethiopia.",
+  title: "Delala Admin",
+  description: "Moderation, accounts and analytics for the Delala marketplace.",
   icons: {
     icon: "/app_icon.png",
     shortcut: "/app_icon.png",
@@ -35,22 +28,11 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html
-      lang="en"
-      className={`${manrope.variable} ${inter.variable} ${dmSerif.variable} ${robotoMono.variable}`}
-    >
-      <body className="flex min-h-screen bg-[#FAF8F4] text-[#1C1B12] font-sans antialiased">
-        <Sidebar />
-        <div className="flex-1 flex flex-col min-w-0">
-          <Topbar />
-          <main className="p-6 md:p-8 flex-1 max-w-7xl w-full mx-auto">{children}</main>
-        </div>
+    <html lang="en" className={`${inter.variable} ${serifDisplay.variable}`}>
+      <body className="bg-canvas text-body antialiased">
+        <AdminShell>{children}</AdminShell>
       </body>
     </html>
   );

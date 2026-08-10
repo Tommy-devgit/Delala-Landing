@@ -1,110 +1,150 @@
 "use client";
 
-import { useState } from "react";
-import { X, CheckCircle2, XCircle, ShieldCheck } from "lucide-react";
-import { AdminProperty } from "@/lib/mock-admin-data";
+import { useEffect, useState } from "react";
+import { CheckCircle2, Loader2, X, XCircle } from "lucide-react";
+import { AdminProperty, formatETB, formatDate } from "@/lib/admin-api";
+import { Badge, Button, statusLabel, statusTone } from "@/components/ui";
 
+/**
+ * Moderation dialog. The decision is sent to the API and only closes once the
+ * request succeeds — previously it mutated local state and forgot the change on
+ * the next refresh.
+ */
 export function ApprovalModal({
-  isOpen,
-  onClose,
   property,
-  onAction,
+  onClose,
+  onDecide,
 }: {
-  isOpen: boolean;
-  onClose: () => void;
   property: AdminProperty | null;
-  onAction: (id: string, action: "APPROVED" | "REJECTED", reason?: string, notes?: string) => void;
+  onClose: () => void;
+  onDecide: (id: string, status: "APPROVED" | "REJECTED", reason?: string) => Promise<void>;
 }) {
   const [reason, setReason] = useState("");
-  const [notes, setNotes] = useState(property?.fieldAgentNotes || "");
+  const [submitting, setSubmitting] = useState<"APPROVED" | "REJECTED" | null>(null);
+  const [error, setError] = useState("");
 
-  if (!isOpen || !property) return null;
+  useEffect(() => {
+    setReason("");
+    setError("");
+    setSubmitting(null);
+  }, [property?.id]);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  if (!property) return null;
+
+  const decide = async (status: "APPROVED" | "REJECTED") => {
+    if (status === "REJECTED" && !reason.trim()) {
+      setError("Give a reason so the owner knows what to fix.");
+      return;
+    }
+    setError("");
+    setSubmitting(status);
+    try {
+      await onDecide(property.id, status, reason.trim() || undefined);
+      onClose();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "The decision could not be saved.");
+    } finally {
+      setSubmitting(null);
+    }
+  };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
-      <div className="bg-white w-full max-w-lg rounded-2xl border border-[#ECE7DA] shadow-2xl overflow-hidden font-sans">
-        
-        {/* Header */}
-        <div className="p-5 bg-[#FAF8F4] border-b border-[#ECE7DA] flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-[#4C061D] text-white flex items-center justify-center">
-              <ShieldCheck className="w-4 h-4 text-[#B4C292]" />
-            </div>
-            <h3 className="font-serif-display text-lg text-[#1C1B12]">
-              Review Listing #{property.id}
-            </h3>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/45"
+      role="dialog"
+      aria-modal="true"
+      aria-label={`Review ${property.title}`}
+      onClick={onClose}
+    >
+      <div
+        className="bg-surface w-full max-w-lg rounded-panel border border-line shadow-xl overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="px-5 py-3.5 border-b border-line flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h2 className="font-serif-display text-lg text-ink truncate">{property.title}</h2>
+            <p className="text-label text-muted mt-0.5">
+              Submitted {formatDate(property.submittedAt)} by {property.ownerName}
+            </p>
           </div>
-          <button onClick={onClose} className="p-1 rounded-lg text-[#736F4E] hover:text-[#4C061D] hover:bg-[#ECE7DA] transition-colors">
-            <X className="w-5 h-5" />
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close"
+            className="w-8 h-8 rounded-full text-muted hover:text-ink hover:bg-canvas flex items-center justify-center shrink-0"
+          >
+            <X className="w-4 h-4" aria-hidden="true" />
           </button>
         </div>
 
-        {/* Content */}
-        <div className="p-6 space-y-4">
-          <div className="bg-[#FAF8F4] p-4 rounded-xl border border-[#ECE7DA]">
-            <div className="text-[10px] font-mono-label text-[#736F4E] font-bold mb-1">
-              {property.subCity.toUpperCase()} • {property.city.toUpperCase()} • ETB {property.rentETB.toLocaleString()}/mo
-            </div>
-            <div className="font-bold text-base text-[#1C1B12]">
-              {property.title}
-            </div>
-            <div className="text-xs text-[#736F4E] mt-1 font-mono-label">
-              Submitted by Broker: <strong className="text-[#4C061D]">{property.brokerName}</strong> on {property.submittedAt}
-            </div>
+        <div className="p-5 space-y-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {[
+              { label: "Rent", value: formatETB(property.rentETB) },
+              { label: "Type", value: property.propertyType },
+              { label: "Bedrooms", value: String(property.bedrooms) },
+              { label: "Area", value: property.areaSqm ? `${property.areaSqm} m²` : "—" },
+            ].map((f) => (
+              <div key={f.label}>
+                <p className="text-label text-muted">{f.label}</p>
+                <p className="text-micro font-semibold text-ink mt-0.5">{f.value}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Badge tone={statusTone(property.status)}>{statusLabel(property.status)}</Badge>
+            <span className="text-label text-muted">
+              {[property.subCity, property.city].filter(Boolean).join(", ") || "No location set"}
+            </span>
           </div>
 
           <div>
-            <label className="block text-[10px] font-mono-label text-[#736F4E] font-bold uppercase mb-1">
-              FIELD AGENT AUDIT NOTES
+            <label htmlFor="reason" className="block text-label font-semibold text-muted mb-1">
+              Reason (required to reject)
             </label>
             <textarea
-              rows={2}
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="e.g. 45kVA standby generator and 12,000L water reserve verified operational."
-              className="w-full p-3 rounded-xl bg-[#FAF8F4] border border-[#ECE7DA] text-xs text-[#1C1B12] placeholder-[#736F4E] focus:outline-none focus:border-[#4C061D]"
-            />
-          </div>
-
-          <div>
-            <label className="block text-[10px] font-mono-label text-[#736F4E] font-bold uppercase mb-1">
-              REJECTION REASON (IF REJECTING)
-            </label>
-            <input
-              type="text"
+              id="reason"
+              rows={3}
               value={reason}
               onChange={(e) => setReason(e.target.value)}
-              placeholder="e.g. Discrepancy in title deed or unverified backup generator"
-              className="w-full p-3 rounded-xl bg-[#FAF8F4] border border-[#ECE7DA] text-xs text-[#1C1B12] placeholder-[#736F4E] focus:outline-none focus:border-[#4C061D]"
+              placeholder="e.g. Photos do not match the described property"
+              className="w-full p-3 rounded-control bg-canvas border border-line text-micro text-ink placeholder:text-muted/70 focus:outline-none focus:border-primary"
             />
           </div>
+
+          {error && (
+            <p role="alert" className="rounded-control bg-danger-soft border border-danger/25 px-3 py-2 text-label text-danger">
+              {error}
+            </p>
+          )}
         </div>
 
-        {/* Action Buttons */}
-        <div className="p-4 bg-[#FAF8F4] border-t border-[#ECE7DA] flex items-center justify-end gap-3">
-          <button
-            onClick={() => {
-              onAction(property.id, "REJECTED", reason, notes);
-              onClose();
-            }}
-            className="px-4 py-2.5 rounded-xl bg-rose-50 text-rose-700 border border-rose-200 text-xs font-mono-label font-bold hover:bg-rose-600 hover:text-white transition-colors flex items-center gap-1.5"
-          >
-            <XCircle className="w-4 h-4" />
-            <span>Reject Listing</span>
-          </button>
+        <div className="px-5 py-3.5 bg-canvas border-t border-line flex items-center justify-end gap-2">
+          <Button variant="danger" onClick={() => decide("REJECTED")} disabled={submitting !== null}>
+            {submitting === "REJECTED" ? (
+              <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
+            ) : (
+              <XCircle className="w-4 h-4" aria-hidden="true" />
+            )}
+            <span>Reject</span>
+          </Button>
 
-          <button
-            onClick={() => {
-              onAction(property.id, "APPROVED", undefined, notes);
-              onClose();
-            }}
-            className="px-5 py-2.5 rounded-xl bg-[#4C061D] text-white text-xs font-mono-label font-bold hover:bg-[#3B0416] transition-colors flex items-center gap-1.5 shadow-md"
-          >
-            <CheckCircle2 className="w-4 h-4 text-[#B4C292]" />
-            <span>Approve & Publish →</span>
-          </button>
+          <Button onClick={() => decide("APPROVED")} disabled={submitting !== null}>
+            {submitting === "APPROVED" ? (
+              <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
+            ) : (
+              <CheckCircle2 className="w-4 h-4 text-accent" aria-hidden="true" />
+            )}
+            <span>Approve &amp; publish</span>
+          </Button>
         </div>
-
       </div>
     </div>
   );

@@ -1,67 +1,79 @@
 "use client";
 
 import { useState } from "react";
+import { Search } from "lucide-react";
+import { AdminProperty, adminApi } from "@/lib/admin-api";
+import { useResource } from "@/lib/use-admin";
 import { PropertyTable } from "@/components/property-table";
 import { ApprovalModal } from "@/components/approval-modal";
-import { ADMIN_PROPERTIES, AdminProperty } from "@/lib/mock-admin-data";
+import { ErrorNotice, Input, PageHeader, Select } from "@/components/ui";
 
-export default function AdminPropertiesPage() {
-  const [properties, setProperties] = useState<AdminProperty[]>(ADMIN_PROPERTIES);
-  const [selectedProp, setSelectedProp] = useState<AdminProperty | null>(null);
-  const [filterStatus, setFilterStatus] = useState<string>("ALL");
+const STATUSES = [
+  { value: "ALL", label: "All statuses" },
+  { value: "PENDING_APPROVAL", label: "Pending" },
+  { value: "APPROVED", label: "Approved" },
+  { value: "REJECTED", label: "Rejected" },
+];
 
-  const filteredProps = properties.filter((p) => {
-    if (filterStatus === "ALL") return true;
-    return p.status === filterStatus;
-  });
+export default function PropertiesPage() {
+  const [status, setStatus] = useState("ALL");
+  const [search, setSearch] = useState("");
+  const [selected, setSelected] = useState<AdminProperty | null>(null);
 
-  const handleAction = (id: string, action: "APPROVED" | "REJECTED", reason?: string, notes?: string) => {
-    setProperties((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, status: action, rejectionReason: reason, fieldAgentNotes: notes } : p)),
-    );
+  const { data, loading, error, reload } = useResource(
+    () => adminApi.getProperties(status, search || undefined),
+    [status, search]
+  );
+
+  const decide = async (id: string, next: "APPROVED" | "REJECTED", reason?: string) => {
+    await adminApi.moderateProperty(id, next, reason);
+    reload();
   };
 
   return (
-    <div className="space-y-8 font-sans">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#ECE7DA] pb-6">
-        <div>
-          <span className="text-[11px] font-mono-label font-bold text-[#736F4E] tracking-widest uppercase">
-            DATABASE CATALOG
-          </span>
-          <h1 className="text-3xl font-serif-display font-light text-[#1C1B12] tracking-tight mt-1">
-            Property Management
-          </h1>
-          <p className="text-xs text-[#736F4E] font-mono-label mt-1">
-            Marketplace listings directory & field agent physical verification status
-          </p>
-        </div>
-
-        {/* Filter pills */}
-        <div className="flex items-center gap-1.5 bg-white p-1.5 rounded-full border border-[#ECE7DA] shadow-xs">
-          {["ALL", "APPROVED", "PENDING_APPROVAL", "REJECTED"].map((status) => (
-            <button
-              key={status}
-              onClick={() => setFilterStatus(status)}
-              className={`px-4 py-1.5 rounded-full text-xs font-mono-label font-bold transition-all ${
-                filterStatus === status
-                  ? "bg-[#4C061D] text-white shadow-xs"
-                  : "text-[#736F4E] hover:text-[#4C061D]"
-              }`}
-            >
-              {status.replace("_", " ")}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <PropertyTable properties={filteredProps} onOpenReview={(p) => setSelectedProp(p)} />
-
-      <ApprovalModal
-        isOpen={!!selectedProp}
-        onClose={() => setSelectedProp(null)}
-        property={selectedProp}
-        onAction={handleAction}
+    <div>
+      <PageHeader
+        title="Properties"
+        description="Every listing in the marketplace, whatever its status"
+        actions={
+          <>
+            <div className="relative">
+              <Search
+                className="w-3.5 h-3.5 text-muted absolute left-3 top-1/2 -translate-y-1/2"
+                aria-hidden="true"
+              />
+              <Input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search titles"
+                aria-label="Search listings by title"
+                className="pl-8 w-44"
+              />
+            </div>
+            <Select value={status} onChange={(e) => setStatus(e.target.value)} aria-label="Filter by status">
+              {STATUSES.map((s) => (
+                <option key={s.value} value={s.value}>
+                  {s.label}
+                </option>
+              ))}
+            </Select>
+          </>
+        }
       />
+
+      {error ? (
+        <ErrorNotice message={error} onRetry={reload} />
+      ) : (
+        <PropertyTable
+          properties={data ?? []}
+          loading={loading}
+          onReview={setSelected}
+          emptyTitle="No listings match"
+          emptyDescription="Try a different status filter or clear the search."
+        />
+      )}
+
+      <ApprovalModal property={selected} onClose={() => setSelected(null)} onDecide={decide} />
     </div>
   );
 }

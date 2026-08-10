@@ -1,71 +1,171 @@
 "use client";
 
-import { BarChart3 } from "lucide-react";
+import { useState } from "react";
+import { adminApi, formatETB } from "@/lib/admin-api";
+import { useResource } from "@/lib/use-admin";
+import { Badge, ErrorNotice, PageHeader, Panel, Select, Skeleton } from "@/components/ui";
 
-export default function AdminAnalyticsPage() {
+const RANGES = [
+  { value: 7, label: "Last 7 days" },
+  { value: 30, label: "Last 30 days" },
+  { value: 90, label: "Last 90 days" },
+];
+
+const SERIES = [
+  { key: "listings" as const, label: "Listings", color: "var(--color-primary)" },
+  { key: "users" as const, label: "Signups", color: "var(--color-accent)" },
+  { key: "visits" as const, label: "Visits", color: "var(--color-muted)" },
+];
+
+/** Small inline area chart — avoids pulling a charting library for three lines. */
+function TrendChart({
+  points,
+  metric,
+  color,
+}: {
+  points: { date: string; listings: number; users: number; visits: number }[];
+  metric: "listings" | "users" | "visits";
+  color: string;
+}) {
+  const values = points.map((p) => p[metric]);
+  const max = Math.max(1, ...values);
+  const width = 100;
+  const height = 32;
+
+  const step = points.length > 1 ? width / (points.length - 1) : width;
+  const coords = values.map((v, i) => [i * step, height - (v / max) * height] as const);
+  const line = coords.map(([x, y], i) => `${i === 0 ? "M" : "L"}${x.toFixed(2)},${y.toFixed(2)}`).join(" ");
+  const area = `${line} L${width},${height} L0,${height} Z`;
+  const total = values.reduce((a, b) => a + b, 0);
+
   return (
-    <div className="space-y-8 font-sans">
-      <div className="border-b border-[#ECE7DA] pb-6">
-        <span className="text-[11px] font-mono-label font-bold text-[#736F4E] tracking-widest uppercase">
-          MARKET INTELLIGENCE
-        </span>
-        <h1 className="text-3xl font-serif-display font-light text-[#1C1B12] tracking-tight mt-1">
-          Marketplace Analytics & Intelligence
-        </h1>
-        <p className="text-xs text-[#736F4E] font-mono-label mt-1">
-          Real estate market trends, search keywords, average rent per sub-city & platform growth
-        </p>
+    <div>
+      <div className="flex items-baseline justify-between mb-1.5">
+        <span className="text-label text-muted">Peak {max}</span>
+        <span className="text-micro font-semibold text-ink tabular">{total} total</span>
       </div>
+      <svg
+        viewBox={`0 0 ${width} ${height}`}
+        preserveAspectRatio="none"
+        className="w-full h-16"
+        role="img"
+        aria-label={`${metric} over the period, ${total} in total`}
+      >
+        <path d={area} fill={color} opacity="0.12" />
+        <path d={line} fill="none" stroke={color} strokeWidth="1.5" vectorEffect="non-scaling-stroke" />
+      </svg>
+    </div>
+  );
+}
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        <div className="bg-white p-6 rounded-2xl border border-[#ECE7DA] shadow-xs space-y-2">
-          <div className="text-[10px] font-mono-label text-[#736F4E] font-bold uppercase">TOP SEARCHED SUB-CITY</div>
-          <div className="text-3xl font-serif-display font-light text-[#1C1B12]">Bole Medhanialem</div>
-          <div className="text-xs text-[#4C061D] font-mono-label font-bold">42% of total search traffic</div>
-        </div>
+/** Horizontal bar list for the categorical breakdowns. */
+function Breakdown({
+  title,
+  rows,
+  showRent = true,
+}: {
+  title: string;
+  rows: { name: string; count: number; averageRentETB?: number }[];
+  showRent?: boolean;
+}) {
+  const max = Math.max(1, ...rows.map((r) => r.count));
 
-        <div className="bg-white p-6 rounded-2xl border border-[#ECE7DA] shadow-xs space-y-2">
-          <div className="text-[10px] font-mono-label text-[#736F4E] font-bold uppercase">MOST REQUESTED AMENITY</div>
-          <div className="text-3xl font-serif-display font-light text-[#1C1B12]">Standby Generator</div>
-          <div className="text-xs text-[#4C061D] font-mono-label font-bold">Filter applied in 89% searches</div>
-        </div>
-
-        <div className="bg-white p-6 rounded-2xl border border-[#ECE7DA] shadow-xs space-y-2">
-          <div className="text-[10px] font-mono-label text-[#736F4E] font-bold uppercase">AVG ADDIS ABABA RENT</div>
-          <div className="text-3xl font-serif-display font-light text-[#4C061D]">ETB 45,200 / mo</div>
-          <div className="text-xs text-[#736F4E] font-mono-label">+6.4% YoY index</div>
-        </div>
-      </div>
-
-      {/* Sub-city Breakdown */}
-      <div className="bg-white p-6 rounded-2xl border border-[#ECE7DA] shadow-xs space-y-5">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-[#FAF8F4] border border-[#ECE7DA] flex items-center justify-center text-[#4C061D]">
-            <BarChart3 className="w-4 h-4" />
-          </div>
-          <h2 className="text-lg font-serif-display font-light text-[#1C1B12]">SUB-CITY AVERAGE RENT INDEX</h2>
-        </div>
-
-        <div className="space-y-4">
-          {[
-            { name: "Old Airport", rent: "ETB 75,000", pct: 90 },
-            { name: "Bole Medhanialem", rent: "ETB 65,000", pct: 82 },
-            { name: "Kazanchis", rent: "ETB 38,000", pct: 60 },
-            { name: "CMC Sunshine", rent: "ETB 35,000", pct: 55 },
-            { name: "Hawassa Waterfront", rent: "ETB 28,000", pct: 40 },
-          ].map((item) => (
-            <div key={item.name} className="space-y-1.5">
-              <div className="flex items-center justify-between text-xs font-mono-label">
-                <span className="text-[#1C1B12] font-bold">{item.name}</span>
-                <span className="text-[#4C061D] font-bold">{item.rent}</span>
+  return (
+    <Panel className="p-4">
+      <h2 className="text-micro font-semibold text-ink mb-3">{title}</h2>
+      {rows.length === 0 ? (
+        <p className="text-label text-muted py-4 text-center">No data yet.</p>
+      ) : (
+        <ul className="space-y-2.5">
+          {rows.map((r) => (
+            <li key={r.name}>
+              <div className="flex items-baseline justify-between gap-2 mb-1">
+                <span className="text-micro text-ink truncate">{r.name}</span>
+                <span className="text-label text-muted shrink-0 tabular">
+                  {r.count}
+                  {showRent && r.averageRentETB ? ` · ${formatETB(r.averageRentETB)}` : ""}
+                </span>
               </div>
-              <div className="w-full bg-[#FAF8F4] h-2.5 rounded-full overflow-hidden border border-[#ECE7DA]">
-                <div className="bg-[#4C061D] h-full rounded-full" style={{ width: `${item.pct}%` }} />
+              <div className="h-1.5 rounded-full bg-line overflow-hidden">
+                <div
+                  className="h-full rounded-full bg-primary"
+                  style={{ width: `${(r.count / max) * 100}%` }}
+                />
               </div>
-            </div>
+            </li>
           ))}
+        </ul>
+      )}
+    </Panel>
+  );
+}
+
+export default function AnalyticsPage() {
+  const [days, setDays] = useState(30);
+  const { data, loading, error, reload } = useResource(() => adminApi.getAnalytics(days), [days]);
+
+  return (
+    <div>
+      <PageHeader
+        title="Analytics"
+        description="Marketplace activity, derived from live records"
+        actions={
+          <Select value={days} onChange={(e) => setDays(Number(e.target.value))} aria-label="Date range">
+            {RANGES.map((r) => (
+              <option key={r.value} value={r.value}>
+                {r.label}
+              </option>
+            ))}
+          </Select>
+        }
+      />
+
+      {error ? (
+        <ErrorNotice message={error} onRetry={reload} />
+      ) : loading ? (
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-32" />)}
+          </div>
+          <Skeleton className="h-56" />
         </div>
-      </div>
+      ) : (
+        data && (
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              {SERIES.map((s) => (
+                <Panel key={s.key} className="p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="w-2 h-2 rounded-full" style={{ background: s.color }} aria-hidden="true" />
+                    <h2 className="text-micro font-semibold text-ink">{s.label}</h2>
+                  </div>
+                  <TrendChart points={data.series} metric={s.key} color={s.color} />
+                </Panel>
+              ))}
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+              <Breakdown title="Listings by city" rows={data.byCity} />
+              <Breakdown title="Listings by type" rows={data.byPropertyType} />
+              <Panel className="p-4">
+                <h2 className="text-micro font-semibold text-ink mb-3">Moderation status</h2>
+                <ul className="space-y-2">
+                  {data.byStatus.map((s) => (
+                    <li key={s.name} className="flex items-center justify-between">
+                      <Badge
+                        tone={s.name === "Approved" ? "ok" : s.name === "Pending" ? "warn" : "danger"}
+                      >
+                        {s.name}
+                      </Badge>
+                      <span className="text-micro font-semibold text-ink tabular">{s.count}</span>
+                    </li>
+                  ))}
+                </ul>
+              </Panel>
+            </div>
+          </div>
+        )
+      )}
     </div>
   );
 }
