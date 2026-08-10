@@ -35,11 +35,6 @@ export function AppShowcase() {
             
             {/* Left Column: Conversion Copy & App Features Checklist */}
             <div className="lg:col-span-6">
-              <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 text-[#B4C292] text-xs font-extrabold mb-6 border border-white/15">
-                <Smartphone className="w-3.5 h-3.5" />
-                <span>The Delala Mobile Experience</span>
-              </span>
-
               <h2 className="font-heading text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight mb-6 leading-tight">
                 Ethiopian house hunting, digitized on your mobile phone.
               </h2>

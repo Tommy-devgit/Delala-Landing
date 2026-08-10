@@ -19,10 +19,6 @@ export function FinalCTA() {
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-radial from-[#B4C292]/20 via-transparent to-transparent blur-3xl pointer-events-none" />
 
           <div className="relative z-10 max-w-3xl flex flex-col items-center">
-            <span className="font-mono-label text-[11px] text-[#B4C292] bg-white/10 px-3.5 py-1.5 rounded-full border border-white/15 inline-block mb-6">
-              ETHIOPIA'S TRUSTED HOUSING PLATFORM
-            </span>
-
             <h2 className="font-serif-display text-4xl sm:text-5xl lg:text-6xl font-light text-white tracking-tight mb-6 leading-tight">
               Ready to find your next home? <br className="hidden sm:inline" />
               Download <span className="italic font-normal text-[#B4C292]">Delala</span> today.

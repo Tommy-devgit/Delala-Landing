@@ -42,9 +42,6 @@ export default function Home() {
           
           {/* Section Eyebrow & Display Headline */}
           <div className="max-w-3xl mb-16">
-            <span className="font-mono-label text-[11px] text-[#4C061D] bg-white px-3.5 py-1.5 rounded-full border border-[#ECE7DA] inline-block mb-4">
-              DELALA CORE MODULES
-            </span>
             <h2 className="font-serif-display text-4xl sm:text-5xl lg:text-6xl font-light text-[#4C061D] tracking-tight mb-4 leading-[0.95]">
               Everything you need for <span className="italic font-normal text-[#1c1b12]">verified</span> house hunting.
             </h2>
@@ -153,10 +150,6 @@ export default function Home() {
           
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center mb-20">
             <div className="lg:col-span-6">
-              <span className="font-mono-label text-[11px] text-rose-700 bg-rose-50 px-3.5 py-1.5 rounded-full border border-rose-200 inline-block mb-4">
-                THE OLD SYSTEM vs DELALA
-              </span>
-
               <h2 className="font-serif-display text-4xl sm:text-5xl font-light text-[#1c1b12] tracking-tight mb-6 leading-tight">
                 Why middleman fraud is <span className="italic font-normal text-[#4C061D]">ending</span>.
               </h2>
@@ -196,9 +189,6 @@ export default function Home() {
           {/* Solution Framing Block */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center bg-[#4C061D] text-white p-8 sm:p-12 lg:p-16 rounded-2xl shadow-xl">
             <div className="lg:col-span-7">
-              <span className="font-mono-label text-[11px] text-[#B4C292] bg-white/10 px-3.5 py-1.5 rounded-full border border-white/15 inline-block mb-4">
-                THE DELALA SOLUTION
-              </span>
 
               <h2 className="font-serif-display text-4xl sm:text-5xl font-light text-white tracking-tight mb-6 leading-tight">
                 {STORY_SECTIONS.solution.title}
@@ -241,10 +231,6 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
             <div className="max-w-2xl">
-              <span className="font-mono-label text-[11px] text-[#4C061D] bg-[#B4C292]/30 px-3.5 py-1.5 rounded-full border border-[#B4C292]/50 inline-block mb-4">
-                REGIONAL COVERAGE • ETHIOPIA
-              </span>
-
               <h2 className="font-serif-display text-4xl sm:text-5xl font-light text-[#4C061D] tracking-tight mb-4 leading-tight">
                 Explore verified homes across Ethiopia.
               </h2>

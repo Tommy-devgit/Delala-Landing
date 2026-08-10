@@ -45,18 +45,6 @@ export function Hero() {
             style={{ y: textY }}
             className="lg:col-span-6 flex flex-col items-start text-left z-20"
           >
-            {/* Promo Eyebrow Badge (Roboto Mono 12px uppercase) */}
-            <motion.div
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-[#ECE7DA] shadow-xs mb-6"
-            >
-              <span className="w-2 h-2 rounded-full bg-[#4C061D] animate-pulse" />
-              <span className="font-mono-label text-[11px] text-[#4C061D] tracking-widest font-medium">
-                PHYSICAL VERIFICATION STANDARD • ETHIOPIA
-              </span>
-            </motion.div>
 
             {/* High-Impact Whisper-Weight Serif Display Headline (weight 300, 0.9 leading) */}
             <motion.h1
