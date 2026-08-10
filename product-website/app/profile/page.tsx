@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { authClient, UserSession } from "@/lib/auth-client";
 import { apiClient } from "@/lib/api-client";
@@ -42,36 +42,14 @@ export default function ProfilePage() {
   const [errorMsg, setErrorMsg] = useState("");
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
+  // Refilling the form is only ever safe when the user is not mid-edit. Kept in
+  // a ref so the loader can read the latest value without re-subscribing.
+  const isEditingRef = useRef(false);
   useEffect(() => {
-    async function loadUserSession() {
-      const activeSession = authClient.getSession();
-      setSession(activeSession);
+    isEditingRef.current = isEditing;
+  }, [isEditing]);
 
-      if (activeSession?.user?.id) {
-        // Fetch fresh profile from NestJS API
-        const freshUser = await authClient.fetchProfile(activeSession.user.id);
-        if (freshUser) {
-          populateForm(freshUser);
-        } else {
-          populateForm(activeSession.user);
-        }
-
-        // Fetch user's listings
-        const properties = await apiClient.getProperties();
-        const mine = properties.filter(
-          (p) => p.broker?.id === activeSession.user.id || p.phone === activeSession.user.phone
-        );
-        setUserProperties(mine);
-      }
-    }
-
-    loadUserSession();
-
-    window.addEventListener("delala_auth_change", loadUserSession);
-    return () => window.removeEventListener("delala_auth_change", loadUserSession);
-  }, []);
-
-  function populateForm(u: UserSession) {
+  const populateForm = useCallback((u: UserSession) => {
     const names = (u.fullName || "").split(" ");
     setFirstName(u.firstName || names[0] || "");
     setLastName(u.lastName || names.slice(1).join(" ") || "");
@@ -79,7 +57,43 @@ export default function ProfilePage() {
     setAvatarUrl(u.avatarUrl || "");
     setBio(u.bio || "");
     setRole(u.role || "user");
-  }
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadUserSession() {
+      const activeSession = authClient.getSession();
+      if (cancelled) return;
+      setSession(activeSession);
+
+      const userId = activeSession?.user?.id;
+      if (!userId) return;
+
+      const freshUser = await authClient.fetchProfile(userId);
+      if (cancelled) return;
+
+      // Never clobber fields the user is currently typing into.
+      if (!isEditingRef.current) {
+        populateForm(freshUser || activeSession!.user);
+      }
+
+      const properties = await apiClient.getProperties();
+      if (cancelled) return;
+      setUserProperties(properties.filter((p) => p.broker?.id === userId));
+    }
+
+    loadUserSession();
+
+    // Reacts to sign-in/sign-out elsewhere in the app. `fetchProfile` no longer
+    // fires this event for an unchanged profile, so this cannot re-trigger
+    // itself.
+    window.addEventListener("delala_auth_change", loadUserSession);
+    return () => {
+      cancelled = true;
+      window.removeEventListener("delala_auth_change", loadUserSession);
+    };
+  }, [populateForm]);
 
   /**
    * Uploads the chosen avatar and stores the returned URL.
