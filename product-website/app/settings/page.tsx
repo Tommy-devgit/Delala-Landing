@@ -21,7 +21,7 @@ export default function SettingsPage() {
         <div className="mb-6">
           <span className="font-mono-label text-label text-primary bg-surface border border-line px-3.5 py-1.5 rounded-full inline-flex items-center gap-1.5 mb-4 shadow-xs">
             <SettingsIcon className="w-3.5 h-3.5 text-primary" />
-            <span>MARKETPLACE PREFERENCES</span>
+            <span>Preferences</span>
           </span>
 
           <h1 className="font-serif-display text-4xl font-light text-primary mb-2">

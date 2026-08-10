@@ -15,20 +15,20 @@ import {
   Heart,
   Share2,
   MapPin,
-  Star,
   Zap,
   Droplets,
   Car,
-  Home,
-  Shield,
+  Sofa,
+  BedDouble,
+  Bath,
+  Ruler,
   Calendar,
   Phone,
   MessageSquare,
-  CheckCircle2,
-  Building,
   Building2,
 } from "lucide-react";
 import { Skeleton, buttonClasses } from "@/components/ui";
+import { PropertyMap } from "@/components/map";
 
 export default function PropertyDetailPage() {
   const params = useParams();
@@ -72,19 +72,32 @@ export default function PropertyDetailPage() {
           <Building2 className="w-8 h-8" />
         </div>
         <h2 className="font-serif-display text-2xl text-ink">
-          Property Not Found
+          Property not found
         </h2>
         <p className="text-xs text-muted">
           The requested property listing does not exist or has been removed from the database.
         </p>
-        <Link href="/" className="inline-block px-6 py-2.5 rounded-full bg-primary text-white font-mono-label text-xs font-bold">
-          Return to Marketplace
+        <Link href="/" className={buttonClasses({ size: "md" })}>
+          Back to marketplace
         </Link>
       </div>
     );
   }
 
   const postedAt = formatPostedAt(property.createdAt);
+  const hasPin = property.latitude !== null && property.longitude !== null;
+
+  // Only list what the property actually has, rather than showing every
+  // amenity with a yes/no beside it.
+  const amenities = [
+    { has: property.generator, icon: Zap, label: "Standby generator" },
+    { has: property.waterTank, icon: Droplets, label: "Reserve water tank" },
+    { has: property.parking, icon: Car, label: "Dedicated parking" },
+    { has: property.furnished, icon: Sofa, label: "Furnished" },
+    { has: property.securityGuard, icon: ShieldCheck, label: "Security guard" },
+    { has: property.balcony, icon: Building2, label: "Balcony" },
+  ].filter((a) => a.has);
+
   const posterName = property.broker?.name || "Property owner";
   const posterInitials = posterName
     .split(" ")
@@ -101,19 +114,19 @@ export default function PropertyDetailPage() {
         {/* Top Breadcrumb & Actions Bar */}
         <div className="flex items-center justify-between mb-4 pb-3 border-b border-line">
           <div className="flex items-center gap-2 text-xs font-mono-label text-muted">
-            <Link href="/" className="hover:text-primary">MARKETPLACE</Link>
+            <Link href="/" className="hover:text-primary">Marketplace</Link>
             {property.city && (
               <>
                 <span>/</span>
                 <Link href={`/cities/${property.city.toLowerCase().replace(/\s+/g, "-")}`} className="hover:text-primary">
-                  {property.city.toUpperCase()}
+                  {property.city}
                 </Link>
               </>
             )}
             {property.subCity && (
               <>
                 <span>/</span>
-                <span className="text-primary font-bold">{property.subCity.toUpperCase()}</span>
+                <span className="text-primary font-bold">{property.subCity}</span>
               </>
             )}
           </div>
@@ -163,10 +176,10 @@ export default function PropertyDetailPage() {
             </p>
           </div>
 
-          <div className="bg-surface p-4 rounded-card border border-line shadow-xs text-right">
-            <span className="font-mono-label text-label text-muted block">MONTHLY RENT</span>
-            <div className="font-mono-label text-2xl font-bold text-primary">
-              ETB {property.rentETB.toLocaleString()} <span className="text-xs font-normal text-muted">/mo</span>
+          <div className="shrink-0 md:text-right">
+            <div className="text-2xl font-bold text-primary leading-none">
+              ETB {property.rentETB.toLocaleString()}
+              <span className="text-sm font-normal text-muted"> /month</span>
             </div>
           </div>
         </div>
@@ -194,32 +207,70 @@ export default function PropertyDetailPage() {
 
         {/* Main Content Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          <div className="lg:col-span-8 space-y-4">
-            
-            {/* Infrastructure Specs */}
-            <div className="bg-surface p-5 rounded-panel border border-line space-y-3">
-              <h3 className="font-serif-display text-lg text-ink">
-                Verified Infrastructure Specs
-              </h3>
+          {/* One continuous column, divided by rules rather than broken into
+              separate floating panels with their own padding and borders. */}
+          <div className="lg:col-span-8 bg-surface rounded-panel border border-line divide-y divide-line">
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs font-mono-label text-muted">
-                <div>🛏️ {property.bedrooms} Bedrooms</div>
-                <div>🚿 {property.bathrooms} Bathrooms</div>
-                <div>📐 {property.areaSqm} sqm</div>
-                <div>⚡ {property.generator ? "Standby Generator" : "No Generator"}</div>
-              </div>
+            {/* Key facts */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-line">
+              {[
+                { icon: BedDouble, value: property.bedrooms, label: "Bedrooms" },
+                { icon: Bath, value: property.bathrooms, label: "Bathrooms" },
+                { icon: Ruler, value: `${property.areaSqm}`, label: "Square metres" },
+                {
+                  icon: Zap,
+                  value: property.generator ? "Yes" : "No",
+                  label: "Standby generator",
+                },
+              ].map(({ icon: Icon, value, label }) => (
+                <div key={label} className="px-4 py-3.5 text-center">
+                  <Icon className="w-4 h-4 text-primary mx-auto mb-1.5" aria-hidden="true" />
+                  <div className="text-base font-bold text-ink leading-none">{value}</div>
+                  <div className="text-label text-muted mt-1">{label}</div>
+                </div>
+              ))}
             </div>
 
             {/* Description */}
-            <div className="bg-surface p-5 rounded-panel border border-line space-y-2">
-              <h3 className="font-serif-display text-lg text-ink">
-                Property Overview
-              </h3>
-              <p className="text-sm text-muted leading-relaxed">
+            <div className="px-5 py-4">
+              <h2 className="font-serif-display text-lg text-ink mb-1.5">About this home</h2>
+              <p className="text-sm text-body leading-relaxed whitespace-pre-line">
                 {property.description}
               </p>
             </div>
 
+            {/* Amenities, only those the listing actually has */}
+            {amenities.length > 0 && (
+              <div className="px-5 py-4">
+                <h2 className="font-serif-display text-lg text-ink mb-2.5">What this place offers</h2>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-y-2 gap-x-4">
+                  {amenities.map(({ icon: Icon, label }) => (
+                    <div key={label} className="flex items-center gap-2 text-sm text-body">
+                      <Icon className="w-4 h-4 text-primary shrink-0" aria-hidden="true" />
+                      <span>{label}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Location — the coordinates are already on the property */}
+            <div className="px-5 py-4">
+              <h2 className="font-serif-display text-lg text-ink mb-1">Where you&rsquo;ll be</h2>
+              <p className="text-xs text-muted mb-3">
+                {[property.neighborhood, property.subCity, property.city].filter(Boolean).join(", ")}
+                {hasPin ? " · approximate location" : ""}
+              </p>
+              {hasPin ? (
+                <div className="h-64 rounded-card overflow-hidden border border-line">
+                  <PropertyMap properties={[property]} />
+                </div>
+              ) : (
+                <p className="text-xs text-muted bg-canvas border border-line rounded-card px-4 py-3">
+                  The owner has not pinned this property on the map yet.
+                </p>
+              )}
+            </div>
           </div>
 
           {/* Right Property Lister Contact Card */}
@@ -257,27 +308,27 @@ export default function PropertyDetailPage() {
                       className={buttonClasses({ size: "lg", className: "w-full" })}
                     >
                       <Phone className="w-4 h-4 text-accent" />
-                      <span>CALL {property.phone || property.broker?.phone}</span>
+                      <span>Call {property.phone || property.broker?.phone}</span>
                     </a>
 
                     <a
                       href={`https://wa.me/${(property.phone || property.broker?.phone).replace(/[^0-9]/g, "")}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-full py-3 rounded-full bg-emerald-700 text-white font-mono-label text-xs font-bold hover:bg-emerald-800 transition-colors shadow-sm flex items-center justify-center gap-2"
+                      className="w-full h-11 rounded-full bg-emerald-700 text-white text-xs font-bold hover:bg-emerald-800 transition-colors flex items-center justify-center gap-2"
                     >
                       <MessageSquare className="w-4 h-4" />
-                      <span>WHATSAPP LISTER</span>
+                      <span>WhatsApp owner</span>
                     </a>
                   </>
                 ) : null}
 
                 <button
                   onClick={() => setIsScheduleOpen(true)}
-                  className="w-full py-3 rounded-full bg-canvas text-ink font-mono-label text-xs font-bold hover:bg-line transition-colors border border-line flex items-center justify-center gap-2"
+                  className="w-full h-11 rounded-full bg-canvas text-ink text-xs font-bold hover:bg-line transition-colors border border-line flex items-center justify-center gap-2"
                 >
                   <Calendar className="w-4 h-4 text-primary" />
-                  <span>SCHEDULE WALKTHROUGH</span>
+                  <span>Schedule a visit</span>
                 </button>
               </div>
 
@@ -288,9 +339,9 @@ export default function PropertyDetailPage() {
         {/* Similar Listings */}
         {similarListings.length > 0 && (
           <div className="mt-10 pt-6 border-t border-line">
-            <h3 className="font-serif-display text-xl text-ink mb-4">
-              Similar Verified Listings in {property.city}
-            </h3>
+            <h2 className="font-serif-display text-xl text-ink mb-4">
+              More homes in {property.city}
+            </h2>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {similarListings.map((p) => (
                 <PropertyCard key={p.id} property={p} />

@@ -67,23 +67,23 @@ export default function MyListingsPage() {
         {/* Metric Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
           <div className="p-6 rounded-panel bg-surface border border-line shadow-xs">
-            <div className="text-xs font-mono-label text-muted">TOTAL PROPERTIES</div>
+            <div className="text-xs font-mono-label text-muted">Total properties</div>
             <div className="font-serif-display text-3xl text-ink mt-1">{properties.length}</div>
           </div>
           <div className="p-6 rounded-panel bg-surface border border-line shadow-xs">
-            <div className="text-xs font-mono-label text-emerald-700">APPROVED & LIVE</div>
+            <div className="text-xs font-mono-label text-emerald-700">Approved &amp; live</div>
             <div className="font-serif-display text-3xl text-ink mt-1">
               {properties.filter((p) => p.verified).length}
             </div>
           </div>
           <div className="p-6 rounded-panel bg-surface border border-line shadow-xs">
-            <div className="text-xs font-mono-label text-amber-700">PENDING FIELD AUDIT</div>
+            <div className="text-xs font-mono-label text-amber-700">Pending review</div>
             <div className="font-serif-display text-3xl text-ink mt-1">
               {properties.filter((p) => !p.verified).length}
             </div>
           </div>
           <div className="p-6 rounded-panel bg-surface border border-line shadow-xs">
-            <div className="text-xs font-mono-label text-primary">WALKTHROUGH REQUESTS</div>
+            <div className="text-xs font-mono-label text-primary">Walkthrough requests</div>
             <div className="font-serif-display text-3xl text-ink mt-1">12</div>
           </div>
         </div>

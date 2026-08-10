@@ -64,7 +64,7 @@ export function AuthModal({
         <div className="text-center max-w-sm mx-auto space-y-2 mb-6">
           <span className="font-mono-label text-label text-primary bg-canvas border border-line px-3.5 py-1 rounded-full inline-flex items-center gap-1.5 shadow-xs">
             <ShieldCheck className="w-3.5 h-3.5 text-primary" />
-            <span>AUTHENTICATION</span>
+            <span>Sign in</span>
           </span>
           <h2 className="font-serif-display text-3xl text-ink">
             {isSignUp ? "Create Your Account" : "Sign In to Delala"}

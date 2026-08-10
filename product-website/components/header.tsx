@@ -75,8 +75,8 @@ export function Header({ onOpenFilters }: { onOpenFilters?: () => void }) {
               className="flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-primary text-white font-mono-label text-xs font-bold hover:bg-primary-hover transition-colors shadow-sm"
             >
               <Plus className="w-3.5 h-3.5 text-accent" />
-              <span className="hidden sm:inline">LIST PROPERTY</span>
-              <span className="sm:hidden">LIST</span>
+              <span className="hidden sm:inline">List property</span>
+              <span className="sm:hidden">List</span>
             </Link>
 
             {/* Notifications Bell */}
@@ -108,7 +108,7 @@ export function Header({ onOpenFilters }: { onOpenFilters?: () => void }) {
                   className="flex items-center gap-1.5 p-1.5 pl-3 pr-2 rounded-full bg-surface border border-line hover:border-primary transition-all shadow-xs text-ink"
                 >
                   <div className="w-7 h-7 rounded-full bg-primary text-white flex items-center justify-center text-label font-bold">
-                    {user.fullName.slice(0, 2).toUpperCase()}
+                    {user.fullName.slice(0, 2)}
                   </div>
                   <ChevronDown className="w-3.5 h-3.5 text-muted" />
                 </button>
@@ -117,7 +117,7 @@ export function Header({ onOpenFilters }: { onOpenFilters?: () => void }) {
                   <div className="absolute right-0 mt-2 w-56 bg-surface rounded-card border border-line shadow-xl py-2 z-50 text-xs font-sans animate-in fade-in-50">
                     <div className="px-4 py-2.5 border-b border-line">
                       <div className="font-bold text-ink">{user.fullName}</div>
-                      <div className="text-label font-mono-label text-muted uppercase">{user.role} ACCOUNT</div>
+                      <div className="text-label font-mono-label text-muted uppercase">{user.role} account</div>
                     </div>
 
                     <Link

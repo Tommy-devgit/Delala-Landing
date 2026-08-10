@@ -198,7 +198,7 @@ export default function ProfilePage() {
                   </h1>
                   <span className="font-mono-label text-label text-primary bg-accent/30 px-3 py-1 rounded-full border border-accent/50 font-bold uppercase tracking-wider flex items-center gap-1">
                     <ShieldCheck className="w-3 h-3" />
-                    {user.role} ACCOUNT
+                    {user.role} account
                   </span>
                 </div>
 
@@ -232,7 +232,7 @@ export default function ProfilePage() {
                 className="px-6 py-3 rounded-full bg-primary text-white font-mono-label text-xs font-bold hover:bg-primary-hover transition-colors flex items-center gap-2 shadow-xs"
               >
                 <Edit3 className="w-4 h-4" />
-                <span>EDIT PROFILE</span>
+                <span>Edit profile</span>
               </button>
 
               <button
@@ -240,7 +240,7 @@ export default function ProfilePage() {
                 className="px-5 py-3 rounded-full bg-red-50 border border-red-200 text-xs font-mono-label text-red-600 font-bold hover:bg-red-100 transition-colors flex items-center gap-2"
               >
                 <LogOut className="w-4 h-4" />
-                <span>LOG OUT</span>
+                <span>Log out</span>
               </button>
             </div>
           </div>

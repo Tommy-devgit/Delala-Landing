@@ -51,7 +51,7 @@ export default function FavoritesPage() {
         <div className="max-w-3xl mb-6">
           <span className="font-mono-label text-label text-primary bg-surface border border-line px-3.5 py-1.5 rounded-full inline-flex items-center gap-1.5 mb-4 shadow-xs">
             <Heart className="w-3.5 h-3.5 fill-rose-500 text-rose-500" />
-            <span>SAVED WISHLIST</span>
+            <span>Saved wishlist</span>
           </span>
 
           <h1 className="font-serif-display text-4xl sm:text-5xl font-light text-primary mb-3">

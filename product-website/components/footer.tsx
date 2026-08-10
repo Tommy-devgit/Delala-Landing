@@ -62,7 +62,7 @@ export function Footer() {
         {/* Bottom Bar: Copyright & Locale Controls */}
         <div className="pt-6 border-t border-line flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted">
           <div className="flex items-center gap-2">
-            <span className="font-serif-display font-light text-lg text-primary">DELALA</span>
+            <span className="font-serif-display font-light text-lg text-primary">Delala</span>
             <span>© 2026 Delala Technologies Inc. All rights reserved.</span>
           </div>
 

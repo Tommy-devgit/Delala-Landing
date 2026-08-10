@@ -94,7 +94,7 @@ function PropertyPreview({ property, onClose }: { property: Property; onClose: (
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 mb-0.5">
             <span className="font-mono-label text-label text-muted truncate">
-              {[property.subCity, property.city].filter(Boolean).join(" • ").toUpperCase()}
+              {[property.subCity, property.city].filter(Boolean).join(" • ")}
             </span>
             {property.verified && (
               <ShieldCheck className="w-3 h-3 text-primary shrink-0" aria-label="Field verified" />
@@ -194,7 +194,7 @@ export function PropertyMap({
         <div className="absolute inset-0 z-[550] flex items-center justify-center pointer-events-none p-6">
           <div className="pointer-events-auto max-w-xs text-center rounded-card bg-surface/95 backdrop-blur-md border border-line shadow-sm px-5 py-4 space-y-1.5">
             <Building2 className="w-6 h-6 text-muted mx-auto opacity-60" aria-hidden="true" />
-            <p className="font-mono-label text-label text-primary font-bold">NO MAPPED LISTINGS</p>
+            <p className="font-mono-label text-label text-primary font-bold">No mapped listings</p>
             <p className="text-micro text-muted">
               {properties.length > 0
                 ? "These listings have no location pin yet. Browse them in the list."

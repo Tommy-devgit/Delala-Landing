@@ -285,7 +285,7 @@ export default function PublishListingPage() {
                     <Upload className="w-5 h-5" aria-hidden="true" />
                   </span>
                   <span className="text-micro font-bold text-ink">Add photos</span>
-                  <span className="text-label font-mono-label text-muted">JPG • PNG • WEBP</span>
+                  <span className="text-label font-mono-label text-muted">JPG, PNG or WEBP</span>
                 </label>
 
                 {images.map((image, idx) => (
