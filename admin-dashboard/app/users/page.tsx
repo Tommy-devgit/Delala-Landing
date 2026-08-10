@@ -16,6 +16,7 @@ import {
   statusLabel,
   statusTone,
 } from "@/components/ui";
+import { Avatar } from "@/components/avatar";
 
 const ROLES = ["USER", "BROKER", "MODERATOR", "ADMIN"];
 
@@ -90,8 +91,13 @@ export default function UsersPage() {
             return (
               <tr key={u.id} className="hover:bg-canvas/60 transition-colors">
                 <td className="px-4 py-3">
-                  <p className="text-micro font-semibold text-ink truncate max-w-56">{u.fullName}</p>
-                  <p className="text-label text-muted truncate max-w-56">{u.email}</p>
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <Avatar src={u.avatarUrl} name={u.fullName} size={32} />
+                    <div className="min-w-0">
+                      <p className="text-micro font-semibold text-ink truncate max-w-48">{u.fullName}</p>
+                      <p className="text-label text-muted truncate max-w-48">{u.email}</p>
+                    </div>
+                  </div>
                 </td>
                 <td className="px-4 py-3">
                   {isAdmin && !isSelf ? (

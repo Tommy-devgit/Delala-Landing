@@ -12,6 +12,7 @@ import {
   statusLabel,
   statusTone,
 } from "@/components/ui";
+import { Avatar } from "@/components/avatar";
 
 /**
  * Brokers are a role rather than a separate table, so this is the users list
@@ -49,8 +50,13 @@ export default function BrokersPage() {
           {brokers.map((b) => (
             <tr key={b.id} className="hover:bg-canvas/60 transition-colors">
               <td className="px-4 py-3">
-                <p className="text-micro font-semibold text-ink truncate max-w-56">{b.fullName}</p>
-                <p className="text-label text-muted truncate max-w-56">{b.email}</p>
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <Avatar src={b.avatarUrl} name={b.fullName} size={32} />
+                  <div className="min-w-0">
+                    <p className="text-micro font-semibold text-ink truncate max-w-48">{b.fullName}</p>
+                    <p className="text-label text-muted truncate max-w-48">{b.email}</p>
+                  </div>
+                </div>
               </td>
               <td className="px-4 py-3 text-micro text-body whitespace-nowrap">{b.phone || "—"}</td>
               <td className="px-4 py-3 text-micro text-body tabular">{b.listingCount}</td>

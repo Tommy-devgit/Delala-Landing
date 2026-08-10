@@ -24,6 +24,7 @@ export interface AdminSessionUser {
   email: string;
   fullName: string;
   role: string;
+  avatarUrl: string | null;
 }
 
 export const adminSession = {
@@ -217,6 +218,7 @@ export const adminApi = {
       email: data.user.email,
       fullName: data.user.fullName || data.user.email,
       role,
+      avatarUrl: data.user.avatarUrl || null,
     });
     return data.user;
   },
