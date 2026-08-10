@@ -4,20 +4,21 @@ export declare class UsersController {
     constructor(prisma: PrismaService);
     findAll(): import(".prisma/client").Prisma.PrismaPromise<({
         profile: {
-            phone: string | null;
             id: string;
             createdAt: Date | null;
-            updatedAt: Date | null;
             firstName: string | null;
             lastName: string | null;
+            phone: string | null;
             avatarUrl: string | null;
             bio: string | null;
             role: string | null;
+            status: string | null;
+            updatedAt: Date | null;
         };
     } & {
         id: string;
-        createdAt: Date | null;
         email: string | null;
+        createdAt: Date | null;
     })[]>;
     getProfile(id: string): Promise<{
         id: string;
@@ -54,14 +55,15 @@ export declare class UsersController {
     updateRole(id: string, body: {
         role: string;
     }): Promise<{
-        phone: string | null;
         id: string;
         createdAt: Date | null;
-        updatedAt: Date | null;
         firstName: string | null;
         lastName: string | null;
+        phone: string | null;
         avatarUrl: string | null;
         bio: string | null;
         role: string | null;
+        status: string | null;
+        updatedAt: Date | null;
     }>;
 }

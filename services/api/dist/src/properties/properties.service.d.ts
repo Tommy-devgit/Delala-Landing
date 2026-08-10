@@ -8,6 +8,7 @@ export declare class PropertiesService {
         subCity?: string;
         propertyType?: string;
         verifiedOnly?: boolean;
+        status?: string;
     }): Promise<{
         id: any;
         slug: string;

@@ -31,9 +31,12 @@ let PropertiesService = class PropertiesService {
         this.prisma = prisma;
     }
     async findAll(query) {
+        const status = query.status?.toLowerCase();
         const list = await this.prisma.property.findMany({
             where: {
                 ...(query.propertyType ? { propertyType: query.propertyType.toLowerCase() } : {}),
+                ...(status && status !== "all" ? { status } : {}),
+                ...(query.verifiedOnly ? { status: "approved" } : {}),
             },
             include: {
                 location: {
@@ -193,7 +196,7 @@ let PropertiesService = class PropertiesService {
                 latitude: toCoordinate(createDto.latitude, 90),
                 longitude: toCoordinate(createDto.longitude, 180),
                 contactPhone: createDto.phone || null,
-                status: "approved",
+                status: "pending",
                 images: {
                     create: imageRecords,
                 },

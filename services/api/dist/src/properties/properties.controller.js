@@ -21,6 +21,8 @@ const create_property_dto_1 = require("./dto/create-property.dto");
 const r2_storage_service_1 = require("../storage/r2-storage.service");
 const roles_decorator_1 = require("../common/decorators/roles.decorator");
 const roles_guard_1 = require("../common/guards/roles.guard");
+const session_auth_guard_1 = require("../common/guards/session-auth.guard");
+const admin_service_1 = require("../admin/admin.service");
 const userIdFromAuthHeader = (authorization) => {
     if (!authorization)
         return undefined;
@@ -29,9 +31,10 @@ const userIdFromAuthHeader = (authorization) => {
     return match?.[1];
 };
 let PropertiesController = class PropertiesController {
-    constructor(propertiesService, r2StorageService) {
+    constructor(propertiesService, r2StorageService, adminService) {
         this.propertiesService = propertiesService;
         this.r2StorageService = r2StorageService;
+        this.adminService = adminService;
     }
     findAll(query) {
         return this.propertiesService.findAll(query);
@@ -55,8 +58,10 @@ let PropertiesController = class PropertiesController {
         }
         return this.propertiesService.create(createDto, uploadedUrls, userIdFromAuthHeader(authorization));
     }
-    moderate(id, moderateDto) {
-        return this.propertiesService.moderate(id, moderateDto);
+    async moderate(id, moderateDto, req) {
+        const result = await this.propertiesService.moderate(id, moderateDto);
+        await this.adminService.recordAudit(req?.user?.id, `property.${moderateDto.status.toLowerCase()}`, "properties", id);
+        return result;
     }
 };
 exports.PropertiesController = PropertiesController;
@@ -100,20 +105,22 @@ __decorate([
 ], PropertiesController.prototype, "create", null);
 __decorate([
     (0, common_1.Patch)(":id/moderate"),
-    (0, common_1.UseGuards)(roles_guard_1.RolesGuard),
+    (0, common_1.UseGuards)(session_auth_guard_1.SessionAuthGuard, roles_guard_1.RolesGuard),
     (0, roles_decorator_1.Roles)("ADMIN", "MODERATOR"),
     (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiOperation)({ summary: "Moderate property submission (Approve / Reject)" }),
     __param(0, (0, common_1.Param)("id")),
     __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, create_property_dto_1.ModeratePropertyDto]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:paramtypes", [String, create_property_dto_1.ModeratePropertyDto, Object]),
+    __metadata("design:returntype", Promise)
 ], PropertiesController.prototype, "moderate", null);
 exports.PropertiesController = PropertiesController = __decorate([
     (0, swagger_1.ApiTags)("properties"),
     (0, common_1.Controller)("properties"),
     __metadata("design:paramtypes", [properties_service_1.PropertiesService,
-        r2_storage_service_1.R2StorageService])
+        r2_storage_service_1.R2StorageService,
+        admin_service_1.AdminService])
 ], PropertiesController);
 //# sourceMappingURL=properties.controller.js.map

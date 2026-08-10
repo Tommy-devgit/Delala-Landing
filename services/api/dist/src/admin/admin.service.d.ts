@@ -1,8 +1,8 @@
-import { AdminService } from "./admin.service";
-export declare class AdminController {
-    private readonly adminService;
-    constructor(adminService: AdminService);
-    private actorId;
+import { PrismaService } from "../prisma/prisma.service";
+export declare class AdminService {
+    private prisma;
+    constructor(prisma: PrismaService);
+    recordAudit(userId: string | undefined, action: string, tableName: string, recordId?: string): Promise<void>;
     getOverview(): Promise<{
         metrics: {
             totalUsers: number;
@@ -22,7 +22,7 @@ export declare class AdminController {
         };
         timestamp: string;
     }>;
-    getAnalytics(days?: string): Promise<{
+    getAnalytics(days?: number): Promise<{
         rangeDays: number;
         series: {
             date: string;
@@ -74,10 +74,10 @@ export declare class AdminController {
         listingCount: any;
         joinedAt: any;
     }[]>;
-    updateUser(id: string, body: {
+    updateUser(id: string, changes: {
         role?: string;
         status?: string;
-    }, req: any): Promise<{
+    }, actorId?: string): Promise<{
         id: any;
         email: any;
         fullName: string;
@@ -97,9 +97,7 @@ export declare class AdminController {
         status: any;
         reportedAt: any;
     }[]>;
-    resolveReport(id: string, body: {
-        status: string;
-    }, req: any): Promise<{
+    resolveReport(id: string, status: string, actorId?: string): Promise<{
         id: string;
         status: string;
     }>;
@@ -112,7 +110,7 @@ export declare class AdminController {
         status: any;
         requestedAt: any;
     }[]>;
-    listLocations(type?: string): Promise<{
+    listLocations(type: "city" | "sub_city" | "neighborhood"): Promise<{
         id: any;
         name: any;
         type: any;
