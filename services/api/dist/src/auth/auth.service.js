@@ -54,6 +54,8 @@ let AuthService = AuthService_1 = class AuthService {
                     email: user.email,
                     role: user.profile?.role || "user",
                     fullName,
+                    avatarUrl: user.profile?.avatarUrl || null,
+                    phone: user.profile?.phone || null,
                 },
             };
         }
@@ -86,6 +88,8 @@ let AuthService = AuthService_1 = class AuthService {
                     email: user.email,
                     role: user.profile?.role || "user",
                     fullName,
+                    avatarUrl: user.profile?.avatarUrl || null,
+                    phone: user.profile?.phone || null,
                 },
             };
         }

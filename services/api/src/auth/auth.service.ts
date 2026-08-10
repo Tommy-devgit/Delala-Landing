@@ -50,6 +50,10 @@ export class AuthService {
           email: user.email,
           role: user.profile?.role || "user",
           fullName,
+          // Returned at sign-in so the navbar can show the real picture
+          // immediately, rather than initials until the profile is fetched.
+          avatarUrl: user.profile?.avatarUrl || null,
+          phone: user.profile?.phone || null,
         },
       };
     } catch (err: any) {
@@ -84,6 +88,10 @@ export class AuthService {
           email: user.email,
           role: user.profile?.role || "user",
           fullName,
+          // Returned at sign-in so the navbar can show the real picture
+          // immediately, rather than initials until the profile is fetched.
+          avatarUrl: user.profile?.avatarUrl || null,
+          phone: user.profile?.phone || null,
         },
       };
     } catch (err: any) {

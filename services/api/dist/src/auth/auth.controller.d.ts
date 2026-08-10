@@ -11,6 +11,8 @@ export declare class AuthController {
             email: string;
             role: string;
             fullName: string;
+            avatarUrl: string;
+            phone: string;
         };
     }>;
     login(dto: LoginDto): Promise<{
@@ -20,6 +22,8 @@ export declare class AuthController {
             email: string;
             role: string;
             fullName: string;
+            avatarUrl: string;
+            phone: string;
         };
     }>;
     getProfile(authHeader?: string): Promise<{

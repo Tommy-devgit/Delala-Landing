@@ -12,6 +12,8 @@ export declare class AuthService {
             email: string;
             role: string;
             fullName: string;
+            avatarUrl: string;
+            phone: string;
         };
     }>;
     login(dto: LoginDto): Promise<{
@@ -21,6 +23,8 @@ export declare class AuthService {
             email: string;
             role: string;
             fullName: string;
+            avatarUrl: string;
+            phone: string;
         };
     }>;
     validateSession(token: string): Promise<{
