@@ -40,6 +40,7 @@ export default function SettingsPage() {
               CURRENCY DISPLAY
             </label>
             <select
+              aria-label="CURRENCY DISPLAY"
               value={currency}
               onChange={(e) => setCurrency(e.target.value)}
               className="w-full p-3.5 rounded-control bg-canvas border border-line text-xs font-medium text-body"

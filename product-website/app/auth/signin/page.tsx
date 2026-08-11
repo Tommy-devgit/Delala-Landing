@@ -101,6 +101,7 @@ function SignInContent() {
               </div>
               <div className="relative">
                 <input
+              aria-label="PASSWORD"
                   type={showPassword ? "text" : "password"}
                   required
                   value={password}

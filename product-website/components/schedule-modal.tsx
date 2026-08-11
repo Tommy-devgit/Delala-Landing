@@ -101,6 +101,7 @@ export function ScheduleModal({
                 PREFERRED DATE & TIME SLOT
               </label>
               <select
+              aria-label="PREFERRED DATE & TIME SLOT"
                 value={selectedDate}
                 onChange={(e) => setSelectedDate(e.target.value)}
                 className="w-full p-3 rounded-control bg-canvas border border-line text-xs font-mono-label text-ink focus:outline-none focus:border-primary"
@@ -116,6 +117,7 @@ export function ScheduleModal({
                 YOUR FULL NAME
               </label>
               <input
+              aria-label="YOUR FULL NAME"
                 type="text"
                 required
                 value={seekerName}
@@ -130,6 +132,7 @@ export function ScheduleModal({
                 PHONE NUMBER FOR CONFIRMATION
               </label>
               <input
+              aria-label="PHONE NUMBER FOR CONFIRMATION"
                 type="tel"
                 required
                 value={seekerPhone}

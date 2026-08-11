@@ -17,7 +17,7 @@ function Counter({ targetValue }: { targetValue: string }) {
   useEffect(() => {
     if (!isInView) return;
 
-    let start = 0;
+    const start = 0;
     const duration = 2000;
     const frameTime = 1000 / 60;
     const totalFrames = Math.round(duration / frameTime);

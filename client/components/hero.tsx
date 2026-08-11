@@ -77,6 +77,7 @@ export function Hero() {
               <div className="relative flex items-center bg-surface rounded-lg border border-line shadow-xs pl-[22px] pr-2 py-2 hover:border-primary/40 transition-colors">
                 <input
                   type="text"
+                  aria-label="Describe the home you are looking for"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="Ask anything... e.g. 2-bedroom in Bole under 45k Birr"

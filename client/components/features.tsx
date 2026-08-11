@@ -46,7 +46,7 @@ export function Features() {
           </h1>
 
           <p className="text-base sm:text-lg text-muted font-normal leading-relaxed">
-            Delala isn't just an online directory. We operate on-the-ground field verification teams to ensure every home, broker, and contract is 100% verified before you take a step outside.
+            Delala isn’t just an online directory. We operate on-the-ground field verification teams to ensure every home, broker, and contract is 100% verified before you take a step outside.
           </p>
         </div>
 

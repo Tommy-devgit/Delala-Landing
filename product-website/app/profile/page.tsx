@@ -418,6 +418,7 @@ export default function ProfilePage() {
                       First Name
                     </label>
                     <input
+              aria-label="First Name"
                       type="text"
                       required
                       value={firstName}
@@ -432,6 +433,7 @@ export default function ProfilePage() {
                       Last Name
                     </label>
                     <input
+              aria-label="Last Name"
                       type="text"
                       required
                       value={lastName}
@@ -448,6 +450,7 @@ export default function ProfilePage() {
                     Contact Phone Number
                   </label>
                   <input
+              aria-label="Contact Phone Number"
                     type="tel"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
@@ -489,6 +492,7 @@ export default function ProfilePage() {
 
                   <input
                     type="text"
+                    aria-label="Profile photo web address"
                     value={avatarUrl}
                     onChange={(e) => setAvatarUrl(e.target.value)}
                     placeholder="https://example.com/photo.jpg or select image above"
@@ -509,6 +513,7 @@ export default function ProfilePage() {
                     Account Role / User Type
                   </label>
                   <select
+              aria-label="Account Role / User Type"
                     value={role}
                     onChange={(e) => setRole(e.target.value)}
                     className="w-full px-4 py-3 rounded-card bg-canvas border border-line text-sm focus:outline-none focus:border-primary"

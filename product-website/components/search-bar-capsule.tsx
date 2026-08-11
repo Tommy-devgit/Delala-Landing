@@ -33,6 +33,7 @@ export function SearchBarCapsule({
       >
         <Search className="w-4 h-4 text-primary shrink-0 mr-2.5" />
         <input
+              aria-label="Search"
           type="text"
           value={subCity}
           onChange={(e) => setSubCity(e.target.value)}
@@ -63,6 +64,7 @@ export function SearchBarCapsule({
           LOCATION
         </label>
         <input
+              aria-label="LOCATION"
           type="text"
           value={subCity}
           onChange={(e) => setSubCity(e.target.value)}
@@ -77,6 +79,7 @@ export function SearchBarCapsule({
           PROPERTY TYPE
         </label>
         <select
+              aria-label="PROPERTY TYPE"
           value={propertyType}
           onChange={(e) => setPropertyType(e.target.value)}
           className="w-full bg-transparent text-xs text-body focus:outline-none font-medium appearance-none cursor-pointer"
@@ -96,6 +99,7 @@ export function SearchBarCapsule({
           CITY
         </label>
         <select
+              aria-label="CITY"
           value={city}
           onChange={(e) => setCity(e.target.value)}
           className="w-full bg-transparent text-xs text-body focus:outline-none font-medium appearance-none cursor-pointer"

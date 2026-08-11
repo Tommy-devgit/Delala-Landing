@@ -122,6 +122,7 @@ function SignUpContent() {
                 I WANT TO *
               </label>
               <select
+              aria-label="I WANT TO"
                 value={role}
                 onChange={(e) => setRole(e.target.value)}
                 className=""
@@ -138,6 +139,7 @@ function SignUpContent() {
               </label>
               <div className="relative">
                 <input
+              aria-label="CREATE PASSWORD"
                   type={showPassword ? "text" : "password"}
                   required
                   value={password}

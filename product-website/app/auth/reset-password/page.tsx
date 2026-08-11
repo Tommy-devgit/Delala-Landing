@@ -98,6 +98,7 @@ function ResetPasswordContent() {
                 </label>
                 <div className="relative">
                   <input
+              aria-label="NEW PASSWORD"
                     type={showPassword ? "text" : "password"}
                     required
                     value={password}

@@ -63,6 +63,7 @@ export default function EditListingPage() {
                   PROPERTY TITLE
                 </label>
                 <input
+              aria-label="PROPERTY TITLE"
                   type="text"
                   required
                   value={title}
@@ -77,6 +78,7 @@ export default function EditListingPage() {
                     MONTHLY RENT (ETB)
                   </label>
                   <input
+              aria-label="MONTHLY RENT (ETB)"
                     type="number"
                     required
                     value={rentETB}
@@ -89,6 +91,7 @@ export default function EditListingPage() {
                     BEDROOMS
                   </label>
                   <input
+              aria-label="BEDROOMS"
                     type="number"
                     value={bedrooms}
                     onChange={(e) => setBedrooms(e.target.value)}
@@ -100,6 +103,7 @@ export default function EditListingPage() {
                     BATHROOMS
                   </label>
                   <input
+              aria-label="BATHROOMS"
                     type="number"
                     step="0.5"
                     value={bathrooms}

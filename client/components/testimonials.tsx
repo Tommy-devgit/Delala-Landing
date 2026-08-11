@@ -52,7 +52,7 @@ export function Testimonials() {
                 </div>
 
                 <p className="text-sm sm:text-base text-body/90 leading-relaxed font-medium italic mb-8">
-                  "{item.quote}"
+                  “{item.quote}”
                 </p>
               </div>
 
