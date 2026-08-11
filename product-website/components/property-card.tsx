@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Heart, ShieldCheck, Zap, Droplets, Car, Phone, MapPin } from "lucide-react";
 import { Property } from "@/lib/types";
 import { formatPostedAt, formatPostedDate } from "@/lib/format";
+import { useFavorites } from "@/lib/use-favorites";
 
 /** Overlay chip used for the badges that sit on top of the photo. */
 function PhotoChip({
@@ -38,16 +39,24 @@ export function PropertyCard({
   /** Fired on hover/focus so the map can centre on this property. */
   onActivate?: (id: string) => void;
 }) {
-  const [fav, setFav] = useState(isFavorite);
+  const router = useRouter();
+  const { isSaved, toggle, pendingId } = useFavorites();
+  // `isFavorite` remains supported for callers that render a known state.
+  const fav = isSaved(property.id) || isFavorite;
 
   const contactPhone = property.phone || property.broker?.phone;
   const postedAt = formatPostedAt(property.createdAt);
   const location = [property.subCity, property.city].filter(Boolean).join(" • ");
 
-  const handleFavoriteClick = (e: React.MouseEvent) => {
+  const handleFavoriteClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setFav(!fav);
+
+    const handled = await toggle(property.id);
+    if (!handled) {
+      router.push(`/auth/signin?callbackUrl=/property/${property.slug}`);
+      return;
+    }
     onToggleFavorite?.(property.id);
   };
 
@@ -95,6 +104,7 @@ export function PropertyCard({
             className="w-8 h-8 rounded-full bg-black/45 backdrop-blur-md text-white flex items-center justify-center hover:bg-black/65 transition-colors shrink-0"
             aria-label={fav ? `Remove ${property.title} from favourites` : `Save ${property.title} to favourites`}
             aria-pressed={fav}
+            disabled={pendingId === property.id}
           >
             <Heart className={`w-4 h-4 ${fav ? "fill-rose-500 text-rose-500" : "text-white"}`} aria-hidden="true" />
           </button>

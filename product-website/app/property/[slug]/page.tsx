@@ -3,7 +3,7 @@
 export const dynamic = "force-dynamic";
 
 import { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { apiClient } from "@/lib/api-client";
 import { Property } from "@/lib/types";
@@ -30,17 +30,19 @@ import {
 import { Skeleton, buttonClasses } from "@/components/ui";
 import { PropertyMap } from "@/components/map";
 import { Avatar } from "@/components/avatar";
+import { useFavorites } from "@/lib/use-favorites";
 
 export default function PropertyDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const slug = params?.slug as string;
 
   const [property, setProperty] = useState<Property | null>(null);
   const [similarListings, setSimilarListings] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [isScheduleOpen, setIsScheduleOpen] = useState(false);
-  const [isFav, setIsFav] = useState(false);
   const [activeImage, setActiveImage] = useState<string>("/images/hero_property.png");
+  const { isSaved, toggle } = useFavorites();
 
   useEffect(() => {
     async function loadData() {
@@ -100,6 +102,7 @@ export default function PropertyDetailPage() {
   ].filter((a) => a.has);
 
   const posterName = property.broker?.name || "Property owner";
+  const saved = isSaved(property.id);
   return (
     <div className="bg-canvas min-h-screen py-6">
       <div className="max-w-[1440px] mx-auto px-4 sm:px-8">
@@ -126,15 +129,28 @@ export default function PropertyDetailPage() {
 
           <div className="flex items-center gap-3">
             <button
-              onClick={() => setIsFav(!isFav)}
-              className={`p-2.5 rounded-full border border-line transition-colors ${
-                isFav ? "bg-red-50 text-red-600 border-red-200" : "bg-surface text-muted hover:text-primary"
+              type="button"
+              onClick={async () => {
+                const handled = await toggle(property.id);
+                if (!handled) router.push(`/auth/signin?callbackUrl=/property/${property.slug}`);
+              }}
+              aria-pressed={saved}
+              aria-label={saved ? "Remove from saved homes" : "Save this home"}
+              className={`p-2.5 rounded-full border transition-colors ${
+                saved
+                  ? "bg-rose-50 text-rose-600 border-rose-200"
+                  : "bg-surface text-muted border-line hover:text-primary"
               }`}
             >
-              <Heart className={`w-4 h-4 ${isFav ? "fill-current" : ""}`} />
+              <Heart className={`w-4 h-4 ${saved ? "fill-current" : ""}`} aria-hidden="true" />
             </button>
-            <button className="p-2.5 rounded-full bg-surface border border-line text-muted hover:text-primary transition-colors">
-              <Share2 className="w-4 h-4" />
+            <button
+              type="button"
+              onClick={() => navigator.share?.({ title: property.title, url: window.location.href })}
+              aria-label="Share this listing"
+              className="p-2.5 rounded-full bg-surface border border-line text-muted hover:text-primary transition-colors"
+            >
+              <Share2 className="w-4 h-4" aria-hidden="true" />
             </button>
           </div>
         </div>
@@ -278,8 +294,17 @@ export default function PropertyDetailPage() {
                   className="border border-line"
                 />
                 <div className="min-w-0">
-                  <h4 className="font-serif-display text-base text-ink truncate">{posterName}</h4>
-                  <p className="text-label font-mono-label text-muted">Listed by owner</p>
+                  {property.broker?.id ? (
+                    <Link
+                      href={`/profile/${property.broker.id}`}
+                      className="font-serif-display text-base text-ink truncate hover:text-primary transition-colors block"
+                    >
+                      {posterName}
+                    </Link>
+                  ) : (
+                    <h4 className="font-serif-display text-base text-ink truncate">{posterName}</h4>
+                  )}
+                  <p className="text-label text-muted">Listed by owner</p>
                   {(property.phone || property.broker?.phone) && (
                     <p className="text-label font-mono-label text-primary font-bold mt-0.5">
                       {property.phone || property.broker?.phone}
@@ -310,6 +335,15 @@ export default function PropertyDetailPage() {
                     </a>
                   </>
                 ) : null}
+
+                {property.broker?.id && (
+                  <Link
+                    href={`/profile/${property.broker.id}`}
+                    className="w-full h-11 rounded-full bg-canvas text-ink text-xs font-bold hover:bg-line transition-colors border border-line flex items-center justify-center gap-2"
+                  >
+                    <span>See all homes by {posterName.split(" ")[0]}</span>
+                  </Link>
+                )}
 
                 <button
                   onClick={() => setIsScheduleOpen(true)}
