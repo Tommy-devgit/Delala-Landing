@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { AdminSessionUser, ApiError, adminSession } from "./admin-api";
 
 type Session = { user: AdminSessionUser; token: string } | null;
@@ -48,31 +48,42 @@ export function useResource<T>(load: () => Promise<T>, deps: unknown[] = []): Re
   const [error, setError] = useState<string | null>(null);
   const [nonce, setNonce] = useState(0);
 
-  // `load` is typically an inline arrow, so it is intentionally not a dependency;
-  // callers declare what it actually depends on via `deps`.
-  const run = useCallback(load, deps); // eslint-disable-line react-hooks/exhaustive-deps
+  // `load` is normally an inline arrow, so it is held in a ref and callers
+  // declare what it actually depends on through `deps`.
+  const loadRef = useRef(load);
+  useEffect(() => {
+    loadRef.current = load;
+  });
 
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
-    setError(null);
 
-    run()
-      .then((result) => {
+    (async () => {
+      // Awaited first so no state is written synchronously during the effect.
+      await Promise.resolve();
+      if (cancelled) return;
+      setLoading(true);
+      setError(null);
+
+      try {
+        const result = await loadRef.current();
         if (!cancelled) setData(result);
-      })
-      .catch((err: unknown) => {
-        if (cancelled) return;
-        setError(err instanceof ApiError || err instanceof Error ? err.message : "Something went wrong.");
-      })
-      .finally(() => {
+      } catch (err) {
+        if (!cancelled) {
+          setError(
+            err instanceof ApiError || err instanceof Error ? err.message : "Something went wrong."
+          );
+        }
+      } finally {
         if (!cancelled) setLoading(false);
-      });
+      }
+    })();
 
     return () => {
       cancelled = true;
     };
-  }, [run, nonce]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [...deps, nonce]);
 
   return { data, loading, error, reload: () => setNonce((n) => n + 1) };
 }

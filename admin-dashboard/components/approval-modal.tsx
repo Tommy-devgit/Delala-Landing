@@ -24,12 +24,6 @@ export function ApprovalModal({
   const [error, setError] = useState("");
 
   useEffect(() => {
-    setReason("");
-    setError("");
-    setSubmitting(null);
-  }, [property?.id]);
-
-  useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);

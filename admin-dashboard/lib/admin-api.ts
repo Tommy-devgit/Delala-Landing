@@ -84,9 +84,10 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
 
   const data = await res.json().catch(() => null);
   if (!res.ok) {
-    const message = Array.isArray((data as any)?.message)
-      ? (data as any).message.join(", ")
-      : (data as any)?.message || `Request failed (${res.status}).`;
+    // NestJS returns `message` as a string, or an array when validation fails.
+    const payload = data as { message?: string | string[] } | null;
+    const raw = payload?.message;
+    const message = Array.isArray(raw) ? raw.join(", ") : raw || `Request failed (${res.status}).`;
     throw new ApiError(message, res.status);
   }
   return data as T;

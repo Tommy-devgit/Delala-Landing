@@ -47,7 +47,7 @@ export default function ApprovalsPage() {
         />
       )}
 
-      <ApprovalModal property={selected} onClose={() => setSelected(null)} onDecide={decide} />
+      <ApprovalModal key={selected?.id ?? "none"} property={selected} onClose={() => setSelected(null)} onDecide={decide} />
     </div>
   );
 }
