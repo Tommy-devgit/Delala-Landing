@@ -39,7 +39,12 @@ export class FavoritesService {
   }
 
   async findByUser(userId: string, requestedUserId?: string) {
-    if (requestedUserId && requestedUserId !== userId) {
+    // "me" is the conventional self alias; anything else that names a different
+    // real account is refused, since a wishlist is private.
+    const asksForSomeoneElse =
+      requestedUserId && requestedUserId !== "me" && requestedUserId !== userId;
+
+    if (asksForSomeoneElse) {
       throw new ForbiddenException("You can only view your own saved properties.");
     }
 
