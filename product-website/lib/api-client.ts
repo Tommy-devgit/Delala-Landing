@@ -197,14 +197,53 @@ export interface CreatePropertyInput {
   images?: File[];
 }
 
+
+/** Bearer header for authenticated calls, or an empty object when signed out. */
+const authHeaders = (): Record<string, string> => {
+  if (typeof window === "undefined") return {};
+  const token = localStorage.getItem("delala_token");
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
+
+/** Public profile of a property poster. Never includes the email address. */
+export interface PublicProfile {
+  id: string;
+  fullName: string;
+  role: string;
+  avatarUrl: string | null;
+  bio: string;
+  phone: string | null;
+  listingCount: number;
+  activeListingCount: number;
+  memberSince: string | null;
+}
+
+export interface AppNotification {
+  id: string;
+  type: string;
+  title: string;
+  body: string;
+  propertyId: string | null;
+  read: boolean;
+  createdAt: string | null;
+}
+
 export const apiClient = {
   // Fetch properties directly from NestJS REST API
-  async getProperties(filters?: { city?: string; subCity?: string; propertyType?: string }): Promise<Property[]> {
+  async getProperties(filters?: {
+    city?: string;
+    subCity?: string;
+    propertyType?: string;
+    ownerId?: string;
+    status?: string;
+  }): Promise<Property[]> {
     try {
       const queryParams = new URLSearchParams();
       if (filters?.city) queryParams.set("city", filters.city);
       if (filters?.subCity) queryParams.set("subCity", filters.subCity);
       if (filters?.propertyType && filters.propertyType !== "all") queryParams.set("propertyType", filters.propertyType);
+      if (filters?.ownerId) queryParams.set("ownerId", filters.ownerId);
+      if (filters?.status) queryParams.set("status", filters.status);
 
       const res = await fetch(`${API_BASE}/properties?${queryParams.toString()}`, { cache: "no-store" });
       if (res.ok) {
@@ -294,6 +333,85 @@ export const apiClient = {
       throw new Error(created?.message || "Failed to publish property.");
     }
     return created;
+  },
+
+
+  /** Public profile for a poster. Returns null when the account is gone. */
+  async getPublicProfile(userId: string): Promise<PublicProfile | null> {
+    try {
+      const res = await fetch(`${API_BASE}/users/${userId}/public`, { cache: "no-store" });
+      if (res.ok) return (await res.json()) as PublicProfile;
+    } catch (err) {
+      console.warn("Public profile fetch error:", err);
+    }
+    return null;
+  },
+
+  /* -------------------------------- favorites ------------------------------ */
+
+  /** Ids the signed-in user has saved, for marking hearts across a grid. */
+  async getFavoriteIds(): Promise<string[]> {
+    const res = await fetch(`${API_BASE}/favorites/ids`, {
+      cache: "no-store",
+      headers: authHeaders(),
+    });
+    if (!res.ok) throw new Error("Could not load your saved homes.");
+    const data = await res.json();
+    return Array.isArray(data) ? data : [];
+  },
+
+  async getFavorites(): Promise<Property[]> {
+    // The API resolves the wishlist from the session; the path segment is
+    // retained only because the route shape predates that.
+    const res = await fetch(`${API_BASE}/favorites/user/me`, {
+      cache: "no-store",
+      headers: authHeaders(),
+    });
+    if (!res.ok) throw new Error("Could not load your saved homes.");
+    const data = await res.json();
+    return Array.isArray(data) ? data.map(mapProperty) : [];
+  },
+
+  /** Returns the new saved state so the caller can reconcile optimistic UI. */
+  async toggleFavorite(propertyId: string): Promise<boolean> {
+    const res = await fetch(`${API_BASE}/favorites`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...authHeaders() },
+      body: JSON.stringify({ propertyId }),
+    });
+    if (!res.ok) throw new Error("Could not update your saved homes.");
+    const data = await res.json();
+    return Boolean(data?.saved);
+  },
+
+  /* ------------------------------ notifications ---------------------------- */
+
+  async getNotifications(): Promise<AppNotification[]> {
+    const res = await fetch(`${API_BASE}/notifications`, {
+      cache: "no-store",
+      headers: authHeaders(),
+    });
+    if (!res.ok) throw new Error("Could not load your notifications.");
+    const data = await res.json();
+    return Array.isArray(data) ? data : [];
+  },
+
+  async getUnreadNotificationCount(): Promise<number> {
+    const res = await fetch(`${API_BASE}/notifications/unread-count`, {
+      cache: "no-store",
+      headers: authHeaders(),
+    });
+    if (!res.ok) return 0;
+    const data = await res.json();
+    return Number(data?.count) || 0;
+  },
+
+  async markNotificationRead(id: string): Promise<void> {
+    await fetch(`${API_BASE}/notifications/${id}/read`, { method: "PATCH", headers: authHeaders() });
+  },
+
+  async markAllNotificationsRead(): Promise<void> {
+    await fetch(`${API_BASE}/notifications/read-all`, { method: "PATCH", headers: authHeaders() });
   },
 
   // Fetch cities together with their sub-city / neighborhood hierarchy
