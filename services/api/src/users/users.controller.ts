@@ -61,6 +61,37 @@ export class UsersController {
     };
   }
 
+  @Get(":id/public")
+  @ApiOperation({ summary: "Publicly visible profile for a property poster" })
+  async getPublicProfile(@Param("id") id: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+      include: { profile: true, properties: { select: { id: true, status: true } } },
+    });
+
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+
+    const profile: any = user.profile || {};
+    const listings = user.properties || [];
+
+    // Deliberately omits email and anything else the marketplace does not need
+    // to show. The phone is included because it is already published on every
+    // listing this person posts.
+    return {
+      id: user.id,
+      fullName: [profile.firstName, profile.lastName].filter(Boolean).join(" ") || "Property owner",
+      role: (profile.role || "user").toLowerCase(),
+      avatarUrl: profile.avatarUrl || null,
+      bio: profile.bio || "",
+      phone: profile.phone || null,
+      listingCount: listings.length,
+      activeListingCount: listings.filter((p: any) => p.status === "approved").length,
+      memberSince: user.createdAt,
+    };
+  }
+
   @Patch("profile/:id")
   @ApiOperation({ summary: "Update user profile details" })
   async updateProfile(

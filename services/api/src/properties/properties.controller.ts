@@ -22,6 +22,7 @@ import { Roles } from "../common/decorators/roles.decorator";
 import { RolesGuard } from "../common/guards/roles.guard";
 import { SessionAuthGuard } from "../common/guards/session-auth.guard";
 import { AdminService } from "../admin/admin.service";
+import { NotificationsService } from "../notifications/notifications.service";
 
 /**
  * Session tokens are issued as `betterauth-session-<uuid>-<timestamp>`, so the
@@ -43,13 +44,16 @@ export class PropertiesController {
   constructor(
     private readonly propertiesService: PropertiesService,
     private readonly r2StorageService: R2StorageService,
-    private readonly adminService: AdminService
+    private readonly adminService: AdminService,
+    private readonly notifications: NotificationsService
   ) {}
 
   @Get()
   @ApiOperation({ summary: "Get all verified approved marketplace property listings" })
   @ApiResponse({ status: 200, description: "Returns list of approved properties" })
-  findAll(@Query() query: { city?: string; subCity?: string; propertyType?: string }) {
+  findAll(
+    @Query() query: { city?: string; subCity?: string; propertyType?: string; ownerId?: string; status?: string }
+  ) {
     return this.propertiesService.findAll(query);
   }
 
@@ -104,6 +108,19 @@ export class PropertiesController {
     @Req() req?: any
   ) {
     const result = await this.propertiesService.moderate(id, moderateDto);
+
+    // Tell the owner what happened to their submission.
+    const approved = moderateDto.status === "APPROVED";
+    await this.notifications.create({
+      userId: result.brokerId,
+      type: approved ? "LISTING_APPROVED" : "LISTING_REJECTED",
+      title: approved ? "Your listing is live" : "Your listing needs changes",
+      body: approved
+        ? `"${result.title}" passed review and is now visible on the marketplace.`
+        : `"${result.title}" was not approved. ${moderateDto.rejectionReason || "Please review the details and resubmit."}`,
+      propertyId: id,
+    });
+
     await this.adminService.recordAudit(
       req?.user?.id,
       `property.${moderateDto.status.toLowerCase()}`,

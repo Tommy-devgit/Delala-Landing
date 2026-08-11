@@ -27,6 +27,7 @@ export class PropertiesService {
     propertyType?: string;
     verifiedOnly?: boolean;
     status?: string;
+    ownerId?: string;
   }) {
     const status = query.status?.toLowerCase();
     const list = await this.prisma.property.findMany({
@@ -34,6 +35,8 @@ export class PropertiesService {
         ...(query.propertyType ? { propertyType: query.propertyType.toLowerCase() } : {}),
         ...(status && status !== "all" ? { status } : {}),
         ...(query.verifiedOnly ? { status: "approved" } : {}),
+        // Powers the public poster profile: "other homes by this owner".
+        ...(isValidUuid(query.ownerId) ? { ownerId: query.ownerId } : {}),
       },
       include: {
         location: {
@@ -285,7 +288,8 @@ export class PropertiesService {
     return this.mapPropertyResponse(updated);
   }
 
-  private mapPropertyResponse(p: any) {
+  /** Public so other modules (favourites) reuse one property shape. */
+  mapPropertyResponse(p: any) {
     const slug = p.title.toLowerCase().replace(/[^a-z0-9]+/g, "-") + "-" + (p.id ? p.id.slice(0, 4) : "prop");
     const ownerName = [p.owner?.profile?.firstName, p.owner?.profile?.lastName].filter(Boolean).join(" ") || "Verified Owner";
     const phone = p.contactPhone || p.owner?.profile?.phone || null;
