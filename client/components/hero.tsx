@@ -29,11 +29,11 @@ export function Hero() {
     <section
       ref={containerRef}
       id="hero"
-      className="relative pt-24 sm:pt-28 md:pt-32 pb-20 sm:pb-28 overflow-hidden select-none bg-[#FAF8F4]"
+      className="relative pt-24 sm:pt-28 md:pt-32 pb-20 sm:pb-28 overflow-hidden select-none bg-canvas"
     >
       {/* Background Soft Glows & Ambient Atmospheric Accent */}
-      <div className="absolute top-10 left-1/2 -translate-x-1/2 w-full max-w-6xl h-[500px] bg-radial from-[#B4C292]/25 via-transparent to-transparent blur-3xl pointer-events-none" />
-      <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[#ECE7DA] to-transparent" />
+      <div className="absolute top-10 left-1/2 -translate-x-1/2 w-full max-w-6xl h-[500px] bg-radial from-accent/25 via-transparent to-transparent blur-3xl pointer-events-none" />
+      <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-line to-transparent" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
 
@@ -51,9 +51,9 @@ export function Hero() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
-              className="font-serif-display text-5xl sm:text-6xl lg:text-7xl font-light text-[#4C061D] tracking-tight leading-[0.92] mb-6"
+              className="font-serif-display text-5xl sm:text-6xl lg:text-7xl font-light text-primary tracking-tight leading-[0.92] mb-6"
             >
-              The <span className="italic font-normal text-[#1c1b12]">Best Way</span> to Find Your Next Home.
+              The <span className="italic font-normal text-ink">Best Way</span> to Find Your Next Home.
             </motion.h1>
 
             {/* Subheadline & Purpose Statement */}
@@ -61,7 +61,7 @@ export function Hero() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-base sm:text-lg text-[#736F4E] font-normal leading-relaxed mb-8 max-w-xl"
+              className="text-base sm:text-lg text-muted font-normal leading-relaxed mb-8 max-w-xl"
             >
               {HERO_EDITORIAL_CONTENT.subheadline}
             </motion.p>
@@ -74,36 +74,36 @@ export function Hero() {
               transition={{ duration: 0.6, delay: 0.25 }}
               className="w-full max-w-lg mb-8 relative"
             >
-              <div className="relative flex items-center bg-white rounded-lg border border-[#ECE7DA] shadow-xs pl-[22px] pr-2 py-2 hover:border-[#4C061D]/40 transition-colors">
+              <div className="relative flex items-center bg-surface rounded-lg border border-line shadow-xs pl-[22px] pr-2 py-2 hover:border-primary/40 transition-colors">
                 <input
                   type="text"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="Ask anything... e.g. 2-bedroom in Bole under 45k Birr"
-                  className="w-full bg-transparent text-sm text-[#2D2D2D] placeholder-[#9f9fa0] focus:outline-none font-sans"
+                  className="w-full bg-transparent text-sm text-body placeholder-muted/70 focus:outline-none font-sans"
                 />
                 <button
                   type="submit"
-                  className="w-9 h-9 rounded-full bg-[#4C061D] text-white flex items-center justify-center hover:bg-[#3B3923] transition-colors shrink-0 active:scale-95 ml-2"
+                  className="w-9 h-9 rounded-full bg-primary text-white flex items-center justify-center hover:bg-primary-hover transition-colors shrink-0 active:scale-95 ml-2"
                   aria-label="Search properties"
                 >
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
               <div className="flex items-center gap-2 mt-2 pl-2">
-                <span className="font-mono-label text-[10px] text-[#736F4E]">POPULAR:</span>
+                <span className="font-mono-label text-label text-muted">POPULAR:</span>
                 <button
                   type="button"
                   onClick={() => setQuery("Furnished studio in Kazanchis")}
-                  className="text-[11px] text-[#4C061D] hover:underline font-medium"
+                  className="text-label text-primary hover:underline font-medium"
                 >
                   Studio in Kazanchis
                 </button>
-                <span className="text-[#ECE7DA]">•</span>
+                <span className="text-line">•</span>
                 <button
                   type="button"
                   onClick={() => setQuery("G+1 House in Hawassa")}
-                  className="text-[11px] text-[#4C061D] hover:underline font-medium"
+                  className="text-label text-primary hover:underline font-medium"
                 >
                   Villa in Hawassa
                 </button>
@@ -119,7 +119,7 @@ export function Hero() {
             >
               <Link
                 href="/download"
-                className="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-[#4C061D] text-white font-medium text-sm shadow-sm hover:bg-[#3B3923] transition-all duration-200 group active:scale-98"
+                className="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-primary text-white font-medium text-sm shadow-sm hover:bg-primary-hover transition-all duration-200 group active:scale-98"
               >
                 <span>Download App</span>
                 <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
@@ -127,7 +127,7 @@ export function Hero() {
 
               <Link
                 href="/about"
-                className="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-white text-[#2D2D2D] border border-[#ECE7DA] font-medium text-sm shadow-xs hover:border-[#4C061D] hover:text-[#4C061D] transition-all duration-200 group active:scale-98"
+                className="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-surface text-body border border-line font-medium text-sm shadow-xs hover:border-primary hover:text-primary transition-all duration-200 group active:scale-98"
               >
                 <span>Learn More</span>
               </Link>
@@ -138,12 +138,12 @@ export function Hero() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
-              className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-6 border-t border-[#ECE7DA] w-full"
+              className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-6 border-t border-line w-full"
             >
               {HERO_EDITORIAL_CONTENT.trustBadges.map((badge) => (
                 <div key={badge} className="flex items-center gap-2">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-[#4C061D] shrink-0" />
-                  <span className="font-mono-label text-[10px] text-[#3B3923] font-medium truncate">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-primary shrink-0" />
+                  <span className="font-mono-label text-label text-primary-hover font-medium truncate">
                     {badge}
                   </span>
                 </div>
@@ -156,14 +156,14 @@ export function Hero() {
             <div className="relative w-full max-w-lg aspect-[4/4.5] sm:aspect-[4/3.8] lg:aspect-[4/4.6]">
 
               {/* Subtle Back Accent Box */}
-              <div className="absolute -top-4 -right-4 w-full h-full rounded-2xl bg-[#4C061D]/10 border border-[#4C061D]/15 pointer-events-none" />
+              <div className="absolute -top-4 -right-4 w-full h-full rounded-card bg-primary/10 border border-primary/15 pointer-events-none" />
 
               {/* Main Image Frame */}
               <motion.div
                 initial={{ opacity: 0, scale: 0.96 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.8, delay: 0.2 }}
-                className="relative w-full h-full rounded-2xl overflow-hidden border border-[#ECE7DA] shadow-xl bg-[#1c1b12] group"
+                className="relative w-full h-full rounded-card overflow-hidden border border-line shadow-xl bg-ink group"
               >
                 <motion.img
                   style={{ y: imageY }}
@@ -177,7 +177,7 @@ export function Hero() {
 
                 {/* Bottom Image Caption Badge */}
                 <div className="absolute bottom-6 left-6 right-6 z-10 text-white">
-                  <div className="font-mono-label text-[10px] text-[#B4C292] mb-1">
+                  <div className="font-mono-label text-label text-accent mb-1">
                     FEATURED RESIDENCE • ADDIS ABABA
                   </div>
                   <h3 className="font-serif-display text-2xl font-light text-white tracking-tight mb-1">
@@ -194,17 +194,17 @@ export function Hero() {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.6, delay: 0.5 }}
-                className="absolute -top-5 -left-5 sm:-left-7 z-30 bg-white/95 backdrop-blur-md p-4 rounded-xl border border-[#ECE7DA] shadow-lg max-w-[210px]"
+                className="absolute -top-5 -left-5 sm:-left-7 z-30 bg-surface/95 backdrop-blur-md p-4 rounded-control border border-line shadow-lg max-w-[210px]"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-md bg-[#4C061D] text-white flex items-center justify-center font-bold text-xs shrink-0">
+                  <div className="w-8 h-8 rounded-md bg-primary text-white flex items-center justify-center font-bold text-xs shrink-0">
                     ETB
                   </div>
                   <div>
-                    <div className="font-mono-label text-[10px] text-[#4C061D] font-bold">
+                    <div className="font-mono-label text-label text-primary font-bold">
                       TRANSPARENT RENT
                     </div>
-                    <div className="text-[10px] text-[#736F4E]">
+                    <div className="text-label text-muted">
                       Zero hidden middleman fees
                     </div>
                   </div>
@@ -216,15 +216,15 @@ export function Hero() {
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.6, delay: 0.6 }}
-                className="absolute -bottom-5 -right-3 sm:-right-5 z-30 bg-[#3B3923] text-white p-4 rounded-xl border border-[#B4C292]/40 shadow-xl max-w-[200px]"
+                className="absolute -bottom-5 -right-3 sm:-right-5 z-30 bg-primary-hover text-white p-4 rounded-control border border-accent/40 shadow-xl max-w-[200px]"
               >
                 <div className="flex items-center gap-2.5">
-                  <ShieldCheck className="w-5 h-5 text-[#B4C292] shrink-0" />
+                  <ShieldCheck className="w-5 h-5 text-accent shrink-0" />
                   <div>
-                    <div className="font-mono-label text-[10px] text-white font-bold">
+                    <div className="font-mono-label text-label text-white font-bold">
                       FIELD VERIFIED
                     </div>
-                    <div className="text-[10px] text-[#B4C292]">
+                    <div className="text-label text-accent">
                       In-person agent checked
                     </div>
                   </div>

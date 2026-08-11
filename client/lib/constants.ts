@@ -4,11 +4,11 @@ export interface NavItem {
 }
 
 export const NAV_ITEMS: NavItem[] = [
-  { label: "Home", href: "/" },
-  { label: "Features", href: "/features" },
-  { label: "How It Works", href: "/how-it-works" },
-  { label: "About", href: "/about" },
-  { label: "FAQ", href: "/faq" },
+  { label: "How it works", href: "/how-it-works" },
+  { label: "For renters", href: "/for-buyers" },
+  { label: "For owners", href: "/for-owners" },
+  { label: "Verification", href: "/verification" },
+  { label: "Cities", href: "/cities" },
 ];
 
 export const STATS_DATA = [
@@ -362,5 +362,69 @@ export const TESTIMONIALS_DATA = [
     avatar: "/images/avatar_selam.png",
     rating: 5,
     quote: "Relocating to Hawassa was seamless. Delala's verified maps and Birr pricing made it simple to secure a family home before I even landed.",
+  },
+];
+
+/**
+ * Cities Delala covers. Kept here so the marketing site has one source for
+ * market names, imagery and copy rather than repeating them per page.
+ * Cities without a photograph yet render a typographic tile.
+ */
+export interface Market {
+  slug: string;
+  name: string;
+  blurb: string;
+  areas: string;
+  image: string | null;
+}
+
+export const MARKETS: Market[] = [
+  {
+    slug: "addis-ababa",
+    name: "Addis Ababa",
+    blurb:
+      "The capital and the deepest rental market in the country, from diplomatic villas around Old Airport to new apartment blocks in Bole and CMC.",
+    areas: "Bole · Yeka · Kirkos · Arada · Lideta · Nifas Silk-Lafto and more",
+    image: "/images/city_addis_ababa.png",
+  },
+  {
+    slug: "hawassa",
+    name: "Hawassa",
+    blurb:
+      "A Rift Valley lakeside city with steady demand from the industrial park and a growing university population.",
+    areas: "Tabor · Haile Resort area · Industrial Park · Bole Hawassa",
+    image: "/images/city_hawassa.png",
+  },
+  {
+    slug: "adama",
+    name: "Adama",
+    blurb:
+      "An hour from Addis on the expressway, which makes it a practical base for people working in both cities.",
+    areas: "Posta Bet · Expressway Junction · Kebele 04 · Melka Adama",
+    image: "/images/city_adama.png",
+  },
+  {
+    slug: "bahir-dar",
+    name: "Bahir Dar",
+    blurb:
+      "Lake Tana waterfront and a strong tourism economy, with rental demand concentrated near the promenade.",
+    areas: "Tana Waterfront · Kebele 14 · Poly · Abay Mado",
+    image: "/images/city_bahir_dar.png",
+  },
+  {
+    slug: "dire-dawa",
+    name: "Dire Dawa",
+    blurb:
+      "Eastern trade and industrial hub with its own charter administration and a distinct rental market.",
+    areas: "Kezira · Megala · Taiwan Market · Sabian",
+    image: null,
+  },
+  {
+    slug: "gondar",
+    name: "Gondar",
+    blurb:
+      "Historic royal city in the north, where demand is driven by the university and year-round tourism.",
+    areas: "Fasil Ghebbi area · Azezo · Maraki · Piazza",
+    image: null,
   },
 ];

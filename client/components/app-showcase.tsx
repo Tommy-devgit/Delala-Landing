@@ -22,14 +22,14 @@ export function AppShowcase() {
   const [activeScreen, setActiveScreen] = useState<"search" | "map" | "chat">("search");
 
   return (
-    <section id="app-showcase" className="py-16 sm:py-20 lg:py-24 bg-[#FAF8F4] relative">
+    <section id="app-showcase" className="py-16 sm:py-20 lg:py-24 bg-canvas relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Main App Showcase Container */}
-        <div className="bg-[#4C061D] rounded-xl p-8 sm:p-12 lg:p-16 text-white relative overflow-hidden shadow-2xl border border-[#B4C292]/30">
+        <div className="bg-primary rounded-control p-8 sm:p-12 lg:p-16 text-white relative overflow-hidden shadow-2xl border border-accent/30">
           
           {/* Ambient Background Glow */}
-          <div className="absolute top-0 right-0 w-96 h-96 bg-radial from-[#B4C292]/20 via-transparent to-transparent blur-3xl pointer-events-none" />
+          <div className="absolute top-0 right-0 w-96 h-96 bg-radial from-accent/20 via-transparent to-transparent blur-3xl pointer-events-none" />
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center relative z-10">
             
@@ -49,7 +49,7 @@ export function AppShowcase() {
                   onClick={() => setActiveScreen("search")}
                   className={`flex-1 py-2 px-3 rounded-full text-xs font-bold transition-all ${
                     activeScreen === "search"
-                      ? "bg-white text-[#4C061D] shadow-md"
+                      ? "bg-surface text-primary shadow-md"
                       : "text-white/80 hover:text-white"
                   }`}
                 >
@@ -60,7 +60,7 @@ export function AppShowcase() {
                   onClick={() => setActiveScreen("map")}
                   className={`flex-1 py-2 px-3 rounded-full text-xs font-bold transition-all ${
                     activeScreen === "map"
-                      ? "bg-[#B4C292] text-[#4C061D] shadow-md"
+                      ? "bg-accent text-primary shadow-md"
                       : "text-white/80 hover:text-white"
                   }`}
                 >
@@ -71,7 +71,7 @@ export function AppShowcase() {
                   onClick={() => setActiveScreen("chat")}
                   className={`flex-1 py-2 px-3 rounded-full text-xs font-bold transition-all ${
                     activeScreen === "chat"
-                      ? "bg-white text-[#4C061D] shadow-md"
+                      ? "bg-surface text-primary shadow-md"
                       : "text-white/80 hover:text-white"
                   }`}
                 >
@@ -82,21 +82,21 @@ export function AppShowcase() {
               {/* Checklist Requirements */}
               <div className="space-y-3 mb-10">
                 <div className="flex items-center gap-3 text-xs sm:text-sm font-semibold text-white/95">
-                  <div className="w-5 h-5 rounded-full bg-[#B4C292] text-[#4C061D] flex items-center justify-center font-bold text-xs shrink-0">
+                  <div className="w-5 h-5 rounded-full bg-accent text-primary flex items-center justify-center font-bold text-xs shrink-0">
                     <Check className="w-3 h-3" />
                   </div>
                   <span>100% physically checked photos & legal document verification</span>
                 </div>
 
                 <div className="flex items-center gap-3 text-xs sm:text-sm font-semibold text-white/95">
-                  <div className="w-5 h-5 rounded-full bg-[#B4C292] text-[#4C061D] flex items-center justify-center font-bold text-xs shrink-0">
+                  <div className="w-5 h-5 rounded-full bg-accent text-primary flex items-center justify-center font-bold text-xs shrink-0">
                     <Check className="w-3 h-3" />
                   </div>
                   <span>Real-time availability updates & instant Birr price alerts</span>
                 </div>
 
                 <div className="flex items-center gap-3 text-xs sm:text-sm font-semibold text-white/95">
-                  <div className="w-5 h-5 rounded-full bg-[#B4C292] text-[#4C061D] flex items-center justify-center font-bold text-xs shrink-0">
+                  <div className="w-5 h-5 rounded-full bg-accent text-primary flex items-center justify-center font-bold text-xs shrink-0">
                     <Check className="w-3 h-3" />
                   </div>
                   <span>Direct owner messaging with zero hidden viewing fees</span>
@@ -107,22 +107,22 @@ export function AppShowcase() {
               <div id="download" className="flex flex-wrap items-center gap-4">
                 <a
                   href="#download"
-                  className="flex items-center gap-3 px-6 py-3.5 rounded-full bg-white text-[#4C061D] font-bold text-sm shadow-md hover:bg-[#FAF8F4] transition-all"
+                  className="flex items-center gap-3 px-6 py-3.5 rounded-full bg-surface text-primary font-bold text-sm shadow-md hover:bg-canvas transition-all"
                 >
-                  <Smartphone className="w-5 h-5 text-[#4C061D]" />
+                  <Smartphone className="w-5 h-5 text-primary" />
                   <div className="flex flex-col text-left">
-                    <span className="text-[9px] uppercase font-bold text-[#736F4E]">Download for</span>
-                    <span className="text-xs font-extrabold text-[#4C061D]">iOS App Store</span>
+                    <span className="text-label uppercase font-bold text-muted">Download for</span>
+                    <span className="text-xs font-extrabold text-primary">iOS App Store</span>
                   </div>
                 </a>
 
                 <a
                   href="#download"
-                  className="flex items-center gap-3 px-6 py-3.5 rounded-full bg-[#3B3923] text-white font-bold text-sm shadow-md border border-[#B4C292]/30 hover:bg-[#2D2D2D] transition-all"
+                  className="flex items-center gap-3 px-6 py-3.5 rounded-full bg-primary-hover text-white font-bold text-sm shadow-md border border-accent/30 hover:bg-body transition-all"
                 >
-                  <Smartphone className="w-5 h-5 text-[#B4C292]" />
+                  <Smartphone className="w-5 h-5 text-accent" />
                   <div className="flex flex-col text-left">
-                    <span className="text-[9px] uppercase font-bold text-[#B4C292]">Get it on</span>
+                    <span className="text-label uppercase font-bold text-accent">Get it on</span>
                     <span className="text-xs font-extrabold text-white">Google Play</span>
                   </div>
                 </a>
@@ -139,23 +139,23 @@ export function AppShowcase() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5 }}
-                  className="w-72 sm:w-80 h-[500px] bg-[#3B3923] rounded-xl p-3 border-4 border-white/20 shadow-2xl overflow-hidden relative z-20"
+                  className="w-72 sm:w-80 h-[500px] bg-primary-hover rounded-control p-3 border-4 border-white/20 shadow-2xl overflow-hidden relative z-20"
                 >
                   {/* Speaker Notch */}
-                  <div className="w-24 h-4 bg-[#2D2D2D] rounded-full mx-auto mb-2 flex items-center justify-center">
+                  <div className="w-24 h-4 bg-body rounded-full mx-auto mb-2 flex items-center justify-center">
                     <div className="w-3 h-3 rounded-full bg-black mr-2" />
                     <div className="w-2 h-2 rounded-full bg-black" />
                   </div>
 
                   {/* Screen Content Container */}
-                  <div className="w-full h-[calc(100%-24px)] bg-[#FAF8F4] rounded-lg p-4 text-[#2D2D2D] flex flex-col pt-3 font-sans overflow-hidden">
+                  <div className="w-full h-[calc(100%-24px)] bg-canvas rounded-lg p-4 text-body flex flex-col pt-3 font-sans overflow-hidden">
                     
                     {/* App Header */}
-                    <div className="flex items-center justify-between mb-3 pb-2 border-b border-[#ECE7DA]">
-                      <span className="font-heading font-black text-base text-[#4C061D]">
+                    <div className="flex items-center justify-between mb-3 pb-2 border-b border-line">
+                      <span className="font-heading font-black text-base text-primary">
                         Delala
                       </span>
-                      <span className="text-[10px] font-bold text-[#4C061D] bg-[#B4C292]/30 px-2 py-0.5 rounded-full">
+                      <span className="text-label font-bold text-primary bg-accent/30 px-2 py-0.5 rounded-full">
                         Addis Ababa
                       </span>
                     </div>
@@ -170,28 +170,28 @@ export function AppShowcase() {
                           transition={{ duration: 0.2 }}
                           className="flex-1 flex flex-col justify-between"
                         >
-                          <div className="bg-white p-2.5 rounded-lg border border-[#ECE7DA] flex items-center gap-2 mb-3 shadow-2xs">
-                            <Search className="w-3.5 h-3.5 text-[#736F4E]" />
-                            <span className="text-xs text-[#2D2D2D]/70 font-medium">Bole • 30k-50k ETB</span>
-                            <SlidersHorizontal className="w-3.5 h-3.5 text-[#4C061D] ml-auto" />
+                          <div className="bg-surface p-2.5 rounded-lg border border-line flex items-center gap-2 mb-3 shadow-2xs">
+                            <Search className="w-3.5 h-3.5 text-muted" />
+                            <span className="text-xs text-body/70 font-medium">Bole • 30k-50k ETB</span>
+                            <SlidersHorizontal className="w-3.5 h-3.5 text-primary ml-auto" />
                           </div>
 
-                          <div className="bg-white rounded-lg border border-[#ECE7DA] overflow-hidden shadow-xs mb-3">
+                          <div className="bg-surface rounded-lg border border-line overflow-hidden shadow-xs mb-3">
                             <div className="relative h-32 w-full">
                               <img src="/images/hero_home_away.jpg" alt="Bole Villa" className="w-full h-full object-cover" />
-                              <span className="absolute top-2 left-2 bg-[#4C061D] text-white text-[9px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
-                                <CheckCircle2 className="w-2.5 h-2.5 text-[#B4C292]" /> Verified
+                              <span className="absolute top-2 left-2 bg-primary text-white text-label font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+                                <CheckCircle2 className="w-2.5 h-2.5 text-accent" /> Verified
                               </span>
                             </div>
                             <div className="p-3">
                               <div className="flex items-center justify-between mb-1">
-                                <span className="font-bold text-xs text-[#4C061D]">Bole Medhanialem Residence</span>
-                                <div className="flex items-center text-[10px] text-amber-500 font-bold">
+                                <span className="font-bold text-xs text-primary">Bole Medhanialem Residence</span>
+                                <div className="flex items-center text-label text-amber-500 font-bold">
                                   <Star className="w-3 h-3 fill-amber-400 mr-0.5" /> 4.9
                                 </div>
                               </div>
-                              <div className="text-[11px] font-extrabold text-[#4C061D] mb-2">45,000 ETB / month</div>
-                              <button className="w-full py-2 bg-[#4C061D] text-white rounded-full text-xs font-bold">
+                              <div className="text-label font-extrabold text-primary mb-2">45,000 ETB / month</div>
+                              <button className="w-full py-2 bg-primary text-white rounded-full text-xs font-bold">
                                 Book Walkthrough
                               </button>
                             </div>
@@ -206,25 +206,25 @@ export function AppShowcase() {
                           animate={{ opacity: 1, x: 0 }}
                           exit={{ opacity: 0, x: -10 }}
                           transition={{ duration: 0.2 }}
-                          className="flex-1 bg-[#ECE7DA]/50 rounded-lg p-3 flex flex-col justify-between relative overflow-hidden border border-[#ECE7DA]"
+                          className="flex-1 bg-line/50 rounded-lg p-3 flex flex-col justify-between relative overflow-hidden border border-line"
                         >
-                          <div className="bg-white/90 p-2.5 rounded-lg text-xs font-bold text-[#4C061D] shadow-xs flex items-center justify-between">
+                          <div className="bg-surface/90 p-2.5 rounded-lg text-xs font-bold text-primary shadow-xs flex items-center justify-between">
                             <span>Sub-City Map View</span>
-                            <MapPin className="w-4 h-4 text-[#4C061D]" />
+                            <MapPin className="w-4 h-4 text-primary" />
                           </div>
 
                           <div className="space-y-2 my-auto">
-                            <div className="bg-[#4C061D] text-white p-2 rounded-lg text-xs font-bold shadow-md flex items-center justify-between">
+                            <div className="bg-primary text-white p-2 rounded-lg text-xs font-bold shadow-md flex items-center justify-between">
                               <span>Bole Medhanialem</span>
-                              <span className="bg-[#B4C292] text-[#4C061D] text-[10px] px-2 py-0.5 rounded-full">42 Homes</span>
+                              <span className="bg-accent text-primary text-label px-2 py-0.5 rounded-full">42 Homes</span>
                             </div>
-                            <div className="bg-white text-[#2D2D2D] p-2 rounded-lg text-xs font-bold shadow-xs flex items-center justify-between">
+                            <div className="bg-surface text-body p-2 rounded-lg text-xs font-bold shadow-xs flex items-center justify-between">
                               <span>Kazanchis Sub-City</span>
-                              <span className="text-[10px] text-[#736F4E]">28 Homes</span>
+                              <span className="text-label text-muted">28 Homes</span>
                             </div>
-                            <div className="bg-white text-[#2D2D2D] p-2 rounded-lg text-xs font-bold shadow-xs flex items-center justify-between">
+                            <div className="bg-surface text-body p-2 rounded-lg text-xs font-bold shadow-xs flex items-center justify-between">
                               <span>Old Airport Diplomatic</span>
-                              <span className="text-[10px] text-[#736F4E]">19 Homes</span>
+                              <span className="text-label text-muted">19 Homes</span>
                             </div>
                           </div>
                         </motion.div>
@@ -239,26 +239,26 @@ export function AppShowcase() {
                           transition={{ duration: 0.2 }}
                           className="flex-1 flex flex-col justify-between"
                         >
-                          <div className="flex items-center gap-2.5 bg-white p-2.5 rounded-lg border border-[#ECE7DA] mb-3">
-                            <div className="w-8 h-8 rounded-full overflow-hidden border border-[#B4C292]">
+                          <div className="flex items-center gap-2.5 bg-surface p-2.5 rounded-lg border border-line mb-3">
+                            <div className="w-8 h-8 rounded-full overflow-hidden border border-accent">
                               <img src="/images/avatar_abebe.png" alt="Abebe Broker" className="w-full h-full object-cover" />
                             </div>
                             <div>
-                              <div className="text-xs font-bold text-[#2D2D2D]">Abebe (Verified Owner)</div>
-                              <div className="text-[9px] text-[#736F4E]">Active Now • Bole Villa</div>
+                              <div className="text-xs font-bold text-body">Abebe (Verified Owner)</div>
+                              <div className="text-label text-muted">Active Now • Bole Villa</div>
                             </div>
                           </div>
 
                           <div className="space-y-2 my-auto">
-                            <div className="bg-[#FAF8F4] border border-[#ECE7DA] p-2.5 rounded-lg text-xs text-[#2D2D2D] max-w-[85%]">
+                            <div className="bg-canvas border border-line p-2.5 rounded-lg text-xs text-body max-w-[85%]">
                               Is Saturday at 3:00 PM good for the physical walkthrough?
                             </div>
-                            <div className="bg-[#4C061D] text-white p-2.5 rounded-lg text-xs max-w-[85%] ml-auto">
+                            <div className="bg-primary text-white p-2.5 rounded-lg text-xs max-w-[85%] ml-auto">
                               Yes perfect! See you at Bole Medhanialem.
                             </div>
                           </div>
 
-                          <div className="bg-white p-2 rounded-lg border border-[#ECE7DA] text-xs text-[#736F4E] mt-3">
+                          <div className="bg-surface p-2 rounded-lg border border-line text-xs text-muted mt-3">
                             Type message...
                           </div>
                         </motion.div>
@@ -266,8 +266,8 @@ export function AppShowcase() {
                     </AnimatePresence>
 
                     {/* Bottom App Nav */}
-                    <div className="pt-2 border-t border-[#ECE7DA] flex items-center justify-around text-[#736F4E]">
-                      <div className="flex flex-col items-center text-[#4C061D]">
+                    <div className="pt-2 border-t border-line flex items-center justify-around text-muted">
+                      <div className="flex flex-col items-center text-primary">
                         <Building2 className="w-3.5 h-3.5" />
                         <span className="text-[8px] font-bold">Explore</span>
                       </div>
@@ -284,12 +284,12 @@ export function AppShowcase() {
                 </motion.div>
 
                 {/* Floating QR Badge */}
-                <div className="absolute top-8 -right-4 sm:-right-8 z-30 bg-white p-3 rounded-lg border border-[#ECE7DA] shadow-xl max-w-[170px] hidden sm:block">
+                <div className="absolute top-8 -right-4 sm:-right-8 z-30 bg-surface p-3 rounded-lg border border-line shadow-xl max-w-[170px] hidden sm:block">
                   <div className="flex items-center gap-2">
-                    <QrCode className="w-8 h-8 text-[#4C061D]" />
-                    <div className="text-[10px]">
-                      <div className="font-extrabold text-[#4C061D]">Scan QR</div>
-                      <div className="text-[#736F4E]">Instant Install</div>
+                    <QrCode className="w-8 h-8 text-primary" />
+                    <div className="text-label">
+                      <div className="font-extrabold text-primary">Scan QR</div>
+                      <div className="text-muted">Instant Install</div>
                     </div>
                   </div>
                 </div>

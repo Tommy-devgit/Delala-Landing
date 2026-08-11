@@ -17,35 +17,35 @@ export function Features() {
   const getIcon = (iconName: string) => {
     switch (iconName) {
       case "ShieldCheck":
-        return <ShieldCheck className="w-5 h-5 text-[#4C061D]" />;
+        return <ShieldCheck className="w-5 h-5 text-primary" />;
       case "MapPin":
-        return <MapPin className="w-5 h-5 text-[#4C061D]" />;
+        return <MapPin className="w-5 h-5 text-primary" />;
       case "SlidersHorizontal":
-        return <SlidersHorizontal className="w-5 h-5 text-[#4C061D]" />;
+        return <SlidersHorizontal className="w-5 h-5 text-primary" />;
       case "MessageSquare":
-        return <MessageSquare className="w-5 h-5 text-[#4C061D]" />;
+        return <MessageSquare className="w-5 h-5 text-primary" />;
       case "FileText":
-        return <FileText className="w-5 h-5 text-[#4C061D]" />;
+        return <FileText className="w-5 h-5 text-primary" />;
       default:
-        return <ShieldCheck className="w-5 h-5 text-[#4C061D]" />;
+        return <ShieldCheck className="w-5 h-5 text-primary" />;
     }
   };
 
   return (
-    <section id="features" className="py-16 sm:py-20 lg:py-24 bg-[#FAF8F4] relative">
+    <section id="features" className="py-16 sm:py-20 lg:py-24 bg-canvas relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Page Header */}
         <div className="max-w-3xl mb-16 sm:mb-20">
-          <span className="font-mono-label text-[11px] text-[#4C061D] bg-white px-3.5 py-1.5 rounded-full border border-[#ECE7DA] inline-block mb-4">
+          <span className="font-mono-label text-label text-primary bg-surface px-3.5 py-1.5 rounded-full border border-line inline-block mb-4">
             PRODUCT CAPABILITIES
           </span>
 
-          <h1 className="font-serif-display text-4xl sm:text-5xl lg:text-6xl font-light text-[#4C061D] tracking-tight mb-6 leading-[0.95]">
-            Built for physical <span className="italic font-normal text-[#1c1b12]">trust</span> & digital clarity.
+          <h1 className="font-serif-display text-4xl sm:text-5xl lg:text-6xl font-light text-primary tracking-tight mb-6 leading-[0.95]">
+            Built for physical <span className="italic font-normal text-ink">trust</span> & digital clarity.
           </h1>
 
-          <p className="text-base sm:text-lg text-[#736F4E] font-normal leading-relaxed">
+          <p className="text-base sm:text-lg text-muted font-normal leading-relaxed">
             Delala isn't just an online directory. We operate on-the-ground field verification teams to ensure every home, broker, and contract is 100% verified before you take a step outside.
           </p>
         </div>
@@ -67,20 +67,20 @@ export function Features() {
               >
                 {/* Text Story Column */}
                 <div className={`lg:col-span-6 ${isEven ? "" : "lg:order-2"}`}>
-                  <span className="font-mono-label text-[10px] text-[#736F4E] block mb-2">
+                  <span className="font-mono-label text-label text-muted block mb-2">
                     {feature.tag}
                   </span>
 
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 rounded-xl bg-white border border-[#ECE7DA] flex items-center justify-center shrink-0">
+                    <div className="w-10 h-10 rounded-control bg-surface border border-line flex items-center justify-center shrink-0">
                       {getIcon(feature.icon)}
                     </div>
-                    <h2 className="font-serif-display text-3xl sm:text-4xl font-light text-[#1c1b12] tracking-tight">
+                    <h2 className="font-serif-display text-3xl sm:text-4xl font-light text-ink tracking-tight">
                       {feature.title}
                     </h2>
                   </div>
 
-                  <p className="text-base text-[#736F4E] leading-relaxed font-normal mb-6">
+                  <p className="text-base text-muted leading-relaxed font-normal mb-6">
                     {feature.description}
                   </p>
 
@@ -88,8 +88,8 @@ export function Features() {
                   <div className="space-y-2.5 mb-8">
                     {feature.highlights.map((item) => (
                       <div key={item} className="flex items-center gap-2.5">
-                        <CheckCircle2 className="w-4 h-4 text-[#4C061D] shrink-0" />
-                        <span className="font-mono-label text-[11px] text-[#3B3923] font-medium">
+                        <CheckCircle2 className="w-4 h-4 text-primary shrink-0" />
+                        <span className="font-mono-label text-label text-primary-hover font-medium">
                           {item}
                         </span>
                       </div>
@@ -98,7 +98,7 @@ export function Features() {
 
                   <Link
                     href="/download"
-                    className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[#4C061D] text-white font-medium text-xs sm:text-sm hover:bg-[#3B3923] transition-colors group"
+                    className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-primary text-white font-medium text-xs sm:text-sm hover:bg-primary-hover transition-colors group"
                   >
                     <span>Experience on App</span>
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -107,7 +107,7 @@ export function Features() {
 
                 {/* Visual Image Column */}
                 <div className={`lg:col-span-6 ${isEven ? "" : "lg:order-1"}`}>
-                  <div className="relative rounded-2xl overflow-hidden border border-[#ECE7DA] shadow-xl bg-[#1c1b12] group aspect-[4/3]">
+                  <div className="relative rounded-card overflow-hidden border border-line shadow-xl bg-ink group aspect-[4/3]">
                     <img
                       src={feature.image}
                       alt={feature.title}
@@ -116,7 +116,7 @@ export function Features() {
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
 
                     <div className="absolute bottom-4 left-4 right-4 z-10 text-white">
-                      <span className="font-mono-label text-[10px] text-[#B4C292] bg-black/50 px-3 py-1 rounded-full border border-white/20">
+                      <span className="font-mono-label text-label text-accent bg-black/50 px-3 py-1 rounded-full border border-white/20">
                         {feature.tag}
                       </span>
                     </div>

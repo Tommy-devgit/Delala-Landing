@@ -50,20 +50,20 @@ export function SocialProof() {
   const getStatIcon = (index: number) => {
     switch (index) {
       case 0:
-        return <ShieldCheck className="w-5 h-5 text-[#4C061D]" />;
+        return <ShieldCheck className="w-5 h-5 text-primary" />;
       case 1:
-        return <Award className="w-5 h-5 text-[#4C061D]" />;
+        return <Award className="w-5 h-5 text-primary" />;
       case 2:
-        return <MapPin className="w-5 h-5 text-[#4C061D]" />;
+        return <MapPin className="w-5 h-5 text-primary" />;
       case 3:
-        return <Smile className="w-5 h-5 text-[#4C061D]" />;
+        return <Smile className="w-5 h-5 text-primary" />;
       default:
-        return <ShieldCheck className="w-5 h-5 text-[#4C061D]" />;
+        return <ShieldCheck className="w-5 h-5 text-primary" />;
     }
   };
 
   return (
-    <section className="py-12 lg:py-16 bg-[#FAF8F4] relative border-y border-[#ECE7DA]">
+    <section className="py-12 lg:py-16 bg-canvas relative border-y border-line">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
           {STATS_DATA.map((stat, idx) => (
@@ -73,20 +73,20 @@ export function SocialProof() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: idx * 0.08 }}
-              className="bg-white p-6 rounded-lg border border-[#ECE7DA] shadow-xs text-center hover:border-[#B4C292] hover:shadow-md transition-all duration-300 flex flex-col items-center justify-between group"
+              className="bg-surface p-6 rounded-lg border border-line shadow-xs text-center hover:border-accent hover:shadow-md transition-all duration-300 flex flex-col items-center justify-between group"
             >
-              <div className="w-10 h-10 rounded-lg bg-[#FAF8F4] border border-[#ECE7DA] flex items-center justify-center mb-3 group-hover:bg-[#4C061D]/5 transition-colors">
+              <div className="w-10 h-10 rounded-lg bg-canvas border border-line flex items-center justify-center mb-3 group-hover:bg-primary/5 transition-colors">
                 {getStatIcon(idx)}
               </div>
 
               <div>
-                <div className="font-heading text-3xl sm:text-4xl lg:text-5xl font-black text-[#4C061D] tracking-tight mb-1">
+                <div className="font-heading text-3xl sm:text-4xl lg:text-5xl font-black text-primary tracking-tight mb-1">
                   <Counter targetValue={stat.value} />
                 </div>
-                <div className="font-heading text-sm sm:text-base font-bold text-[#2D2D2D] mb-1">
+                <div className="font-heading text-sm sm:text-base font-bold text-body mb-1">
                   {stat.label}
                 </div>
-                <p className="text-xs text-[#736F4E] font-medium leading-normal">
+                <p className="text-xs text-muted font-medium leading-normal">
                   {stat.subtext}
                 </p>
               </div>
