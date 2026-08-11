@@ -12,39 +12,59 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.FavoritesService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
+const properties_service_1 = require("../properties/properties.service");
 let FavoritesService = class FavoritesService {
-    constructor(prisma) {
+    constructor(prisma, properties) {
         this.prisma = prisma;
+        this.properties = properties;
     }
     async toggle(userId, propertyId) {
-        const existing = await this.prisma.favorite.findFirst({
-            where: { userId, propertyId },
-        });
+        const existing = await this.prisma.favorite.findFirst({ where: { userId, propertyId } });
         if (existing) {
             await this.prisma.favorite.delete({ where: { id: existing.id } });
-            return { saved: false };
+            return { saved: false, propertyId };
         }
-        else {
-            await this.prisma.favorite.create({
-                data: { userId, propertyId },
-            });
-            return { saved: true };
-        }
+        await this.prisma.favorite.create({ data: { userId, propertyId } });
+        return { saved: true, propertyId };
     }
-    async findByUser(userId) {
-        return this.prisma.favorite.findMany({
+    async remove(userId, propertyId) {
+        await this.prisma.favorite.deleteMany({ where: { userId, propertyId } });
+        return { saved: false, propertyId };
+    }
+    async idsForUser(userId) {
+        const rows = await this.prisma.favorite.findMany({
             where: { userId },
+            select: { propertyId: true },
+        });
+        return rows.map((r) => r.propertyId).filter((id) => Boolean(id));
+    }
+    async findByUser(userId, requestedUserId) {
+        const asksForSomeoneElse = requestedUserId && requestedUserId !== "me" && requestedUserId !== userId;
+        if (asksForSomeoneElse) {
+            throw new common_1.ForbiddenException("You can only view your own saved properties.");
+        }
+        const favorites = await this.prisma.favorite.findMany({
+            where: { userId },
+            orderBy: { createdAt: "desc" },
             include: {
                 property: {
-                    include: { location: true, images: true },
+                    include: {
+                        location: { include: { parent: { include: { parent: true } } } },
+                        images: true,
+                        owner: { include: { profile: true } },
+                    },
                 },
             },
         });
+        return favorites
+            .filter((f) => f.property)
+            .map((f) => this.properties.mapPropertyResponse(f.property));
     }
 };
 exports.FavoritesService = FavoritesService;
 exports.FavoritesService = FavoritesService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        properties_service_1.PropertiesService])
 ], FavoritesService);
 //# sourceMappingURL=favorites.service.js.map

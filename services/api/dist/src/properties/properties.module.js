@@ -9,6 +9,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.PropertiesModule = void 0;
 const common_1 = require("@nestjs/common");
 const admin_module_1 = require("../admin/admin.module");
+const notifications_module_1 = require("../notifications/notifications.module");
 const properties_controller_1 = require("./properties.controller");
 const properties_service_1 = require("./properties.service");
 const r2_storage_service_1 = require("../storage/r2-storage.service");
@@ -17,7 +18,7 @@ let PropertiesModule = class PropertiesModule {
 exports.PropertiesModule = PropertiesModule;
 exports.PropertiesModule = PropertiesModule = __decorate([
     (0, common_1.Module)({
-        imports: [admin_module_1.AdminModule],
+        imports: [admin_module_1.AdminModule, notifications_module_1.NotificationsModule],
         controllers: [properties_controller_1.PropertiesController],
         providers: [properties_service_1.PropertiesService, r2_storage_service_1.R2StorageService],
         exports: [properties_service_1.PropertiesService, r2_storage_service_1.R2StorageService],

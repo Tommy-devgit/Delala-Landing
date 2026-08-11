@@ -16,36 +16,64 @@ exports.FavoritesController = void 0;
 const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
 const favorites_service_1 = require("./favorites.service");
+const session_auth_guard_1 = require("../common/guards/session-auth.guard");
 let FavoritesController = class FavoritesController {
     constructor(favoritesService) {
         this.favoritesService = favoritesService;
     }
-    toggle(body) {
-        return this.favoritesService.toggle(body.userId, body.propertyId);
+    toggle(body, req) {
+        return this.favoritesService.toggle(req.user.id, body.propertyId);
     }
-    findByUser(userId) {
-        return this.favoritesService.findByUser(userId);
+    remove(propertyId, req) {
+        return this.favoritesService.remove(req.user.id, propertyId);
+    }
+    ids(req) {
+        return this.favoritesService.idsForUser(req.user.id);
+    }
+    findByUser(userId, req) {
+        return this.favoritesService.findByUser(req.user.id, userId);
     }
 };
 exports.FavoritesController = FavoritesController;
 __decorate([
     (0, common_1.Post)(),
-    (0, swagger_1.ApiOperation)({ summary: "Toggle saving a property to user favorites wishlist" }),
+    (0, swagger_1.ApiOperation)({ summary: "Toggle a property in the signed-in user's wishlist" }),
     __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", void 0)
 ], FavoritesController.prototype, "toggle", null);
 __decorate([
-    (0, common_1.Get)("user/:userId"),
-    (0, swagger_1.ApiOperation)({ summary: "Get saved wishlist properties for user" }),
-    __param(0, (0, common_1.Param)("userId")),
+    (0, common_1.Delete)(":propertyId"),
+    (0, swagger_1.ApiOperation)({ summary: "Remove a property from the wishlist" }),
+    __param(0, (0, common_1.Param)("propertyId")),
+    __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", void 0)
+], FavoritesController.prototype, "remove", null);
+__decorate([
+    (0, common_1.Get)("ids"),
+    (0, swagger_1.ApiOperation)({ summary: "Property ids the signed-in user has saved" }),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], FavoritesController.prototype, "ids", null);
+__decorate([
+    (0, common_1.Get)("user/:userId"),
+    (0, swagger_1.ApiOperation)({ summary: "Saved properties. Only the owner of the wishlist may read it." }),
+    __param(0, (0, common_1.Param)("userId")),
+    __param(1, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", void 0)
 ], FavoritesController.prototype, "findByUser", null);
 exports.FavoritesController = FavoritesController = __decorate([
     (0, swagger_1.ApiTags)("favorites"),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.UseGuards)(session_auth_guard_1.SessionAuthGuard),
     (0, common_1.Controller)("favorites"),
     __metadata("design:paramtypes", [favorites_service_1.FavoritesService])
 ], FavoritesController);

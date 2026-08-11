@@ -5,41 +5,68 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.NotificationsService = void 0;
 const common_1 = require("@nestjs/common");
+const prisma_service_1 = require("../prisma/prisma.service");
 let NotificationsService = class NotificationsService {
-    async getNotifications(userId) {
-        return [
-            {
-                id: "notif-1",
-                title: "Walkthrough Visit Confirmed",
-                message: "Broker Abebe Tesfaye confirmed your visit for Bole Medhanialem Villa tomorrow at 10:00 AM.",
-                type: "VISIT_CONFIRMED",
-                read: false,
-                createdAt: "2 hours ago",
-            },
-            {
-                id: "notif-2",
-                title: "Listing Approved & Live",
-                message: "Your property submission 'Kazanchis Executive Studio' was verified by field agents and published.",
-                type: "LISTING_APPROVED",
-                read: true,
-                createdAt: "1 day ago",
-            },
-            {
-                id: "notif-3",
-                title: "Price Drop Alert",
-                message: "Rent for 'Old Airport Diplomatic G+1' dropped from ETB 105,000 to ETB 95,000/mo.",
-                type: "PRICE_DROP",
-                read: true,
-                createdAt: "3 days ago",
-            },
-        ];
+    constructor(prisma) {
+        this.prisma = prisma;
+    }
+    async create(input) {
+        try {
+            return await this.prisma.notification.create({
+                data: {
+                    userId: input.userId,
+                    type: input.type,
+                    title: input.title,
+                    body: input.body ?? null,
+                    propertyId: input.propertyId ?? null,
+                },
+            });
+        }
+        catch {
+            return null;
+        }
+    }
+    async findByUser(userId) {
+        const rows = await this.prisma.notification.findMany({
+            where: { userId },
+            orderBy: { createdAt: "desc" },
+            take: 100,
+        });
+        return rows.map((n) => ({
+            id: n.id,
+            type: n.type,
+            title: n.title,
+            body: n.body || "",
+            propertyId: n.propertyId,
+            read: Boolean(n.read),
+            createdAt: n.createdAt,
+        }));
+    }
+    async unreadCount(userId) {
+        const count = await this.prisma.notification.count({ where: { userId, read: false } });
+        return { count };
+    }
+    async markRead(userId, id) {
+        await this.prisma.notification.updateMany({ where: { id, userId }, data: { read: true } });
+        return { id, read: true };
+    }
+    async markAllRead(userId) {
+        const result = await this.prisma.notification.updateMany({
+            where: { userId, read: false },
+            data: { read: true },
+        });
+        return { updated: result.count };
     }
 };
 exports.NotificationsService = NotificationsService;
 exports.NotificationsService = NotificationsService = __decorate([
-    (0, common_1.Injectable)()
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
 ], NotificationsService);
 //# sourceMappingURL=notifications.service.js.map

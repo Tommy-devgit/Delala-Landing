@@ -2,15 +2,19 @@ import { PropertiesService } from "./properties.service";
 import { CreatePropertyDto, ModeratePropertyDto } from "./dto/create-property.dto";
 import { R2StorageService } from "../storage/r2-storage.service";
 import { AdminService } from "../admin/admin.service";
+import { NotificationsService } from "../notifications/notifications.service";
 export declare class PropertiesController {
     private readonly propertiesService;
     private readonly r2StorageService;
     private readonly adminService;
-    constructor(propertiesService: PropertiesService, r2StorageService: R2StorageService, adminService: AdminService);
+    private readonly notifications;
+    constructor(propertiesService: PropertiesService, r2StorageService: R2StorageService, adminService: AdminService, notifications: NotificationsService);
     findAll(query: {
         city?: string;
         subCity?: string;
         propertyType?: string;
+        ownerId?: string;
+        status?: string;
     }): Promise<{
         id: any;
         slug: string;

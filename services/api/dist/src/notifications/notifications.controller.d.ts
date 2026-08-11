@@ -2,12 +2,32 @@ import { NotificationsService } from "./notifications.service";
 export declare class NotificationsController {
     private readonly notificationsService;
     constructor(notificationsService: NotificationsService);
-    getNotifications(userId: string): Promise<{
+    findMine(req: any): Promise<{
         id: string;
-        title: string;
-        message: string;
         type: string;
+        title: string;
+        body: string;
+        propertyId: string;
         read: boolean;
-        createdAt: string;
+        createdAt: Date;
+    }[]>;
+    unreadCount(req: any): Promise<{
+        count: number;
+    }>;
+    markAllRead(req: any): Promise<{
+        updated: number;
+    }>;
+    markRead(id: string, req: any): Promise<{
+        id: string;
+        read: boolean;
+    }>;
+    findByUser(req: any): Promise<{
+        id: string;
+        type: string;
+        title: string;
+        body: string;
+        propertyId: string;
+        read: boolean;
+        createdAt: Date;
     }[]>;
 }

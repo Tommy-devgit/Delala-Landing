@@ -23,6 +23,7 @@ const roles_decorator_1 = require("../common/decorators/roles.decorator");
 const roles_guard_1 = require("../common/guards/roles.guard");
 const session_auth_guard_1 = require("../common/guards/session-auth.guard");
 const admin_service_1 = require("../admin/admin.service");
+const notifications_service_1 = require("../notifications/notifications.service");
 const userIdFromAuthHeader = (authorization) => {
     if (!authorization)
         return undefined;
@@ -31,10 +32,11 @@ const userIdFromAuthHeader = (authorization) => {
     return match?.[1];
 };
 let PropertiesController = class PropertiesController {
-    constructor(propertiesService, r2StorageService, adminService) {
+    constructor(propertiesService, r2StorageService, adminService, notifications) {
         this.propertiesService = propertiesService;
         this.r2StorageService = r2StorageService;
         this.adminService = adminService;
+        this.notifications = notifications;
     }
     findAll(query) {
         return this.propertiesService.findAll(query);
@@ -60,6 +62,16 @@ let PropertiesController = class PropertiesController {
     }
     async moderate(id, moderateDto, req) {
         const result = await this.propertiesService.moderate(id, moderateDto);
+        const approved = moderateDto.status === "APPROVED";
+        await this.notifications.create({
+            userId: result.brokerId,
+            type: approved ? "LISTING_APPROVED" : "LISTING_REJECTED",
+            title: approved ? "Your listing is live" : "Your listing needs changes",
+            body: approved
+                ? `"${result.title}" passed review and is now visible on the marketplace.`
+                : `"${result.title}" was not approved. ${moderateDto.rejectionReason || "Please review the details and resubmit."}`,
+            propertyId: id,
+        });
         await this.adminService.recordAudit(req?.user?.id, `property.${moderateDto.status.toLowerCase()}`, "properties", id);
         return result;
     }
@@ -121,6 +133,7 @@ exports.PropertiesController = PropertiesController = __decorate([
     (0, common_1.Controller)("properties"),
     __metadata("design:paramtypes", [properties_service_1.PropertiesService,
         r2_storage_service_1.R2StorageService,
-        admin_service_1.AdminService])
+        admin_service_1.AdminService,
+        notifications_service_1.NotificationsService])
 ], PropertiesController);
 //# sourceMappingURL=properties.controller.js.map

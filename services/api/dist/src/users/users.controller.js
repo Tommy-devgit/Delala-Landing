@@ -62,6 +62,28 @@ let UsersController = class UsersController {
             createdAt: user.createdAt,
         };
     }
+    async getPublicProfile(id) {
+        const user = await this.prisma.user.findUnique({
+            where: { id },
+            include: { profile: true, properties: { select: { id: true, status: true } } },
+        });
+        if (!user) {
+            throw new common_1.NotFoundException(`User with ID ${id} not found`);
+        }
+        const profile = user.profile || {};
+        const listings = user.properties || [];
+        return {
+            id: user.id,
+            fullName: [profile.firstName, profile.lastName].filter(Boolean).join(" ") || "Property owner",
+            role: (profile.role || "user").toLowerCase(),
+            avatarUrl: profile.avatarUrl || null,
+            bio: profile.bio || "",
+            phone: profile.phone || null,
+            listingCount: listings.length,
+            activeListingCount: listings.filter((p) => p.status === "approved").length,
+            memberSince: user.createdAt,
+        };
+    }
     async updateProfile(id, body) {
         const user = await this.prisma.user.findUnique({
             where: { id },
@@ -150,6 +172,14 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "getProfile", null);
+__decorate([
+    (0, common_1.Get)(":id/public"),
+    (0, swagger_1.ApiOperation)({ summary: "Publicly visible profile for a property poster" }),
+    __param(0, (0, common_1.Param)("id")),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "getPublicProfile", null);
 __decorate([
     (0, common_1.Patch)("profile/:id"),
     (0, swagger_1.ApiOperation)({ summary: "Update user profile details" }),

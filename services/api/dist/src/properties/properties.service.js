@@ -37,6 +37,7 @@ let PropertiesService = class PropertiesService {
                 ...(query.propertyType ? { propertyType: query.propertyType.toLowerCase() } : {}),
                 ...(status && status !== "all" ? { status } : {}),
                 ...(query.verifiedOnly ? { status: "approved" } : {}),
+                ...(isValidUuid(query.ownerId) ? { ownerId: query.ownerId } : {}),
             },
             include: {
                 location: {

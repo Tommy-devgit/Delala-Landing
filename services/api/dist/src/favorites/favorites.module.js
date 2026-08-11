@@ -8,6 +8,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FavoritesModule = void 0;
 const common_1 = require("@nestjs/common");
+const properties_module_1 = require("../properties/properties.module");
 const favorites_controller_1 = require("./favorites.controller");
 const favorites_service_1 = require("./favorites.service");
 let FavoritesModule = class FavoritesModule {
@@ -15,6 +16,7 @@ let FavoritesModule = class FavoritesModule {
 exports.FavoritesModule = FavoritesModule;
 exports.FavoritesModule = FavoritesModule = __decorate([
     (0, common_1.Module)({
+        imports: [properties_module_1.PropertiesModule],
         controllers: [favorites_controller_1.FavoritesController],
         providers: [favorites_service_1.FavoritesService],
         exports: [favorites_service_1.FavoritesService],

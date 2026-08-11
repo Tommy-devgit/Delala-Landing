@@ -3,52 +3,71 @@ export declare class FavoritesController {
     private readonly favoritesService;
     constructor(favoritesService: FavoritesService);
     toggle(body: {
-        userId: string;
         propertyId: string;
-    }): Promise<{
+    }, req: any): Promise<{
         saved: boolean;
+        propertyId: string;
     }>;
-    findByUser(userId: string): Promise<({
-        property: {
-            location: {
-                id: string;
-                createdAt: Date | null;
-                name: string;
-                type: string;
-                parentId: string | null;
-                latitude: import("@prisma/client/runtime/library").Decimal | null;
-                longitude: import("@prisma/client/runtime/library").Decimal | null;
-            };
-            images: {
-                id: string;
-                createdAt: Date | null;
-                propertyId: string | null;
-                imageUrl: string;
-            }[];
-        } & {
-            id: string;
-            createdAt: Date | null;
-            status: string | null;
-            updatedAt: Date | null;
-            latitude: import("@prisma/client/runtime/library").Decimal | null;
-            longitude: import("@prisma/client/runtime/library").Decimal | null;
-            description: string | null;
-            price: import("@prisma/client/runtime/library").Decimal | null;
-            bedrooms: number | null;
-            bathrooms: number | null;
-            area: import("@prisma/client/runtime/library").Decimal | null;
-            ownerId: string;
-            locationId: string;
-            title: string;
-            propertyType: string | null;
-            listingType: string | null;
-            address: string | null;
-            contactPhone: string | null;
+    remove(propertyId: string, req: any): Promise<{
+        saved: boolean;
+        propertyId: string;
+    }>;
+    ids(req: any): Promise<string[]>;
+    findByUser(userId: string, req: any): Promise<{
+        id: any;
+        slug: string;
+        title: any;
+        description: any;
+        propertyType: any;
+        rentETB: number;
+        bedrooms: any;
+        bathrooms: number;
+        areaSqm: number;
+        generator: boolean;
+        waterTank: boolean;
+        parking: boolean;
+        furnished: boolean;
+        securityGuard: boolean;
+        balcony: boolean;
+        status: string;
+        subCity: string;
+        city: string;
+        neighborhood: string;
+        address: any;
+        latitude: number;
+        longitude: number;
+        cityId: any;
+        neighborhoodId: any;
+        brokerId: any;
+        phone: any;
+        createdAt: any;
+        updatedAt: any;
+        cityEntity: {
+            id: any;
+            name: string;
+            slug: string;
         };
-    } & {
-        id: string;
-        createdAt: Date | null;
-        userId: string | null;
-        propertyId: string | null;
-    })[]>;
+        neighborhoodEntity: {
+            id: any;
+            name: string;
+            subCity: string;
+        };
+        broker: {
+            id: any;
+            agencyName: string;
+            name: string;
+            phone: any;
+            verified: boolean;
+            rating: number;
+            reviewsCount: number;
+            responseTime: string;
+            user: {
+                profile: {
+                    fullName: string;
+                    avatarUrl: any;
+                };
+            };
+        };
+        images: any;
+    }[]>;
 }

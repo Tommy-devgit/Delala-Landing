@@ -32,6 +32,17 @@ export declare class UsersController {
         role: any;
         createdAt: Date;
     }>;
+    getPublicProfile(id: string): Promise<{
+        id: string;
+        fullName: string;
+        role: any;
+        avatarUrl: any;
+        bio: any;
+        phone: any;
+        listingCount: number;
+        activeListingCount: number;
+        memberSince: Date;
+    }>;
     updateProfile(id: string, body: {
         firstName?: string;
         lastName?: string;

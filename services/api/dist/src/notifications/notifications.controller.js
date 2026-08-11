@@ -16,25 +16,73 @@ exports.NotificationsController = void 0;
 const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
 const notifications_service_1 = require("./notifications.service");
+const session_auth_guard_1 = require("../common/guards/session-auth.guard");
 let NotificationsController = class NotificationsController {
     constructor(notificationsService) {
         this.notificationsService = notificationsService;
     }
-    getNotifications(userId) {
-        return this.notificationsService.getNotifications(userId);
+    findMine(req) {
+        return this.notificationsService.findByUser(req.user.id);
+    }
+    unreadCount(req) {
+        return this.notificationsService.unreadCount(req.user.id);
+    }
+    markAllRead(req) {
+        return this.notificationsService.markAllRead(req.user.id);
+    }
+    markRead(id, req) {
+        return this.notificationsService.markRead(req.user.id, id);
+    }
+    findByUser(req) {
+        return this.notificationsService.findByUser(req.user.id);
     }
 };
 exports.NotificationsController = NotificationsController;
 __decorate([
-    (0, common_1.Get)("user/:userId"),
-    (0, swagger_1.ApiOperation)({ summary: "Get system notifications for user" }),
-    __param(0, (0, common_1.Param)("userId")),
+    (0, common_1.Get)(),
+    (0, swagger_1.ApiOperation)({ summary: "Notifications for the signed-in user" }),
+    __param(0, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
-], NotificationsController.prototype, "getNotifications", null);
+], NotificationsController.prototype, "findMine", null);
+__decorate([
+    (0, common_1.Get)("unread-count"),
+    (0, swagger_1.ApiOperation)({ summary: "Number of unread notifications, for the navbar badge" }),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], NotificationsController.prototype, "unreadCount", null);
+__decorate([
+    (0, common_1.Patch)("read-all"),
+    (0, swagger_1.ApiOperation)({ summary: "Mark every notification as read" }),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], NotificationsController.prototype, "markAllRead", null);
+__decorate([
+    (0, common_1.Patch)(":id/read"),
+    (0, swagger_1.ApiOperation)({ summary: "Mark one notification as read" }),
+    __param(0, (0, common_1.Param)("id")),
+    __param(1, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", void 0)
+], NotificationsController.prototype, "markRead", null);
+__decorate([
+    (0, common_1.Get)("user/:userId"),
+    (0, swagger_1.ApiOperation)({ summary: "Deprecated. Kept for existing callers; returns the caller's own list." }),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], NotificationsController.prototype, "findByUser", null);
 exports.NotificationsController = NotificationsController = __decorate([
     (0, swagger_1.ApiTags)("notifications"),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.UseGuards)(session_auth_guard_1.SessionAuthGuard),
     (0, common_1.Controller)("notifications"),
     __metadata("design:paramtypes", [notifications_service_1.NotificationsService])
 ], NotificationsController);
