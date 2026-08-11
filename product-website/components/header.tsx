@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import { useSession } from "@/lib/use-session";
 import { Avatar } from "@/components/avatar";
+import { useUnreadNotifications } from "@/lib/use-notifications";
 import {
   Heart,
   User,
@@ -24,6 +25,7 @@ import {
 export function Header({ onOpenFilters }: { onOpenFilters?: () => void }) {
   const pathname = usePathname();
   const [avatarOpen, setAvatarOpen] = useState(false);
+  const unreadCount = useUnreadNotifications();
   const session = useSession();
 
   const navLinks = [
@@ -84,9 +86,16 @@ export function Header({ onOpenFilters }: { onOpenFilters?: () => void }) {
             <Link
               href="/notifications"
               className="p-2.5 rounded-full bg-surface border border-line text-muted hover:text-primary hover:border-primary transition-colors relative"
-              title="Notifications"
+              aria-label={
+                unreadCount > 0 ? `Notifications, ${unreadCount} unread` : "Notifications"
+              }
             >
-              <Bell className="w-4 h-4" />
+              <Bell className="w-4 h-4" aria-hidden="true" />
+              {unreadCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 min-w-4 h-4 px-1 rounded-full bg-primary text-white text-[9px] font-bold flex items-center justify-center">
+                  {unreadCount > 9 ? "9+" : unreadCount}
+                </span>
+              )}
             </Link>
 
             {/* Saved Wishlist */}

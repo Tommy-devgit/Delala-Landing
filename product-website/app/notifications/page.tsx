@@ -1,106 +1,179 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { Bell, CheckCircle2, Calendar, ShieldCheck, Tag, Lock } from "lucide-react";
-import { Skeleton } from "@/components/ui";
-import { authClient, UserSession } from "@/lib/auth-client";
+import { Bell, CheckCheck, CheckCircle2, Home, Lock, XCircle } from "lucide-react";
+import { AppNotification, apiClient } from "@/lib/api-client";
+import { useSession } from "@/lib/use-session";
+import { formatPostedAt } from "@/lib/format";
+import { Skeleton, buttonClasses } from "@/components/ui";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1";
-
-/** Row shape returned by GET /api/v1/notifications. */
-interface AppNotification {
-  id: string;
-  title?: string;
-  message?: string;
-  type?: string;
-  read?: boolean;
-  createdAt?: string;
-}
+const ICONS: Record<string, { icon: React.ElementType; tone: string }> = {
+  LISTING_APPROVED: { icon: CheckCircle2, tone: "text-emerald-600 bg-emerald-50" },
+  LISTING_REJECTED: { icon: XCircle, tone: "text-rose-600 bg-rose-50" },
+  VISIT_CONFIRMED: { icon: CheckCircle2, tone: "text-emerald-600 bg-emerald-50" },
+  VISIT_REQUESTED: { icon: Home, tone: "text-primary bg-primary/10" },
+};
 
 export default function NotificationsPage() {
-  const [session, setSession] = useState<{ user: UserSession; token: string } | null>(null);
-  const [notifications, setNotifications] = useState<AppNotification[]>([]);
+  const session = useSession();
+  const [items, setItems] = useState<AppNotification[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const [nonce, setNonce] = useState(0);
+  const reload = useCallback(() => setNonce((n) => n + 1), []);
+  const userId = session?.user?.id ?? null;
 
   useEffect(() => {
-    async function loadNotifications() {
-      const activeSession = authClient.getSession();
-      setSession(activeSession);
+    let cancelled = false;
 
-      if (activeSession?.user?.id) {
-        try {
-          const res = await fetch(`${API_BASE}/notifications/user/${activeSession.user.id}`);
-          if (res.ok) {
-            const data = await res.json();
-            if (Array.isArray(data)) setNotifications(data);
-          }
-        } catch (err) {
-          console.warn("Notifications API offline.");
-        }
+    (async () => {
+      if (!userId) {
+        if (!cancelled) setLoading(false);
+        return;
       }
-      setLoading(false);
-    }
-    loadNotifications();
-  }, []);
+      try {
+        const data = await apiClient.getNotifications();
+        if (!cancelled) {
+          setItems(data);
+          setError("");
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : "We couldn't load your notifications.");
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
 
-  return (
-    <div className="min-h-screen bg-canvas text-ink font-sans pb-24">
-      <div className="bg-primary text-white py-8 border-b border-primary-hover">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6">
-          <h1 className="font-serif-display text-3xl sm:text-4xl text-white">
-            Notifications & System Alerts
-          </h1>
-          <p className="mt-1 text-sm text-line/80">
-            Realtime walkthrough confirmations, field audit statuses, and saved property updates.
+    return () => {
+      cancelled = true;
+    };
+  }, [userId, nonce]);
+
+  const markRead = async (id: string) => {
+    setItems((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
+    await apiClient.markNotificationRead(id);
+    window.dispatchEvent(new Event("delala_notifications_change"));
+  };
+
+  const markAllRead = async () => {
+    setItems((prev) => prev.map((n) => ({ ...n, read: true })));
+    await apiClient.markAllNotificationsRead();
+    window.dispatchEvent(new Event("delala_notifications_change"));
+  };
+
+  const unread = items.filter((n) => !n.read).length;
+
+  if (!session?.user) {
+    return (
+      <div className="bg-canvas min-h-screen">
+        <div className="max-w-md mx-auto px-4 py-16 text-center space-y-4">
+          <div className="w-14 h-14 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto">
+            <Lock className="w-7 h-7" aria-hidden="true" />
+          </div>
+          <h1 className="font-serif-display text-2xl text-ink">Sign in to see your notifications</h1>
+          <p className="text-micro text-muted">
+            We&rsquo;ll tell you when a listing is approved or someone asks to visit.
           </p>
+          <Link href="/auth/signin?callbackUrl=/notifications" className={buttonClasses({ size: "lg" })}>
+            Sign in
+          </Link>
         </div>
       </div>
+    );
+  }
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 mt-8 space-y-4">
-        {!session?.user ? (
-          <div className="py-10 text-center bg-surface rounded-panel border border-line p-6 max-w-md mx-auto space-y-4 shadow-sm">
-            <Lock className="w-12 h-12 text-primary mx-auto opacity-70" />
-            <h2 className="font-serif-display text-2xl text-ink">
-              Sign in to view alerts
-            </h2>
-            <p className="text-xs text-muted">
-              Authenticate with your account to view walkthrough confirmations and property updates.
+  return (
+    <div className="bg-canvas min-h-screen">
+      <div className="max-w-3xl mx-auto px-4 sm:px-8 py-8">
+        <div className="flex items-end justify-between gap-3 pb-4 mb-5 border-b border-line">
+          <div>
+            <h1 className="font-serif-display text-2xl sm:text-3xl font-light text-ink">Notifications</h1>
+            <p className="text-micro text-muted mt-1">
+              {loading ? "Loading…" : unread > 0 ? `${unread} unread` : "You're all caught up"}
             </p>
-            <Link
-              href="/auth/signin?callbackUrl=/notifications"
-              className="inline-block px-6 py-3 rounded-full bg-primary text-white font-mono-label text-xs font-bold shadow-md hover:bg-primary-hover transition-colors"
-            >
-              Sign In →
-            </Link>
           </div>
-        ) : loading ? (
-          <div className="space-y-3">
-            {[1, 2, 3].map((i) => (
-              <Skeleton key={i} className="h-20 rounded-panel" />
+          {unread > 0 && (
+            <button type="button" onClick={markAllRead} className={buttonClasses({ variant: "secondary", size: "sm" })}>
+              <CheckCheck className="w-3.5 h-3.5" aria-hidden="true" />
+              <span>Mark all read</span>
+            </button>
+          )}
+        </div>
+
+        {loading ? (
+          <div className="space-y-2">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Skeleton key={i} className="h-20" />
             ))}
           </div>
-        ) : notifications.length === 0 ? (
-          <div className="py-10 text-center bg-surface rounded-panel border border-line p-6 max-w-md mx-auto space-y-3 shadow-xs">
-            <CheckCircle2 className="w-10 h-10 text-emerald-600 mx-auto" />
-            <h3 className="font-serif-display text-xl text-ink">All Caught Up</h3>
-            <p className="text-xs text-muted">You have no new unread system notifications at this time.</p>
+        ) : error ? (
+          <div className="rounded-panel border border-rose-200 bg-rose-50 p-6 text-center space-y-3">
+            <p className="text-sm font-semibold text-rose-700">We couldn&rsquo;t load your notifications.</p>
+            <p className="text-micro text-rose-700/80">{error}</p>
+            <button type="button" onClick={reload} className={buttonClasses({ size: "md" })}>
+              Try again
+            </button>
+          </div>
+        ) : items.length === 0 ? (
+          <div className="rounded-panel border border-line bg-surface py-16 px-6 text-center space-y-3">
+            <div className="w-14 h-14 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto">
+              <Bell className="w-7 h-7" aria-hidden="true" />
+            </div>
+            <h2 className="font-serif-display text-xl text-ink">Nothing yet</h2>
+            <p className="text-micro text-muted max-w-sm mx-auto leading-relaxed">
+              When one of your listings is reviewed, or someone asks to visit a home, it will show up here.
+            </p>
           </div>
         ) : (
-          notifications.map((n) => (
-            <div key={n.id} className="p-6 rounded-panel bg-surface border border-line shadow-xs flex items-start gap-4 hover:border-primary transition-colors">
-              <div className="w-10 h-10 rounded-card bg-canvas border border-line text-primary flex items-center justify-center shrink-0">
-                <Bell className="w-5 h-5 text-primary" />
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-bold text-sm text-ink">{n.title}</h3>
-                  <span className="text-label font-mono-label text-muted">{n.createdAt || "Just now"}</span>
-                </div>
-                <p className="text-xs text-muted mt-1">{n.message}</p>
-              </div>
-            </div>
-          ))
+          <ul className="space-y-2">
+            {items.map((n) => {
+              const { icon: Icon, tone } = ICONS[n.type] ?? { icon: Bell, tone: "text-muted bg-canvas" };
+              return (
+                <li
+                  key={n.id}
+                  className={`rounded-card border p-3.5 flex items-start gap-3 transition-colors ${
+                    n.read ? "border-line bg-surface" : "border-primary/25 bg-primary/3"
+                  }`}
+                >
+                  <span className={`w-9 h-9 rounded-control flex items-center justify-center shrink-0 ${tone}`}>
+                    <Icon className="w-4 h-4" aria-hidden="true" />
+                  </span>
+
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-2">
+                      <p className="text-sm font-semibold text-ink">{n.title}</p>
+                      {!n.read && (
+                        <span className="w-2 h-2 rounded-full bg-primary shrink-0 mt-1.5" aria-label="Unread" />
+                      )}
+                    </div>
+                    {n.body && <p className="text-micro text-muted mt-0.5 leading-relaxed">{n.body}</p>}
+
+                    <div className="flex items-center gap-3 mt-1.5">
+                      <span className="text-label text-muted">{formatPostedAt(n.createdAt) || "Just now"}</span>
+                      {n.propertyId && (
+                        <Link href={`/property/${n.propertyId}`} className="text-label text-primary font-semibold hover:underline">
+                          View listing
+                        </Link>
+                      )}
+                      {!n.read && (
+                        <button
+                          type="button"
+                          onClick={() => markRead(n.id)}
+                          className="text-label text-muted hover:text-primary"
+                        >
+                          Mark read
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
         )}
       </div>
     </div>
