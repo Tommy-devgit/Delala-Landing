@@ -1,8 +1,30 @@
 @import "tailwindcss";
 
-@theme inline {
+/* Semantic tokens, matching the product website so the two stay related. */
+@theme {
   --color-primary: #4C061D;
+  --color-primary-hover: #3B0416;
   --color-accent: #B4C292;
+
+  --color-canvas: #FAF8F4;
+  --color-surface: #FFFFFF;
+  --color-line: #ECE7DA;
+
+  --color-ink: #1C1B12;
+  --color-body: #2D2D2D;
+  --color-muted: #736F4E;
+
+  --text-label: 0.6875rem;
+  --text-label--line-height: 1.25;
+  --text-micro: 0.8125rem;
+  --text-micro--line-height: 1.5;
+
+  --radius-control: 0.75rem;
+  --radius-card: 1rem;
+  --radius-panel: 1.5rem;
+}
+
+@theme inline {
   --color-secondary: #736F4E;
   --color-dark: #3B3923;
   --color-bg-warm: #FAF8F4;
