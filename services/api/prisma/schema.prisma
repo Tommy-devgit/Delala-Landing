@@ -21,6 +21,7 @@ model User {
   visits     Visit[]
   reports    Report[]
   auditLogs  AuditLog[]
+  notifications Notification[]
 
   @@map("users")
   @@schema("auth")
@@ -161,6 +162,23 @@ model Report {
   property   Property? @relation(fields: [propertyId], references: [id], onDelete: Cascade)
 
   @@map("reports")
+  @@schema("public")
+}
+
+model Notification {
+  id         String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  userId     String    @map("user_id") @db.Uuid
+  type       String    @db.VarChar(40)
+  title      String    @db.VarChar(200)
+  body       String?
+  propertyId String?   @map("property_id") @db.Uuid
+  read       Boolean?  @default(false)
+  createdAt  DateTime? @default(now()) @map("created_at") @db.Timestamp(6)
+
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, read])
+  @@map("notifications")
   @@schema("public")
 }
 
