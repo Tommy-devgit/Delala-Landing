@@ -22,6 +22,7 @@ export default function HomePage() {
   const [filters, setFilters] = useState<FilterState>({
     city: "",
     subCity: "",
+    neighborhood: "",
     propertyType: "",
     minPrice: 0,
     maxPrice: 150000,

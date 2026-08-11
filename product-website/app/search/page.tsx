@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { PropertyCard } from "@/components/property-card";
 import { FilterModal } from "@/components/filter-modal";
 import { PropertyMap } from "@/components/map";
+import { SearchFilters } from "@/components/search-filters";
 import { apiClient } from "@/lib/api-client";
 import { Badge, Button, Skeleton } from "@/components/ui";
 import { City, Property, FilterState } from "@/lib/types";
@@ -38,6 +39,7 @@ function SearchContent() {
   const [filters, setFilters] = useState<FilterState>({
     city: searchParams.get("city") || "",
     subCity: searchParams.get("subCity") || "",
+    neighborhood: searchParams.get("neighborhood") || "",
     propertyType: searchParams.get("propertyType") || "",
     minPrice: 0,
     maxPrice: Number(searchParams.get("maxPrice")) || 150000,
@@ -76,6 +78,7 @@ function SearchContent() {
     return properties.filter((p) => {
       if (filters.city && p.city.toLowerCase() !== filters.city.toLowerCase()) return false;
       if (filters.subCity && !p.subCity.toLowerCase().includes(filters.subCity.toLowerCase())) return false;
+      if (filters.neighborhood && !p.neighborhood.toLowerCase().includes(filters.neighborhood.toLowerCase())) return false;
       if (filters.propertyType && p.propertyType !== filters.propertyType) return false;
       if (p.rentETB > filters.maxPrice) return false;
       if (filters.bedrooms && p.bedrooms < Number(filters.bedrooms)) return false;

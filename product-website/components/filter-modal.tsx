@@ -30,6 +30,7 @@ export function FilterModal({
     setFilters({
       city: "",
       subCity: "",
+      neighborhood: "",
       propertyType: "",
       minPrice: 0,
       maxPrice: 150000,

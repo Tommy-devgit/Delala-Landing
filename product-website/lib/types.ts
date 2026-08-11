@@ -109,6 +109,8 @@ export interface Neighborhood {
 export interface FilterState {
   city: string;
   subCity: string;
+  /** Most specific location level; the modal previously stopped at sub-city. */
+  neighborhood: string;
   propertyType: string;
   minPrice: number;
   maxPrice: number;
