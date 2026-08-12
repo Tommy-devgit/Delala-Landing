@@ -83,11 +83,14 @@ function SearchContent() {
       if (p.rentETB > filters.maxPrice) return false;
       if (filters.bedrooms && p.bedrooms < Number(filters.bedrooms)) return false;
       if (filters.bathrooms && p.bathrooms < Number(filters.bathrooms)) return false;
-      if (filters.generator && !p.generator) return false;
-      if (filters.waterTank && !p.waterTank) return false;
-      if (filters.parking && !p.parking) return false;
-      if (filters.furnished && !p.furnished) return false;
-      if (filters.verifiedOnly && !p.verified) return false;
+      // `=== true` rather than truthiness: a null amenity means the poster was
+      // never asked, and a filter for "has a generator" must exclude unknowns
+      // rather than treat them as a no — or, worse, as a yes.
+      if (filters.generator && p.generator !== true) return false;
+      if (filters.waterTank && p.waterTank !== true) return false;
+      if (filters.parking && p.parking !== true) return false;
+      if (filters.furnished && p.furnished !== true) return false;
+      if (filters.verifiedOnly && !p.approved) return false;
       return true;
     }).sort((a, b) => {
       if (filters.sortBy === "price-asc") return a.rentETB - b.rentETB;
