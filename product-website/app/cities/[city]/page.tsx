@@ -6,6 +6,8 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { apiClient } from "@/lib/api-client";
+import { useAsync } from "@/lib/use-async";
+import { ErrorNotice } from "@/components/error-notice";
 import { Property, City } from "@/lib/types";
 import { PropertyCard } from "@/components/property-card";
 import { MapPin, ShieldCheck, ArrowRight, Building2 } from "lucide-react";
@@ -15,20 +17,13 @@ export default function CityDetailPage() {
   const params = useParams();
   const slug = params?.city as string;
 
-  const [cityProperties, setCityProperties] = useState<Property[]>([]);
-  const [loading, setLoading] = useState(true);
-
   const cityName = slug ? slug.replace(/-/g, " ") : "Addis Ababa";
 
-  useEffect(() => {
-    async function loadData() {
-      setLoading(true);
-      const data = await apiClient.getProperties({ city: cityName });
-      setCityProperties(data);
-      setLoading(false);
-    }
-    loadData();
-  }, [cityName]);
+  const { data, loading, error, retry } = useAsync(
+    () => apiClient.getProperties({ city: cityName }),
+    [cityName]
+  );
+  const cityProperties: Property[] = data || [];
 
   return (
     <div className="bg-canvas min-h-screen py-8">
@@ -70,7 +65,9 @@ export default function CityDetailPage() {
           </div>
         </div>
 
-        {loading ? (
+        {error ? (
+          <ErrorNotice message={error} onRetry={retry} />
+        ) : loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[1, 2, 3, 4].map((i) => (
               <Skeleton key={i} className="h-80 rounded-panel" />
