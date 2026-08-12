@@ -26,12 +26,16 @@ import {
   Phone,
   MessageSquare,
   Building2,
+  Flag,
+  Wifi,
 } from "lucide-react";
 import { Skeleton, buttonClasses } from "@/components/ui";
 import { PropertyMap } from "@/components/map";
 import { Avatar } from "@/components/avatar";
 import { useFavorites } from "@/lib/use-favorites";
 import { PropertyPhoto } from "@/components/property-photo";
+import { ErrorNotice } from "@/components/error-notice";
+import { ReportListingModal } from "@/components/report-listing-modal";
 
 export default function PropertyDetailPage() {
   const params = useParams();
@@ -45,28 +49,72 @@ export default function PropertyDetailPage() {
   // Null until a property with photographs loads. The old default was a stock
   // interior, so the gallery opened on a room belonging to no listing.
   const [activeImage, setActiveImage] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [reloadNonce, setReloadNonce] = useState(0);
+  const [isReportOpen, setIsReportOpen] = useState(false);
   const { isSaved, toggle } = useFavorites();
 
   useEffect(() => {
-    async function loadData() {
-      if (!slug) return;
+    if (!slug) return;
+    let cancelled = false;
+
+    (async () => {
+      await Promise.resolve();
+      if (cancelled) return;
+
       setLoading(true);
-      const fetchedProperty = await apiClient.getPropertyBySlug(slug);
-      setProperty(fetchedProperty);
-      if (fetchedProperty) {
-        setActiveImage(fetchedProperty.heroImage);
-        const allProperties = await apiClient.getProperties({ city: fetchedProperty.city });
-        setSimilarListings(allProperties.filter((p) => p.id !== fetchedProperty.id).slice(0, 3));
+      setLoadError(null);
+
+      try {
+        const fetchedProperty = await apiClient.getPropertyBySlug(slug);
+        if (cancelled) return;
+
+        setProperty(fetchedProperty);
+
+        if (fetchedProperty) {
+          setActiveImage(fetchedProperty.heroImage);
+          // Similar homes are a nicety; if they fail, the listing itself still
+          // renders rather than the whole page reporting an error.
+          const nearby = await apiClient
+            .getProperties({ city: fetchedProperty.city, pageSize: 4 })
+            .catch(() => []);
+          if (!cancelled) {
+            setSimilarListings(nearby.filter((p) => p.id !== fetchedProperty.id).slice(0, 3));
+          }
+        }
+      } catch (err) {
+        // A 404 returns null and falls through to the not-found view. This is
+        // the other case — the API is unreachable — which used to be
+        // indistinguishable from "this listing does not exist".
+        if (!cancelled) {
+          setLoadError(err instanceof Error ? err.message : "We couldn't load this property.");
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
       }
-      setLoading(false);
-    }
-    loadData();
-  }, [slug]);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [slug, reloadNonce]);
 
   if (loading) {
     return (
       <div className="bg-canvas min-h-screen py-10 px-8">
         <Skeleton className="max-w-[1440px] mx-auto h-96 rounded-panel" />
+      </div>
+    );
+  }
+
+  // Distinct from "not found": the listing may well exist and simply could not
+  // be fetched, so this offers a retry rather than sending the reader away.
+  if (loadError) {
+    return (
+      <div className="bg-canvas min-h-screen py-10 px-4 sm:px-8">
+        <div className="max-w-md mx-auto">
+          <ErrorNotice message={loadError} onRetry={() => setReloadNonce((n) => n + 1)} />
+        </div>
       </div>
     );
   }
@@ -102,6 +150,7 @@ export default function PropertyDetailPage() {
     { has: property.furnished, icon: Sofa, label: "Furnished" },
     { has: property.securityGuard, icon: ShieldCheck, label: "Security guard" },
     { has: property.balcony, icon: Building2, label: "Balcony" },
+    { has: property.internet, icon: Wifi, label: "Internet" },
   ].filter((a) => a.has);
 
   const posterName = property.broker?.name || "Property owner";
@@ -154,6 +203,14 @@ export default function PropertyDetailPage() {
               className="p-2.5 rounded-full bg-surface border border-line text-muted hover:text-primary transition-colors"
             >
               <Share2 className="w-4 h-4" aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsReportOpen(true)}
+              aria-label="Report this listing"
+              className="p-2.5 rounded-full bg-surface border border-line text-muted hover:text-primary transition-colors"
+            >
+              <Flag className="w-4 h-4" aria-hidden="true" />
             </button>
           </div>
         </div>
@@ -378,6 +435,13 @@ export default function PropertyDetailPage() {
         )}
 
       </div>
+
+      <ReportListingModal
+        propertyId={property.id}
+        propertyTitle={property.title}
+        isOpen={isReportOpen}
+        onClose={() => setIsReportOpen(false)}
+      />
 
       <ScheduleModal
         isOpen={isScheduleOpen}
