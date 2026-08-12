@@ -1,134 +1,194 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import Link from "next/link";
+import { ArrowRight, MapPin, PlusCircle, ShieldCheck } from "lucide-react";
 import { HomeHero } from "@/components/home-hero";
-import { CategoryBar } from "@/components/category-bar";
-import { PropertyCard } from "@/components/property-card";
 import { CityCard } from "@/components/city-card";
-import { FilterModal } from "@/components/filter-modal";
+import { PropertyRail } from "@/components/property-rail";
+import { BrowseByType } from "@/components/home/browse-by-type";
+import { HowItWorks } from "@/components/home/how-it-works";
+import { TrustedPosters } from "@/components/home/trusted-posters";
+import { ErrorNotice } from "@/components/error-notice";
 import { apiClient } from "@/lib/api-client";
-import { Property, City, FilterState } from "@/lib/types";
-import { ShieldCheck, MapPin, Building2, ArrowRight } from "lucide-react";
+import { useAsync } from "@/lib/use-async";
 import { Skeleton } from "@/components/ui";
 
+const RAIL_SIZE = 5;
+
+/**
+ * The marketplace front door.
+ *
+ * This was two sections — a grid of every property the API returned, and a
+ * strip of cities — which is why it read as empty. It is now a sequence of
+ * discovery rails, each answering one question a person arriving with no
+ * particular listing in mind would ask.
+ *
+ * Everything below comes from one `Promise.all`, so the page has a single
+ * loading state, a single error state and a single retry rather than six
+ * independent spinners. Each rail hides itself when it legitimately has no
+ * properties: an empty "Homes for sale" heading is worse than no heading.
+ */
 export default function HomePage() {
-  const [selectedCategory, setSelectedCategory] = useState("all");
-  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
-  const [properties, setProperties] = useState<Property[]>([]);
-  const [cities, setCities] = useState<City[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  const [filters, setFilters] = useState<FilterState>({
-    city: "",
-    subCity: "",
-    neighborhood: "",
-    propertyType: "",
-    minPrice: 0,
-    maxPrice: 150000,
-    bedrooms: "",
-    bathrooms: "",
-    generator: false,
-    waterTank: false,
-    parking: false,
-    furnished: false,
-    verifiedOnly: false,
-    sortBy: "newest",
-  });
-
-  useEffect(() => {
-    async function loadData() {
-      setLoading(true);
-      const [fetchedProperties, fetchedCities] = await Promise.all([
-        apiClient.getProperties(),
+  const { data, loading, error, retry } = useAsync(
+    async () => {
+      const [recent, forRent, forSale, facets, cities, posters] = await Promise.all([
+        apiClient.searchProperties({ sort: "newest", pageSize: RAIL_SIZE }),
+        apiClient.searchProperties({ listingType: "rent", sort: "newest", pageSize: RAIL_SIZE }),
+        apiClient.searchProperties({ listingType: "sale", sort: "newest", pageSize: RAIL_SIZE }),
+        apiClient.getFacets(),
         apiClient.getCities(),
+        // A failure here must not take the page down with it; the section
+        // simply does not render.
+        apiClient.getVerifiedPosters().catch(() => []),
       ]);
-      setProperties(fetchedProperties);
-      setCities(fetchedCities);
-      setLoading(false);
-    }
-    loadData();
-  }, []);
+      return { recent, forRent, forSale, facets, cities, posters };
+    },
+    []
+  );
 
-  const filteredListings = properties.filter(
-    (item) => selectedCategory === "all" || item.propertyType === selectedCategory
+  // Cities carry their own property counts from /cities; ordering by the facet
+  // counts keeps "most listings first" honest even when the two disagree.
+  const cityCounts = new Map((data?.facets.cities || []).map((c) => [c.name.toLowerCase(), c.count]));
+  const cities = [...(data?.cities || [])].sort(
+    (a, b) => (cityCounts.get(b.name.toLowerCase()) ?? 0) - (cityCounts.get(a.name.toLowerCase()) ?? 0)
   );
 
   return (
-    <div className="space-y-6 pb-12">
+    <div className="space-y-12 pb-16">
+      <HomeHero cities={data?.cities || []} listingCount={data?.facets.total ?? 0} />
 
-      <HomeHero cities={cities} listingCount={properties.length} />
-
-      {/* 2. CATEGORY STRIP */}
-      <CategoryBar
-        selected={selectedCategory}
-        onSelect={(cat) => setSelectedCategory(cat)}
-      />
-
-      {/* 3. FEATURED HOMES */}
-      <section className="max-w-[1440px] mx-auto px-4 sm:px-8">
-        <div className="flex items-end justify-between mb-5 border-b border-line pb-3">
-          <div>
-            <h2 className="font-serif-display text-2xl sm:text-3xl font-light text-ink">
-              Featured homes
-            </h2>
-          </div>
-
-          <Link
-            href="/search"
-            className="text-micro text-primary font-bold hover:underline flex items-center gap-1"
-          >
-            <span>View all listings</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
+      {/* A single failure notice for the whole page rather than one per rail. */}
+      {error && (
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-8">
+          <ErrorNotice message={error} onRetry={retry} />
         </div>
+      )}
 
-        {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
-              <Skeleton key={n} className="h-72" />
-            ))}
-          </div>
-        ) : filteredListings.length === 0 ? (
-          <div className="text-center py-10 bg-canvas rounded-panel border border-line p-6">
-            <Building2 className="w-12 h-12 text-muted mx-auto mb-3 opacity-50" />
-            <h3 className="font-serif-display text-xl text-ink mb-1">No Properties Found</h3>
-            <p className="text-xs text-muted">Try selecting a different category or search term.</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            {filteredListings.map((property) => (
-              <PropertyCard key={property.id} property={property} />
-            ))}
-          </div>
-        )}
-      </section>
+      {!error && (
+        <>
+          <PropertyRail
+            title="Recently added"
+            description="The newest listings on Delala."
+            href="/search?sort=newest"
+            hrefLabel="See all listings"
+            properties={data?.recent.data || []}
+            loading={loading}
+            error={null}
+            limit={RAIL_SIZE}
+          />
 
-      {/* 4. CITIES */}
-      <section className="bg-canvas py-8 px-4 sm:px-8 border-y border-line">
-        <div className="max-w-[1440px] mx-auto">
-          <div className="mb-5">
-            <h2 className="font-serif-display text-2xl sm:text-3xl font-light text-ink">
-              Explore cities
-            </h2>
-          </div>
+          <PropertyRail
+            title="Homes to rent"
+            description="Monthly rentals across Ethiopia."
+            href="/search?listingType=rent"
+            hrefLabel="Browse rentals"
+            properties={data?.forRent.data || []}
+            loading={loading}
+            error={null}
+            limit={RAIL_SIZE}
+          />
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3.5">
-            {cities.map((city) => (
-              <CityCard key={city.id} city={city} />
-            ))}
-          </div>
-        </div>
-      </section>
+          <PropertyRail
+            title="Homes for sale"
+            description="Properties on the market to buy."
+            href="/search?listingType=sale"
+            hrefLabel="Browse sales"
+            properties={data?.forSale.data || []}
+            loading={loading}
+            error={null}
+            limit={RAIL_SIZE}
+          />
 
-      {/* Filter Modal */}
-      <FilterModal
-        isOpen={isFilterModalOpen}
-        onClose={() => setIsFilterModalOpen(false)}
-        initialFilters={filters}
-        onApply={(newFilters) => setFilters(newFilters)}
-        cities={cities}
-      />
+          <BrowseByType
+            types={data?.facets.propertyTypes || []}
+            loading={loading}
+            error={null}
+          />
+
+          {/* CITIES */}
+          <section className="bg-canvas py-10 px-4 sm:px-8 border-y border-line">
+            <div className="max-w-[1440px] mx-auto">
+              <div className="mb-4 flex items-end justify-between gap-4">
+                <div>
+                  <h2 className="font-serif-display text-2xl sm:text-3xl font-light text-ink">
+                    Where people are looking
+                  </h2>
+                  <p className="text-micro text-muted mt-1">
+                    Ordered by how many listings each city has right now.
+                  </p>
+                </div>
+                <Link
+                  href="/cities"
+                  className="text-micro text-primary font-medium hover:underline flex items-center gap-1 shrink-0"
+                >
+                  <span>All cities</span>
+                  <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
+                </Link>
+              </div>
+
+              {loading ? (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3.5">
+                  {Array.from({ length: 6 }, (_, i) => (
+                    <Skeleton key={i} className="h-40" />
+                  ))}
+                </div>
+              ) : cities.length === 0 ? (
+                <p className="text-micro text-muted flex items-center gap-2">
+                  <MapPin className="w-4 h-4" aria-hidden="true" />
+                  No cities have listings yet.
+                </p>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3.5">
+                  {cities.map((city) => (
+                    <CityCard key={city.id} city={city} />
+                  ))}
+                </div>
+              )}
+            </div>
+          </section>
+
+          <TrustedPosters posters={data?.posters || []} />
+
+          <HowItWorks />
+
+          {/* TRUST + POST CTA */}
+          <section className="max-w-[1440px] mx-auto px-4 sm:px-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div className="p-8 rounded-card bg-surface border border-line flex flex-col gap-3">
+                <ShieldCheck className="w-6 h-6 text-primary" aria-hidden="true" />
+                <h2 className="font-serif-display text-2xl font-light text-ink">
+                  Know what you are looking at
+                </h2>
+                <p className="text-micro text-muted leading-relaxed">
+                  How Delala verifies posters, what a review badge does and does not mean, how to
+                  spot a listing that is not what it claims, and what to do about one.
+                </p>
+                <Link
+                  href="/safety"
+                  className="mt-2 inline-flex items-center justify-center h-11 px-5 rounded-control border border-line bg-canvas text-body text-micro font-medium hover:border-primary/40 transition-colors w-fit"
+                >
+                  Safety &amp; trust
+                </Link>
+              </div>
+
+              <div className="p-8 rounded-card bg-primary text-white flex flex-col gap-3">
+                <PlusCircle className="w-6 h-6 text-accent" aria-hidden="true" />
+                <h2 className="font-serif-display text-2xl font-light">Have a property to list?</h2>
+                <p className="text-micro text-white/80 leading-relaxed">
+                  Post it with photographs, the area, the price and what the place actually has.
+                  Listings go through review before they appear on the marketplace.
+                </p>
+                <Link
+                  href="/publish"
+                  className="mt-2 inline-flex items-center justify-center h-11 px-5 rounded-control bg-white text-primary text-micro font-medium hover:bg-accent transition-colors w-fit"
+                >
+                  Post a property
+                </Link>
+              </div>
+            </div>
+          </section>
+        </>
+      )}
     </div>
   );
 }
