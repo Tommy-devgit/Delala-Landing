@@ -1,11 +1,6 @@
 import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from "@nestjs/common";
 import { PrismaService } from "../../prisma/prisma.service";
-
-/** `betterauth-session-<uuid>-<issuedAtMs>` — the shape issued by AuthService. */
-const SESSION_TOKEN = /^betterauth-session-([0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})-(\d+)$/i;
-
-/** Sessions stop being accepted after 30 days. */
-const MAX_SESSION_AGE_MS = 30 * 24 * 60 * 60 * 1000;
+import { verifySessionToken } from "../session-token";
 
 export interface AuthenticatedUser {
   id: string;
@@ -27,6 +22,11 @@ export const bearerToken = (authorization?: string): string | undefined => {
  * registered, so `request.user` was always undefined and RolesGuard — which
  * reads `user.role` — could never pass. Every guarded route answered 403
  * regardless of credentials.
+ *
+ * The token's signature is checked before the database is touched. Until that
+ * check existed the guard trusted any well-formed string, so a session could be
+ * assembled from a user id alone — and ids are public, returned as `brokerId`
+ * on every property.
  */
 @Injectable()
 export class SessionAuthGuard implements CanActivate {
@@ -40,18 +40,16 @@ export class SessionAuthGuard implements CanActivate {
       throw new UnauthorizedException("Sign in to continue.");
     }
 
-    const match = token.match(SESSION_TOKEN);
-    if (!match) {
-      throw new UnauthorizedException("That session is not valid.");
-    }
-
-    const [, userId, issuedAt] = match;
-    if (Date.now() - Number(issuedAt) > MAX_SESSION_AGE_MS) {
-      throw new UnauthorizedException("That session has expired. Please sign in again.");
+    // One message for malformed, unsigned, wrongly-signed and expired alike.
+    // Every session issued before tokens were signed falls in here, so the first
+    // request after this deploy is a sign-in for everybody.
+    const claims = verifySessionToken(token);
+    if (!claims) {
+      throw new UnauthorizedException("That session is no longer valid. Please sign in again.");
     }
 
     const user = await this.prisma.user.findUnique({
-      where: { id: userId },
+      where: { id: claims.userId },
       include: { profile: true },
     });
 
