@@ -95,12 +95,29 @@ vars are missing.
 Tokens are issued as:
 
 ```
-betterauth-session-<user-uuid>-<issuedAtMs>
+betterauth-session-<user-uuid>-<issuedAtMs>-<hmac>
 ```
 
-`SessionAuthGuard` (`src/common/guards/session-auth.guard.ts`) parses that,
-loads the user, rejects expired (>30 days) and suspended accounts, and sets
-`request.user = { id, email, role, status }`. `RolesGuard` reads `user.role`.
+The trailing 128-bit HMAC-SHA256 covers `<uuid>-<issuedAtMs>` and is keyed by
+**`SESSION_SECRET`**, which must be set in the API environment — locally and on
+Vercel. There is no fallback value; without it the API cannot issue or verify a
+session and answers 500, deliberately, because a default signing key is a
+published one. Generate with:
+
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```
+
+`src/common/session-token.ts` owns minting and verification. `SessionAuthGuard`
+(`src/common/guards/session-auth.guard.ts`) verifies the signature *before*
+touching the database, loads the user, rejects expired (>30 days) and suspended
+accounts, and sets `request.user = { id, email, role, status }`. `RolesGuard`
+reads `user.role`.
+
+Anything that needs the user id from a header must go through
+`verifySessionToken`. `properties.controller.ts` used to re-parse the token with
+its own regex, which meant listing ownership could be asserted by anyone able to
+type a uuid.
 
 Before this guard existed **nothing populated `request.user`**, so `RolesGuard`
 always returned false and every guarded route answered 403 regardless of
@@ -114,18 +131,55 @@ cd services/api
 npm run make-admin -- someone@example.com   # no arg lists accounts + roles
 ```
 
-### ⚠️ Open security issue — passwords are never verified
+### Passwords
 
-`AuthService.login()` looks the user up by email and issues a token **without
-checking the password at all**, and auto-registers unknown emails. There is no
-password hash stored anywhere. In effect:
+Stored as a scrypt digest in `profiles.password_hash`, via
+`src/common/password.ts`. Node's own `crypto.scrypt`, not bcrypt — no native
+module to resolve differently in Vercel's build than it did locally. The digest
+string carries its own cost parameters, so the work factor can be raised later
+without invalidating existing passwords.
 
-- any password works for any existing email
-- anyone who knows an admin's email can sign into the admin dashboard
+`profiles.password_hash` is **globally omitted in `PrismaService`**, because a
+dozen services return `include: { profile: true }` straight to the client and an
+opt-out list only has to be forgotten once. Login selects it explicitly, which
+overrides the omit. Keep it that way.
 
-The route guards, role checks and ownership fixes are all real, but they sit on
-top of this. **Fix this before any public launch.** It was raised with the owner
-and consciously deferred, not overlooked.
+`AuthService.login()` answers the same "Email or password is incorrect." for an
+unknown email as for a wrong password, and hashes against a decoy digest when the
+email does not exist so the two cost the same — otherwise the response time
+re-introduces the account enumeration the shared message exists to prevent.
+
+**Accounts created before this have a NULL digest and cannot sign in.** That is
+deliberate; a NULL digest reads as "wrong password", never as "no password
+required". There is no self-service reset, so the only way to give an existing
+account a password is:
+
+```bash
+cd services/api
+npm run set-password -- someone@example.com "a real password"   # no args lists who is locked out
+```
+
+#### What this replaced
+
+`login()` used to look the user up by email and issue a token **without
+consulting the password at all**, auto-registering unknown emails, and no
+password hash was stored anywhere. Tokens were unsigned, so a session could be
+assembled from a user id alone — and ids are public, returned as `brokerId` on
+every property, so `GET /properties` was enough to take over any account. The
+guards and role checks were real but sat on top of that.
+
+Exposing `brokerId` is now harmless and stays, since the public poster profile
+("other homes by this owner") is built on it. It is the signature, not the
+secrecy of the id, that makes it safe.
+
+#### Still open
+
+- **No password reset flow.** `product-website/lib/auth-client.ts` calls
+  `/auth/forgot-password` and `/auth/reset-password`; neither endpoint exists,
+  and the client swallows the failure and reports success either way. A real one
+  needs email delivery. `set-password` is the manual stand-in.
+- Registration accepts any password of 6+ characters. No strength rules, no rate
+  limiting on `/auth/login`.
 
 ---
 
@@ -239,9 +293,15 @@ curl -s -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $USER" ...     
 curl -s -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $ADMIN" ...    # 200
 ```
 
-A token can be forged locally for testing as
-`betterauth-session-<real-user-uuid>-<epoch-ms>` — which is itself a reminder
-about §3.
+Tokens can no longer be hand-assembled — get one by signing in:
+
+```bash
+curl -s -X POST $API/auth/login -H 'Content-Type: application/json' \
+  -d '{"email":"someone@example.com","password":"..."}' | jq -r .token
+```
+
+If that account has never had `set-password` run for it, this returns 401. If
+every request 500s instead, `SESSION_SECRET` is unset — see §3.
 
 ---
 
@@ -277,13 +337,29 @@ about §3.
 
 ## 10. State at handover
 
-Working tree clean. **5 commits unpushed.** Both the API and the frontends need
-redeploying — the favorites, notifications, public-profile endpoints and the
-pending-review policy are all server-side.
+Working tree clean. Both the API and the frontends need redeploying — the
+favorites, notifications, public-profile endpoints and the pending-review policy
+are all server-side.
+
+**Before deploying the API, in this order:**
+
+1. Set `SESSION_SECRET` on Vercel (32+ chars). Without it every request 500s.
+2. `npm run set-password -- <your admin email> "..."` — every account predates
+   password storage and is otherwise locked out, including the admin one.
+
+`password_hash` has already been added to the live database, so `prisma:migrate`
+is not blocking this deploy. Every existing session is invalidated by the switch
+to signed tokens; users sign in again once.
 
 Verified at handover: all three apps build (17 / 17 / 14 routes), 0 lint errors,
 **41 routes smoke-tested 200 against a live API with 0 server errors**, and every
 form control in all three apps has an accessible name.
+
+The auth changes were exercised against a live API on port 4010 — 13 checks,
+all passing: forged and tampered tokens rejected, wrong passwords rejected,
+unknown emails neither admitted nor auto-registered, valid sessions accepted,
+`/auth/me` resolving, and no digest present in any response body. The throwaway
+accounts those tests created were deleted afterwards.
 
 Not verified: anything requiring a real browser. There is no browser tooling in
 this environment, so interaction — clicking a map marker, dragging the publish
