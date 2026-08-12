@@ -40,6 +40,12 @@ model Profile {
   passwordHash String? @map("password_hash")
   role      String?   @default("user") @db.VarChar(20)
   status    String?   @default("active") @db.VarChar(20)
+  // Trust signals. False until a human verifies — never defaulted to true.
+  phoneVerified    Boolean @default(false) @map("phone_verified")
+  identityVerified Boolean @default(false) @map("identity_verified")
+  businessVerified Boolean @default(false) @map("business_verified")
+  /// owner | broker | agency. Distinct from `role`, which is authorization.
+  posterType       String? @map("poster_type") @db.VarChar(20)
   createdAt DateTime? @default(now()) @map("created_at") @db.Timestamp(6)
   updatedAt DateTime? @default(now()) @map("updated_at") @db.Timestamp(6)
 
@@ -82,6 +88,15 @@ model Property {
   latitude     Decimal?        @db.Decimal(10, 7)
   longitude    Decimal?        @db.Decimal(10, 7)
   contactPhone String?         @map("contact_phone") @db.VarChar(30)
+  // Nullable on purpose — null means "the poster was never asked", which is not
+  // the same claim as false. Only `true` is ever rendered as an amenity.
+  generator     Boolean?
+  waterTank     Boolean?       @map("water_tank")
+  parking       Boolean?
+  furnished     Boolean?
+  securityGuard Boolean?       @map("security_guard")
+  balcony       Boolean?
+  internet      Boolean?
   status       String?         @default("pending") @db.VarChar(30)
   createdAt    DateTime?       @default(now()) @map("created_at") @db.Timestamp(6)
   updatedAt    DateTime?       @default(now()) @map("updated_at") @db.Timestamp(6)
