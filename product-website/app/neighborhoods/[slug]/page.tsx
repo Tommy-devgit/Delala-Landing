@@ -6,6 +6,8 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { apiClient } from "@/lib/api-client";
+import { useAsync } from "@/lib/use-async";
+import { ErrorNotice } from "@/components/error-notice";
 import { Property } from "@/lib/types";
 import { PropertyCard } from "@/components/property-card";
 import { ShieldCheck, Zap, Droplets, ArrowRight, Building2 } from "lucide-react";
@@ -15,20 +17,16 @@ export default function NeighborhoodDetailPage() {
   const params = useParams();
   const slug = params?.slug as string;
 
-  const [nhProperties, setNhProperties] = useState<Property[]>([]);
-  const [loading, setLoading] = useState(true);
-
   const nhName = slug ? slug.replace(/-/g, " ") : "Bole Medhanialem";
 
-  useEffect(() => {
-    async function loadData() {
-      setLoading(true);
-      const data = await apiClient.getProperties();
-      setNhProperties(data.filter((p) => p.subCity.toLowerCase().includes(nhName.toLowerCase()) || p.neighborhood.toLowerCase().includes(nhName.toLowerCase())));
-      setLoading(false);
-    }
-    loadData();
-  }, [nhName]);
+  // The API matches the location hierarchy by name at any level, so this no
+  // longer downloads every property in the country to substring-match two
+  // fields in the browser.
+  const { data, loading, error, retry } = useAsync(
+    () => apiClient.getProperties({ neighborhood: nhName }),
+    [nhName]
+  );
+  const nhProperties: Property[] = data || [];
 
   return (
     <div className="bg-canvas min-h-screen py-8">
@@ -59,7 +57,9 @@ export default function NeighborhoodDetailPage() {
           </div>
         </div>
 
-        {loading ? (
+        {error ? (
+          <ErrorNotice message={error} onRetry={retry} />
+        ) : loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[1, 2, 3, 4].map((i) => (
               <Skeleton key={i} className="h-80 rounded-panel" />
