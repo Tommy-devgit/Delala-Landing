@@ -53,16 +53,36 @@ export default function NotificationsPage() {
     };
   }, [userId, nonce]);
 
+  /**
+   * Optimistic, then rolled back if the write did not land.
+   *
+   * Both of these used to `await` a fetch whose response was never checked, so
+   * a failed write left the row unread on the server while the page showed it
+   * as read — and the navbar badge came back on the next load with nothing to
+   * explain it.
+   */
   const markRead = async (id: string) => {
+    const previous = items;
     setItems((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
-    await apiClient.markNotificationRead(id);
-    window.dispatchEvent(new Event("delala_notifications_change"));
+    try {
+      await apiClient.markNotificationRead(id);
+      window.dispatchEvent(new Event("delala_notifications_change"));
+    } catch (err) {
+      setItems(previous);
+      setError(err instanceof Error ? err.message : "Could not mark that as read.");
+    }
   };
 
   const markAllRead = async () => {
+    const previous = items;
     setItems((prev) => prev.map((n) => ({ ...n, read: true })));
-    await apiClient.markAllNotificationsRead();
-    window.dispatchEvent(new Event("delala_notifications_change"));
+    try {
+      await apiClient.markAllNotificationsRead();
+      window.dispatchEvent(new Event("delala_notifications_change"));
+    } catch (err) {
+      setItems(previous);
+      setError(err instanceof Error ? err.message : "Could not mark your notifications as read.");
+    }
   };
 
   const unread = items.filter((n) => !n.read).length;
