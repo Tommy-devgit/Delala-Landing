@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Controller,
   Get,
   Post,
@@ -15,7 +16,7 @@ import {
 } from "@nestjs/common";
 import { FilesInterceptor, FileInterceptor } from "@nestjs/platform-express";
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiConsumes } from "@nestjs/swagger";
-import { PropertiesService } from "./properties.service";
+import { PropertiesService, PropertyQuery } from "./properties.service";
 import { CreatePropertyDto, ModeratePropertyDto } from "./dto/create-property.dto";
 import { R2StorageService } from "../storage/r2-storage.service";
 import { Roles } from "../common/decorators/roles.decorator";
@@ -51,11 +52,9 @@ export class PropertiesController {
   ) {}
 
   @Get()
-  @ApiOperation({ summary: "Get all verified approved marketplace property listings" })
-  @ApiResponse({ status: 200, description: "Returns list of approved properties" })
-  findAll(
-    @Query() query: { city?: string; subCity?: string; propertyType?: string; ownerId?: string; status?: string }
-  ) {
+  @ApiOperation({ summary: "Search, filter, sort and page the marketplace listings" })
+  @ApiResponse({ status: 200, description: "Returns { data, total, page, pageSize, totalPages }" })
+  findAll(@Query() query: PropertyQuery) {
     return this.propertiesService.findAll(query);
   }
 
@@ -70,7 +69,9 @@ export class PropertiesController {
   @ApiConsumes("multipart/form-data")
   @ApiOperation({ summary: "Upload single image to Cloudflare R2 bucket" })
   async uploadImage(@UploadedFile() file: Express.Multer.File) {
-    if (!file) return { url: "/images/hero_property.png" };
+    // Answering a fileless upload with a stock image URL reported success and
+    // attached a photograph of someone else's house to the listing.
+    if (!file) throw new BadRequestException("No image was received.");
     const url = await this.r2StorageService.uploadImage(file);
     return { url };
   }
