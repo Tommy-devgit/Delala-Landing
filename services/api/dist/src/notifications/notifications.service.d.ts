@@ -12,10 +12,10 @@ export declare class NotificationsService {
     }): Promise<{
         id: string;
         createdAt: Date | null;
-        type: string;
-        title: string;
         userId: string;
         propertyId: string | null;
+        title: string;
+        type: string;
         body: string | null;
         read: boolean | null;
     }>;

@@ -11,6 +11,7 @@ export declare class UsersController {
             phone: string | null;
             avatarUrl: string | null;
             bio: string | null;
+            passwordHash: string | null;
             role: string | null;
             status: string | null;
             updatedAt: Date | null;
@@ -73,6 +74,7 @@ export declare class UsersController {
         phone: string | null;
         avatarUrl: string | null;
         bio: string | null;
+        passwordHash: string | null;
         role: string | null;
         status: string | null;
         updatedAt: Date | null;

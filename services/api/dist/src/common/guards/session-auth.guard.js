@@ -12,8 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.SessionAuthGuard = exports.bearerToken = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../../prisma/prisma.service");
-const SESSION_TOKEN = /^betterauth-session-([0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})-(\d+)$/i;
-const MAX_SESSION_AGE_MS = 30 * 24 * 60 * 60 * 1000;
+const session_token_1 = require("../session-token");
 const bearerToken = (authorization) => {
     if (!authorization)
         return undefined;
@@ -30,16 +29,12 @@ let SessionAuthGuard = class SessionAuthGuard {
         if (!token) {
             throw new common_1.UnauthorizedException("Sign in to continue.");
         }
-        const match = token.match(SESSION_TOKEN);
-        if (!match) {
-            throw new common_1.UnauthorizedException("That session is not valid.");
-        }
-        const [, userId, issuedAt] = match;
-        if (Date.now() - Number(issuedAt) > MAX_SESSION_AGE_MS) {
-            throw new common_1.UnauthorizedException("That session has expired. Please sign in again.");
+        const claims = (0, session_token_1.verifySessionToken)(token);
+        if (!claims) {
+            throw new common_1.UnauthorizedException("That session is no longer valid. Please sign in again.");
         }
         const user = await this.prisma.user.findUnique({
-            where: { id: userId },
+            where: { id: claims.userId },
             include: { profile: true },
         });
         if (!user) {

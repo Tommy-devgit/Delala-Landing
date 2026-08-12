@@ -21,6 +21,7 @@ export declare class VisitsController {
                 phone: string | null;
                 avatarUrl: string | null;
                 bio: string | null;
+                passwordHash: string | null;
                 role: string | null;
                 status: string | null;
                 updatedAt: Date | null;
@@ -35,19 +36,19 @@ export declare class VisitsController {
             createdAt: Date | null;
             status: string | null;
             updatedAt: Date | null;
-            latitude: import("@prisma/client/runtime/library").Decimal | null;
-            longitude: import("@prisma/client/runtime/library").Decimal | null;
+            ownerId: string;
+            locationId: string;
+            title: string;
             description: string | null;
+            propertyType: string | null;
+            listingType: string | null;
             price: import("@prisma/client/runtime/library").Decimal | null;
             bedrooms: number | null;
             bathrooms: number | null;
             area: import("@prisma/client/runtime/library").Decimal | null;
-            ownerId: string;
-            locationId: string;
-            title: string;
-            propertyType: string | null;
-            listingType: string | null;
             address: string | null;
+            latitude: import("@prisma/client/runtime/library").Decimal | null;
+            longitude: import("@prisma/client/runtime/library").Decimal | null;
             contactPhone: string | null;
         };
     } & {

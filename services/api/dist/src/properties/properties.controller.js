@@ -22,14 +22,14 @@ const r2_storage_service_1 = require("../storage/r2-storage.service");
 const roles_decorator_1 = require("../common/decorators/roles.decorator");
 const roles_guard_1 = require("../common/guards/roles.guard");
 const session_auth_guard_1 = require("../common/guards/session-auth.guard");
+const session_token_1 = require("../common/session-token");
 const admin_service_1 = require("../admin/admin.service");
 const notifications_service_1 = require("../notifications/notifications.service");
 const userIdFromAuthHeader = (authorization) => {
     if (!authorization)
         return undefined;
-    const token = authorization.replace(/^Bearer\s+/i, "");
-    const match = token.match(/^betterauth-session-([0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})-\d+$/i);
-    return match?.[1];
+    const token = (0, session_auth_guard_1.bearerToken)(authorization);
+    return token ? (0, session_token_1.verifySessionToken)(token)?.userId : undefined;
 };
 let PropertiesController = class PropertiesController {
     constructor(propertiesService, r2StorageService, adminService, notifications) {

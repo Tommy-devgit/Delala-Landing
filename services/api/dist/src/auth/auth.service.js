@@ -14,6 +14,19 @@ exports.AuthService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const crypto_1 = require("crypto");
+const password_1 = require("../common/password");
+const session_token_1 = require("../common/session-token");
+const BAD_CREDENTIALS = "Email or password is incorrect.";
+const DECOY_DIGEST = "scrypt$16384$8$1$y2i8H8N2hkbXiwy6QJH8/Q==$RB663gFQFvRph5lMr4VqEEYGM5A8BlVnTEXOSAc0p2f6zeFmSLHqlJVJZ6U8nR74t27LGvSJCdkEdZ32yk4X2A==";
+const LOGIN_PROFILE_FIELDS = {
+    firstName: true,
+    lastName: true,
+    role: true,
+    status: true,
+    avatarUrl: true,
+    phone: true,
+    passwordHash: true,
+};
 let AuthService = AuthService_1 = class AuthService {
     constructor(prisma) {
         this.prisma = prisma;
@@ -31,6 +44,7 @@ let AuthService = AuthService_1 = class AuthService {
             const names = (dto.fullName || "User").trim().split(" ");
             const firstName = names[0] || "User";
             const lastName = names.slice(1).join(" ") || "";
+            const passwordHash = await (0, password_1.hashPassword)(dto.password);
             const user = await this.prisma.user.create({
                 data: {
                     id: userId,
@@ -39,16 +53,16 @@ let AuthService = AuthService_1 = class AuthService {
                         create: {
                             firstName,
                             lastName,
+                            passwordHash,
                             role: (dto.role || "user").toLowerCase(),
                         },
                     },
                 },
                 include: { profile: true },
             });
-            const token = `betterauth-session-${user.id}-${Date.now()}`;
             const fullName = [user.profile?.firstName, user.profile?.lastName].filter(Boolean).join(" ") || dto.email;
             return {
-                token,
+                token: (0, session_token_1.issueSessionToken)(user.id),
                 user: {
                     id: user.id,
                     email: user.email,
@@ -70,19 +84,18 @@ let AuthService = AuthService_1 = class AuthService {
         try {
             const user = await this.prisma.user.findFirst({
                 where: { email: dto.email },
-                include: { profile: true },
+                include: { profile: { select: LOGIN_PROFILE_FIELDS } },
             });
-            if (!user) {
-                return this.register({
-                    email: dto.email,
-                    password: dto.password,
-                    fullName: dto.email.split("@")[0],
-                });
+            const matches = await (0, password_1.verifyPassword)(dto.password, user?.profile?.passwordHash || DECOY_DIGEST);
+            if (!user || !matches) {
+                throw new common_1.UnauthorizedException(BAD_CREDENTIALS);
             }
-            const token = `betterauth-session-${user.id}-${Date.now()}`;
+            if (String(user.profile?.status || "active").toLowerCase() === "suspended") {
+                throw new common_1.UnauthorizedException("This account has been suspended.");
+            }
             const fullName = [user.profile?.firstName, user.profile?.lastName].filter(Boolean).join(" ") || user.email;
             return {
-                token,
+                token: (0, session_token_1.issueSessionToken)(user.id),
                 user: {
                     id: user.id,
                     email: user.email,
@@ -94,17 +107,18 @@ let AuthService = AuthService_1 = class AuthService {
             };
         }
         catch (err) {
+            if (err instanceof common_1.UnauthorizedException)
+                throw err;
             this.logger.error(`Login failed for ${dto.email}: ${err.message}`, err.stack);
             throw new common_1.BadRequestException(err.message || "Invalid credentials.");
         }
     }
     async validateSession(token) {
-        const parts = token.split("-");
-        const userId = parts[2];
-        if (!userId)
+        const claims = (0, session_token_1.verifySessionToken)(token);
+        if (!claims)
             throw new common_1.UnauthorizedException("Invalid auth token");
         const user = await this.prisma.user.findFirst({
-            where: { id: userId },
+            where: { id: claims.userId },
             include: { profile: true },
         });
         if (!user)
