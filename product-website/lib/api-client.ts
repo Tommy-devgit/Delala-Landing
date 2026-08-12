@@ -1,4 +1,4 @@
-import { Property, City, Broker, LocationNode, PropertyType } from "./types";
+import { Property, City, Broker, LocationNode, PropertyType, PosterType, PosterVerification } from "./types";
 import { toCoordinates } from "./map";
 
 /**
@@ -26,8 +26,9 @@ interface ApiBroker {
   slug?: string;
   agencyName?: string;
   phone?: string;
-  rating?: number;
-  user?: { profile?: { fullName?: string; avatarUrl?: string } };
+  posterType?: PosterType | null;
+  verification?: { phone?: boolean; identity?: boolean; business?: boolean };
+  user?: { profile?: { fullName?: string; avatarUrl?: string | null } };
 }
 
 interface ApiProperty {
@@ -40,6 +41,7 @@ interface ApiProperty {
   bedrooms: number;
   bathrooms: number;
   areaSqm: number;
+  listingType?: string;
   status?: string;
   createdAt?: string | null;
   city?: string | { name?: string };
@@ -52,12 +54,13 @@ interface ApiProperty {
   longitude?: number | string | null;
   images?: ApiPropertyImage[];
   fieldAgentNotes?: string;
-  generator?: boolean;
-  waterTank?: boolean;
-  parking?: boolean;
-  furnished?: boolean;
-  securityGuard?: boolean;
-  balcony?: boolean;
+  generator?: boolean | null;
+  waterTank?: boolean | null;
+  parking?: boolean | null;
+  furnished?: boolean | null;
+  securityGuard?: boolean | null;
+  balcony?: boolean | null;
+  internet?: boolean | null;
   phone?: string;
   contactPhone?: string;
   broker?: ApiBroker;
@@ -119,7 +122,8 @@ const mapProperty = (p: ApiProperty): Property => {
     id: p.id,
     slug: p.slug,
     title: p.title,
-    propertyType: p.propertyType,
+    propertyType: p.propertyType ?? null,
+    listingType: p.listingType === "sale" ? "sale" : "rent",
     rentETB: p.rentETB,
     city: typeof p.city === "string" ? p.city : (p.city?.name || p.cityEntity?.name || ""),
     subCity: p.subCity || neighborhoodObject?.subCity || p.neighborhoodEntity?.subCity || "",
@@ -131,42 +135,43 @@ const mapProperty = (p: ApiProperty): Property => {
     bedrooms: p.bedrooms,
     bathrooms: p.bathrooms,
     areaSqm: p.areaSqm,
-    heroImage: p.images?.find((img) => img.isHero)?.url || p.images?.[0]?.url || "/images/hero_property.png",
-    galleryImages:
-      p.images?.map((img) => img.url).filter((url): url is string => Boolean(url)) || [
-        "/images/hero_property.png",
-      ],
-    verified: p.status === "APPROVED",
-    fieldAgentNotes: p.fieldAgentNotes || "Physically verified by Delala field inspector.",
-    generator: Boolean(p.generator),
-    waterTank: Boolean(p.waterTank),
-    parking: Boolean(p.parking),
-    furnished: Boolean(p.furnished),
-    securityGuard: Boolean(p.securityGuard),
-    balcony: Boolean(p.balcony),
+    // Null rather than a stock photograph. A placeholder here made every
+    // listing without pictures look photographed, and put the same two rooms
+    // across the whole marketplace.
+    heroImage: p.images?.find((img) => img.isHero)?.url || p.images?.[0]?.url || null,
+    galleryImages: p.images?.map((img) => img.url).filter((url): url is string => Boolean(url)) ?? [],
+    approved: p.status === "APPROVED",
+    // Passed through, including null. `Boolean(null)` would turn "not asked"
+    // into a definite no.
+    generator: p.generator ?? null,
+    waterTank: p.waterTank ?? null,
+    parking: p.parking ?? null,
+    furnished: p.furnished ?? null,
+    securityGuard: p.securityGuard ?? null,
+    balcony: p.balcony ?? null,
+    internet: p.internet ?? null,
     phone: propertyPhone,
     broker: {
-      id: p.broker?.id || "b1",
-      slug: p.broker?.slug || "property-owner",
-      name: p.broker?.user?.profile?.fullName || p.broker?.agencyName || "Verified Owner",
+      id: p.broker?.id || "",
+      slug: p.broker?.slug || "",
+      name: p.broker?.user?.profile?.fullName || p.broker?.agencyName || "Delala poster",
       avatar: p.broker?.user?.profile?.avatarUrl || "",
-      agencyName: p.broker?.agencyName || "Verified Owner",
-      verified: true,
+      agencyName: p.broker?.agencyName || "",
       phone: propertyPhone,
-      email: "owner@delala.et",
-      rating: p.broker?.rating || 4.9,
-      reviewsCount: 14,
-      activeListingsCount: 8,
-      languages: ["Amharic", "English"],
-      responseTime: "Under 15 minutes",
-      specializedAreas: [],
-      bio: "",
+      posterType: p.broker?.posterType ?? null,
+      // Absent verification is unverified. This block used to be
+      // `verified: true` with a 4.9 rating and "Under 15 minutes" response
+      // time, invented client-side on top of the API inventing them too.
+      verification: {
+        phone: Boolean(p.broker?.verification?.phone),
+        identity: Boolean(p.broker?.verification?.identity),
+        business: Boolean(p.broker?.verification?.business),
+      },
     },
     latitude: coordinates?.latitude ?? null,
     longitude: coordinates?.longitude ?? null,
     description: p.description,
     createdAt: p.createdAt ?? null,
-    availableDate: "Immediate",
   };
 };
 
@@ -210,11 +215,16 @@ export interface PublicProfile {
   id: string;
   fullName: string;
   role: string;
+  posterType: PosterType | null;
   avatarUrl: string | null;
   bio: string;
   phone: string | null;
+  verification: PosterVerification;
   listingCount: number;
   activeListingCount: number;
+  /** null when nobody has reviewed this poster's properties yet. */
+  rating: number | null;
+  reviewCount: number;
   memberSince: string | null;
 }
 
