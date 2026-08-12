@@ -34,6 +34,10 @@ model Profile {
   phone     String?   @db.VarChar(20)
   avatarUrl String?   @map("avatar_url") @db.Text
   bio       String?
+  // scrypt digest. NULL means no password has ever been set, which login
+  // refuses. Globally omitted in PrismaService so it cannot leak through the
+  // many `include: { profile: true }` calls that feed API responses.
+  passwordHash String? @map("password_hash")
   role      String?   @default("user") @db.VarChar(20)
   status    String?   @default("active") @db.VarChar(20)
   createdAt DateTime? @default(now()) @map("created_at") @db.Timestamp(6)
