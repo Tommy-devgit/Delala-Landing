@@ -8,6 +8,7 @@ import L from "leaflet";
 import { Building2, ShieldCheck, X } from "lucide-react";
 import { Coordinates, Property } from "@/lib/types";
 import { MAP_ZOOM, coordinatesSignature, withCoordinates } from "@/lib/map";
+import { PropertyPhoto } from "@/components/property-photo";
 import { DelalaMap } from "./delala-map";
 import { MapControls } from "./map-controls";
 import { createPropertyIcon } from "./property-marker";
@@ -85,19 +86,17 @@ function PropertyPreview({ property, onClose }: { property: Property; onClose: (
   return (
     <div className="absolute bottom-7 left-3 right-3 z-[600] rounded-card bg-surface/97 backdrop-blur-md border border-line shadow-lg p-3">
       <div className="flex items-center gap-3">
-        <img
-          src={property.heroImage}
-          alt=""
-          className="w-16 h-16 rounded-control object-cover shrink-0 bg-line"
-        />
+        <div className="w-16 h-16 rounded-control overflow-hidden shrink-0 bg-line">
+          <PropertyPhoto src={property.heroImage} alt={property.title} sizeHint="thumb" />
+        </div>
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 mb-0.5">
             <span className="font-mono-label text-label text-muted truncate">
               {[property.subCity, property.city].filter(Boolean).join(" • ")}
             </span>
-            {property.verified && (
-              <ShieldCheck className="w-3 h-3 text-primary shrink-0" aria-label="Field verified" />
+            {property.approved && (
+              <ShieldCheck className="w-3 h-3 text-primary shrink-0" aria-label="Reviewed by Delala" />
             )}
           </div>
 
