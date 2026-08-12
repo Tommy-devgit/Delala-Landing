@@ -17,8 +17,10 @@ export default function EditListingPage() {
   const [rentETB, setRentETB] = useState(property.rentETB.toString());
   const [bedrooms, setBedrooms] = useState(property.bedrooms.toString());
   const [bathrooms, setBathrooms] = useState(property.bathrooms.toString());
-  const [generator, setGenerator] = useState(property.generator);
-  const [waterTank, setWaterTank] = useState(property.waterTank);
+  // A checkbox has no third state, so an unanswered amenity starts unticked.
+  // Saving the form is what turns "never asked" into a real answer.
+  const [generator, setGenerator] = useState(property.generator === true);
+  const [waterTank, setWaterTank] = useState(property.waterTank === true);
   const [description, setDescription] = useState(property.description);
   const [saved, setSaved] = useState(false);
 
