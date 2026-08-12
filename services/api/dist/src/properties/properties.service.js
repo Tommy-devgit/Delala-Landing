@@ -173,12 +173,7 @@ let PropertiesService = class PropertiesService {
         }
         const priceAmount = Number(createDto.price || createDto.rentETB || 0);
         const finalImageUrls = Array.from(new Set([...uploadedImageUrls, ...(createDto.imageUrls || [])]));
-        const imageRecords = finalImageUrls.length > 0
-            ? finalImageUrls.map((url) => ({ imageUrl: url }))
-            : [
-                { imageUrl: "/images/hero_property.png" },
-                { imageUrl: "/images/hero_home_away.jpg" },
-            ];
+        const imageRecords = finalImageUrls.map((url) => ({ imageUrl: url }));
         const computedAddress = createDto.address || [createDto.subCity, createDto.city].filter(Boolean).join(", ");
         const newProperty = await this.prisma.property.create({
             data: {
@@ -197,6 +192,13 @@ let PropertiesService = class PropertiesService {
                 latitude: toCoordinate(createDto.latitude, 90),
                 longitude: toCoordinate(createDto.longitude, 180),
                 contactPhone: createDto.phone || null,
+                generator: createDto.generator ?? null,
+                waterTank: createDto.waterTank ?? null,
+                parking: createDto.parking ?? null,
+                furnished: createDto.furnished ?? null,
+                securityGuard: createDto.securityGuard ?? null,
+                balcony: createDto.balcony ?? null,
+                internet: createDto.internet ?? null,
                 status: "pending",
                 images: {
                     create: imageRecords,
@@ -244,7 +246,7 @@ let PropertiesService = class PropertiesService {
     }
     mapPropertyResponse(p) {
         const slug = p.title.toLowerCase().replace(/[^a-z0-9]+/g, "-") + "-" + (p.id ? p.id.slice(0, 4) : "prop");
-        const ownerName = [p.owner?.profile?.firstName, p.owner?.profile?.lastName].filter(Boolean).join(" ") || "Verified Owner";
+        const ownerName = [p.owner?.profile?.firstName, p.owner?.profile?.lastName].filter(Boolean).join(" ") || "Delala poster";
         const phone = p.contactPhone || p.owner?.profile?.phone || null;
         let city = "";
         let subCity = "";
@@ -287,17 +289,19 @@ let PropertiesService = class PropertiesService {
             slug,
             title: p.title,
             description: p.description || "",
-            propertyType: p.propertyType ? p.propertyType.charAt(0).toUpperCase() + p.propertyType.slice(1) : "Villa",
+            propertyType: p.propertyType ? p.propertyType.charAt(0).toUpperCase() + p.propertyType.slice(1) : null,
+            listingType: (p.listingType || "rent").toLowerCase(),
             rentETB: Number(p.price || 0),
             bedrooms: p.bedrooms || 0,
             bathrooms: Number(p.bathrooms || 0),
             areaSqm: Number(p.area || 0),
-            generator: true,
-            waterTank: true,
-            parking: true,
-            furnished: true,
-            securityGuard: true,
-            balcony: true,
+            generator: p.generator ?? null,
+            waterTank: p.waterTank ?? null,
+            parking: p.parking ?? null,
+            furnished: p.furnished ?? null,
+            securityGuard: p.securityGuard ?? null,
+            balcony: p.balcony ?? null,
+            internet: p.internet ?? null,
             status: p.status === "approved" ? "APPROVED" : "PENDING_APPROVAL",
             subCity,
             city,
@@ -326,28 +330,25 @@ let PropertiesService = class PropertiesService {
                 agencyName: ownerName,
                 name: ownerName,
                 phone: phone || "",
-                verified: true,
-                rating: 4.9,
-                reviewsCount: 12,
-                responseTime: "Under 15 mins",
+                posterType: p.owner?.profile?.posterType || null,
+                verification: {
+                    phone: Boolean(p.owner?.profile?.phoneVerified),
+                    identity: Boolean(p.owner?.profile?.identityVerified),
+                    business: Boolean(p.owner?.profile?.businessVerified),
+                },
                 user: {
                     profile: {
                         fullName: ownerName,
-                        avatarUrl: p.owner?.profile?.avatarUrl || "/images/hero_home_away.jpg",
+                        avatarUrl: p.owner?.profile?.avatarUrl || null,
                     },
                 },
             },
-            images: p.images && p.images.length > 0
-                ? p.images.map((img, i) => ({
-                    id: img.id,
-                    url: img.imageUrl,
-                    displayOrder: i + 1,
-                    isHero: i === 0,
-                }))
-                : [
-                    { id: "1", url: "/images/hero_property.png", displayOrder: 1, isHero: true },
-                    { id: "2", url: "/images/hero_home_away.jpg", displayOrder: 2, isHero: false },
-                ],
+            images: (p.images || []).map((img, i) => ({
+                id: img.id,
+                url: img.imageUrl,
+                displayOrder: i + 1,
+                isHero: i === 0,
+            })),
         };
     }
 };

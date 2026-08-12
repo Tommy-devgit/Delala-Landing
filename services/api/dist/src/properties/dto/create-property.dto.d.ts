@@ -23,6 +23,7 @@ export declare class CreatePropertyDto {
     furnished?: boolean;
     securityGuard?: boolean;
     balcony?: boolean;
+    internet?: boolean;
     brokerId?: string;
     phone?: string;
     imageUrls?: string[];

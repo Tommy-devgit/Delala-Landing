@@ -5,37 +5,15 @@ export declare class VisitsService {
     constructor(prisma: PrismaService);
     create(dto: CreateVisitDto): Promise<{
         id: string;
-        createdAt: Date | null;
         status: string | null;
-        userId: string | null;
+        createdAt: Date | null;
         propertyId: string | null;
+        userId: string | null;
         visitDate: Date | null;
     }>;
     findAll(): Promise<({
-        user: {
-            profile: {
-                id: string;
-                createdAt: Date | null;
-                firstName: string | null;
-                lastName: string | null;
-                phone: string | null;
-                avatarUrl: string | null;
-                bio: string | null;
-                passwordHash: string | null;
-                role: string | null;
-                status: string | null;
-                updatedAt: Date | null;
-            };
-        } & {
-            id: string;
-            email: string | null;
-            createdAt: Date | null;
-        };
         property: {
             id: string;
-            createdAt: Date | null;
-            status: string | null;
-            updatedAt: Date | null;
             ownerId: string;
             locationId: string;
             title: string;
@@ -50,13 +28,46 @@ export declare class VisitsService {
             latitude: import("@prisma/client/runtime/library").Decimal | null;
             longitude: import("@prisma/client/runtime/library").Decimal | null;
             contactPhone: string | null;
+            generator: boolean | null;
+            waterTank: boolean | null;
+            parking: boolean | null;
+            furnished: boolean | null;
+            securityGuard: boolean | null;
+            balcony: boolean | null;
+            internet: boolean | null;
+            status: string | null;
+            createdAt: Date | null;
+            updatedAt: Date | null;
+        };
+        user: {
+            profile: {
+                id: string;
+                status: string | null;
+                createdAt: Date | null;
+                updatedAt: Date | null;
+                phone: string | null;
+                firstName: string | null;
+                lastName: string | null;
+                avatarUrl: string | null;
+                bio: string | null;
+                passwordHash: string | null;
+                role: string | null;
+                phoneVerified: boolean;
+                identityVerified: boolean;
+                businessVerified: boolean;
+                posterType: string | null;
+            };
+        } & {
+            id: string;
+            createdAt: Date | null;
+            email: string | null;
         };
     } & {
         id: string;
-        createdAt: Date | null;
         status: string | null;
-        userId: string | null;
+        createdAt: Date | null;
         propertyId: string | null;
+        userId: string | null;
         visitDate: Date | null;
     })[]>;
 }

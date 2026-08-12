@@ -72,15 +72,33 @@ let UsersController = class UsersController {
         }
         const profile = user.profile || {};
         const listings = user.properties || [];
+        const propertyIds = listings.map((p) => p.id);
+        const reviewStats = propertyIds.length
+            ? await this.prisma.review.aggregate({
+                where: { propertyId: { in: propertyIds }, rating: { not: null } },
+                _avg: { rating: true },
+                _count: { rating: true },
+            })
+            : null;
+        const reviewCount = reviewStats?._count.rating ?? 0;
+        const average = reviewStats?._avg.rating;
         return {
             id: user.id,
-            fullName: [profile.firstName, profile.lastName].filter(Boolean).join(" ") || "Property owner",
+            fullName: [profile.firstName, profile.lastName].filter(Boolean).join(" ") || "Delala poster",
             role: (profile.role || "user").toLowerCase(),
+            posterType: profile.posterType || null,
             avatarUrl: profile.avatarUrl || null,
             bio: profile.bio || "",
             phone: profile.phone || null,
+            verification: {
+                phone: Boolean(profile.phoneVerified),
+                identity: Boolean(profile.identityVerified),
+                business: Boolean(profile.businessVerified),
+            },
             listingCount: listings.length,
             activeListingCount: listings.filter((p) => p.status === "approved").length,
+            rating: reviewCount > 0 && average !== null && average !== undefined ? Number(average.toFixed(1)) : null,
+            reviewCount,
             memberSince: user.createdAt,
         };
     }

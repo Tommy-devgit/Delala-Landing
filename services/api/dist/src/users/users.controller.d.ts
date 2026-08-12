@@ -14,6 +14,10 @@ export declare class UsersController {
             passwordHash: string | null;
             role: string | null;
             status: string | null;
+            phoneVerified: boolean;
+            identityVerified: boolean;
+            businessVerified: boolean;
+            posterType: string | null;
             updatedAt: Date | null;
         };
     } & {
@@ -37,11 +41,19 @@ export declare class UsersController {
         id: string;
         fullName: string;
         role: any;
+        posterType: any;
         avatarUrl: any;
         bio: any;
         phone: any;
+        verification: {
+            phone: boolean;
+            identity: boolean;
+            business: boolean;
+        };
         listingCount: number;
         activeListingCount: number;
+        rating: number;
+        reviewCount: number;
         memberSince: Date;
     }>;
     updateProfile(id: string, body: {
@@ -77,6 +89,10 @@ export declare class UsersController {
         passwordHash: string | null;
         role: string | null;
         status: string | null;
+        phoneVerified: boolean;
+        identityVerified: boolean;
+        businessVerified: boolean;
+        posterType: string | null;
         updatedAt: Date | null;
     }>;
 }

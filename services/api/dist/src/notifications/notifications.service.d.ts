@@ -11,13 +11,13 @@ export declare class NotificationsService {
         propertyId?: string | null;
     }): Promise<{
         id: string;
-        createdAt: Date | null;
-        userId: string;
-        propertyId: string | null;
         title: string;
+        createdAt: Date | null;
         type: string;
+        propertyId: string | null;
         body: string | null;
         read: boolean | null;
+        userId: string;
     }>;
     findByUser(userId: string): Promise<{
         id: string;

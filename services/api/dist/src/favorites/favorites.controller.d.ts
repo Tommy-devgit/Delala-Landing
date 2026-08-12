@@ -19,16 +19,18 @@ export declare class FavoritesController {
         title: any;
         description: any;
         propertyType: any;
+        listingType: any;
         rentETB: number;
         bedrooms: any;
         bathrooms: number;
         areaSqm: number;
-        generator: boolean;
-        waterTank: boolean;
-        parking: boolean;
-        furnished: boolean;
-        securityGuard: boolean;
-        balcony: boolean;
+        generator: any;
+        waterTank: any;
+        parking: any;
+        furnished: any;
+        securityGuard: any;
+        balcony: any;
+        internet: any;
         status: string;
         subCity: string;
         city: string;
@@ -57,10 +59,12 @@ export declare class FavoritesController {
             agencyName: string;
             name: string;
             phone: any;
-            verified: boolean;
-            rating: number;
-            reviewsCount: number;
-            responseTime: string;
+            posterType: any;
+            verification: {
+                phone: boolean;
+                identity: boolean;
+                business: boolean;
+            };
             user: {
                 profile: {
                     fullName: string;

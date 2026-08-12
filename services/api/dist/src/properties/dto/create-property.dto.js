@@ -181,6 +181,13 @@ __decorate([
     __metadata("design:type", Boolean)
 ], CreatePropertyDto.prototype, "balcony", void 0);
 __decorate([
+    (0, swagger_1.ApiProperty)({ example: true, required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Transform)(({ value }) => value === "true" || value === true),
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], CreatePropertyDto.prototype, "internet", void 0);
+__decorate([
     (0, swagger_1.ApiProperty)({ example: "b1", required: false }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
