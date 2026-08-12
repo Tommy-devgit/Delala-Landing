@@ -216,6 +216,20 @@ export interface PropertyPage {
   totalPages: number;
 }
 
+export const VISIT_STATUSES = ["requested", "accepted", "declined", "completed", "cancelled"] as const;
+export type VisitStatus = (typeof VISIT_STATUSES)[number];
+
+export interface Visit {
+  id: string;
+  status: VisitStatus;
+  visitDate: string | null;
+  createdAt: string | null;
+  property: { id: string; title: string; ownerId: string } | null;
+  /** Which side of the request the signed-in user is on. */
+  role: "owner" | "requester";
+  requester: { id: string | null; name: string; phone: string | null };
+}
+
 export interface FacetCount {
   value: string;
   label?: string;
@@ -609,12 +623,23 @@ export const apiClient = {
     return Number(data?.count) || 0;
   },
 
+  // Both of these ignored the response entirely, so a failed write left the row
+  // unread on the server while the page showed it as read — and the navbar
+  // badge reappeared on the next load with no explanation.
   async markNotificationRead(id: string): Promise<void> {
-    await fetch(`${API_BASE}/notifications/${id}/read`, { method: "PATCH", headers: authHeaders() });
+    const res = await fetch(`${API_BASE}/notifications/${id}/read`, {
+      method: "PATCH",
+      headers: authHeaders(),
+    });
+    if (!res.ok) throw new Error("Could not mark that as read.");
   },
 
   async markAllNotificationsRead(): Promise<void> {
-    await fetch(`${API_BASE}/notifications/read-all`, { method: "PATCH", headers: authHeaders() });
+    const res = await fetch(`${API_BASE}/notifications/read-all`, {
+      method: "PATCH",
+      headers: authHeaders(),
+    });
+    if (!res.ok) throw new Error("Could not mark your notifications as read.");
   },
 
   // Fetch cities together with their sub-city / neighborhood hierarchy
@@ -654,34 +679,51 @@ export const apiClient = {
   },
 
   // Submit walkthrough visit request
-  async scheduleVisit(visitData: {
-    propertyId: string;
-    seekerName: string;
-    seekerPhone: string;
-    scheduledDate: string;
-    timeSlot: string;
-    brokerId: string;
-  }): Promise<{ success: boolean; visitId?: string }> {
-    try {
-      const res = await fetch(`${API_BASE}/visits`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          propertyId: visitData.propertyId,
-          seekerId: "guest-user",
-          brokerId: visitData.brokerId,
-          scheduledDate: visitData.scheduledDate,
-          timeSlot: visitData.timeSlot,
-        }),
-      });
+  /**
+   * Requests a viewing.
+   *
+   * This used to swallow every failure and return `{ success: true, visitId:
+   * "v-local-<timestamp>" }`, so the modal showed a confirmation for a request
+   * that had never reached the server — and when it did reach the server it
+   * carried `seekerId: "guest-user"`, a string that is not a user, alongside a
+   * date the API discarded. The requester now comes from the bearer token and
+   * the failure is reported.
+   */
+  async scheduleVisit(input: { propertyId: string; visitDate: string }): Promise<{ visitId: string }> {
+    const res = await fetch(`${API_BASE}/visits`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...authHeaders() },
+      body: JSON.stringify(input),
+    });
 
-      if (res.ok) {
-        const data = await res.json();
-        return { success: true, visitId: data.id };
-      }
-    } catch (err) {
-      console.warn("NestJS API schedule visit error:", err);
+    const payload = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error(
+        Array.isArray(payload?.message)
+          ? payload.message.join(", ")
+          : payload?.message || "Could not request that viewing."
+      );
     }
-    return { success: true, visitId: `v-local-${Date.now()}` };
+    return { visitId: payload.id };
+  },
+
+  /** Viewings the caller requested, plus those booked on their own properties. */
+  async getVisits(): Promise<Visit[]> {
+    const res = await fetch(`${API_BASE}/visits`, { cache: "no-store", headers: authHeaders() });
+    if (!res.ok) throw new Error("Could not load your viewings.");
+    const payload = await res.json();
+    return Array.isArray(payload) ? payload : [];
+  },
+
+  async updateVisitStatus(visitId: string, status: VisitStatus): Promise<void> {
+    const res = await fetch(`${API_BASE}/visits/${visitId}/status`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json", ...authHeaders() },
+      body: JSON.stringify({ status }),
+    });
+    if (!res.ok) {
+      const payload = await res.json().catch(() => ({}));
+      throw new Error(payload?.message || "Could not update that viewing.");
+    }
   },
 };
