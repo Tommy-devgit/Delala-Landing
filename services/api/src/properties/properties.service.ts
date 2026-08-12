@@ -211,6 +211,69 @@ export class PropertiesService {
     };
   }
 
+  /**
+   * Counts of what actually exists, for the discovery sections.
+   *
+   * The homepage needs to offer "browse by property type" and "popular areas"
+   * without inventing either. Listing a hardcoded set of types would advertise
+   * categories with nothing in them, and calling an area popular is a claim
+   * that needs a number behind it. These are those numbers, grouped in the
+   * database rather than by downloading every property and counting in the
+   * browser.
+   */
+  async facets() {
+    const [byType, byListingType, byLocation, total] = await Promise.all([
+      this.prisma.property.groupBy({
+        by: ["propertyType"],
+        _count: { _all: true },
+        where: { propertyType: { not: null } },
+      }),
+      this.prisma.property.groupBy({ by: ["listingType"], _count: { _all: true } }),
+      this.prisma.property.groupBy({ by: ["locationId"], _count: { _all: true } }),
+      this.prisma.property.count(),
+    ]);
+
+    // Properties hang off whichever level the poster chose, so counts have to
+    // be rolled up to the city the location belongs to.
+    const locations = await this.prisma.location.findMany({
+      where: { id: { in: byLocation.map((row) => row.locationId) } },
+      include: { parent: { include: { parent: true } } },
+    });
+
+    const cityCounts = new Map<string, { id: string; name: string; count: number }>();
+    for (const row of byLocation) {
+      const location: any = locations.find((l) => l.id === row.locationId);
+      if (!location) continue;
+
+      const city =
+        location.type === "city"
+          ? location
+          : location.parent?.type === "city"
+            ? location.parent
+            : location.parent?.parent?.type === "city"
+              ? location.parent.parent
+              : null;
+      if (!city) continue;
+
+      const entry = cityCounts.get(city.id) || { id: city.id, name: city.name, count: 0 };
+      entry.count += row._count._all;
+      cityCounts.set(city.id, entry);
+    }
+
+    const capitalise = (value: string) => value.charAt(0).toUpperCase() + value.slice(1);
+
+    return {
+      total,
+      propertyTypes: byType
+        .map((row) => ({ value: row.propertyType as string, label: capitalise(row.propertyType as string), count: row._count._all }))
+        .sort((a, b) => b.count - a.count),
+      listingTypes: byListingType
+        .map((row) => ({ value: (row.listingType || "rent").toLowerCase(), count: row._count._all }))
+        .sort((a, b) => b.count - a.count),
+      cities: Array.from(cityCounts.values()).sort((a, b) => b.count - a.count),
+    };
+  }
+
   async findOneBySlug(slugOrId: string) {
     const isUuid = isValidUuid(slugOrId);
 
