@@ -5,7 +5,9 @@ export declare class UsersController {
     findAll(): import(".prisma/client").Prisma.PrismaPromise<({
         profile: {
             id: string;
+            status: string | null;
             createdAt: Date | null;
+            updatedAt: Date | null;
             firstName: string | null;
             lastName: string | null;
             phone: string | null;
@@ -13,17 +15,15 @@ export declare class UsersController {
             bio: string | null;
             passwordHash: string | null;
             role: string | null;
-            status: string | null;
             phoneVerified: boolean;
             identityVerified: boolean;
             businessVerified: boolean;
             posterType: string | null;
-            updatedAt: Date | null;
         };
     } & {
         id: string;
-        email: string | null;
         createdAt: Date | null;
+        email: string | null;
     })[]>;
     getProfile(id: string): Promise<{
         id: string;
@@ -37,6 +37,19 @@ export declare class UsersController {
         role: any;
         createdAt: Date;
     }>;
+    verifiedPosters(): Promise<{
+        id: any;
+        fullName: string;
+        posterType: any;
+        avatarUrl: any;
+        bio: any;
+        verification: {
+            phone: boolean;
+            identity: boolean;
+            business: boolean;
+        };
+        activeListingCount: any;
+    }[]>;
     getPublicProfile(id: string): Promise<{
         id: string;
         fullName: string;
@@ -80,7 +93,9 @@ export declare class UsersController {
         role: string;
     }): Promise<{
         id: string;
+        status: string | null;
         createdAt: Date | null;
+        updatedAt: Date | null;
         firstName: string | null;
         lastName: string | null;
         phone: string | null;
@@ -88,11 +103,9 @@ export declare class UsersController {
         bio: string | null;
         passwordHash: string | null;
         role: string | null;
-        status: string | null;
         phoneVerified: boolean;
         identityVerified: boolean;
         businessVerified: boolean;
         posterType: string | null;
-        updatedAt: Date | null;
     }>;
 }

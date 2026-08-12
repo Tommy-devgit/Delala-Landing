@@ -26,35 +26,171 @@ const toCoordinate = (value, max) => {
         return null;
     return parsed;
 };
+const DEFAULT_PAGE_SIZE = 24;
+const MAX_PAGE_SIZE = 60;
+const AMENITY_FILTERS = [
+    "generator",
+    "waterTank",
+    "parking",
+    "furnished",
+    "securityGuard",
+    "balcony",
+    "internet",
+];
+const isTrue = (value) => value === true || value === "true";
+const toFiniteNumber = (value) => {
+    if (value === null || value === undefined || value === "")
+        return undefined;
+    const parsed = typeof value === "number" ? value : Number(value);
+    return Number.isFinite(parsed) ? parsed : undefined;
+};
+const atLeast = (value) => {
+    const parsed = toFiniteNumber(value);
+    return parsed === undefined || parsed <= 0 ? undefined : parsed;
+};
+const numericRange = (min, max) => {
+    const gte = toFiniteNumber(min);
+    const lte = toFiniteNumber(max);
+    if (gte === undefined && lte === undefined)
+        return undefined;
+    return { ...(gte !== undefined ? { gte } : {}), ...(lte !== undefined ? { lte } : {}) };
+};
+const locationFilter = (query) => {
+    if (isValidUuid(query.locationId))
+        return { locationId: query.locationId };
+    const name = query.neighborhood || query.subCity || query.city;
+    if (!name)
+        return {};
+    const match = { name: { equals: name, mode: "insensitive" } };
+    return {
+        location: {
+            OR: [
+                match,
+                { parent: match },
+                { parent: { parent: match } },
+            ],
+        },
+    };
+};
+const textSearch = (q) => {
+    const term = q?.trim();
+    if (!term)
+        return {};
+    const contains = { contains: term, mode: "insensitive" };
+    return {
+        OR: [
+            { title: contains },
+            { description: contains },
+            { address: contains },
+            { location: { name: contains } },
+            { location: { parent: { name: contains } } },
+        ],
+    };
+};
+const SORT_ORDERS = {
+    newest: { createdAt: "desc" },
+    oldest: { createdAt: "asc" },
+    "price-asc": { price: "asc" },
+    "price-desc": { price: "desc" },
+};
 let PropertiesService = class PropertiesService {
     constructor(prisma) {
         this.prisma = prisma;
     }
     async findAll(query) {
         const status = query.status?.toLowerCase();
-        const list = await this.prisma.property.findMany({
-            where: {
-                ...(query.propertyType ? { propertyType: query.propertyType.toLowerCase() } : {}),
-                ...(status && status !== "all" ? { status } : {}),
-                ...(query.verifiedOnly ? { status: "approved" } : {}),
-                ...(isValidUuid(query.ownerId) ? { ownerId: query.ownerId } : {}),
-            },
-            include: {
-                location: {
-                    include: {
-                        parent: {
-                            include: { parent: true },
+        const page = Math.max(1, Number(query.page) || 1);
+        const pageSize = Math.min(MAX_PAGE_SIZE, Math.max(1, Number(query.pageSize) || DEFAULT_PAGE_SIZE));
+        const price = numericRange(query.minPrice, query.maxPrice);
+        const area = numericRange(query.minArea, query.maxArea);
+        const where = {
+            ...(query.propertyType ? { propertyType: query.propertyType.toLowerCase() } : {}),
+            ...(query.listingType ? { listingType: query.listingType.toLowerCase() } : {}),
+            ...(status && status !== "all" ? { status } : {}),
+            ...(query.verifiedOnly ? { status: "approved" } : {}),
+            ...(isValidUuid(query.ownerId) ? { ownerId: query.ownerId } : {}),
+            ...(price ? { price } : {}),
+            ...(area ? { area } : {}),
+            ...(atLeast(query.minBedrooms) !== undefined ? { bedrooms: { gte: atLeast(query.minBedrooms) } } : {}),
+            ...(atLeast(query.minBathrooms) !== undefined ? { bathrooms: { gte: atLeast(query.minBathrooms) } } : {}),
+            ...Object.fromEntries(AMENITY_FILTERS.filter((key) => isTrue(query[key])).map((key) => [key, true])),
+            ...locationFilter(query),
+            ...textSearch(query.q),
+        };
+        const [total, list] = await this.prisma.$transaction([
+            this.prisma.property.count({ where }),
+            this.prisma.property.findMany({
+                where,
+                include: {
+                    location: {
+                        include: {
+                            parent: {
+                                include: { parent: true },
+                            },
                         },
                     },
+                    images: true,
+                    owner: {
+                        include: { profile: true },
+                    },
                 },
-                images: true,
-                owner: {
-                    include: { profile: true },
-                },
-            },
-            orderBy: { createdAt: "desc" },
+                orderBy: SORT_ORDERS[query.sort] || SORT_ORDERS.newest,
+                skip: (page - 1) * pageSize,
+                take: pageSize,
+            }),
+        ]);
+        return {
+            data: list.map((p) => this.mapPropertyResponse(p)),
+            total,
+            page,
+            pageSize,
+            totalPages: Math.max(1, Math.ceil(total / pageSize)),
+        };
+    }
+    async facets() {
+        const [byType, byListingType, byLocation, total] = await Promise.all([
+            this.prisma.property.groupBy({
+                by: ["propertyType"],
+                _count: { _all: true },
+                where: { propertyType: { not: null } },
+            }),
+            this.prisma.property.groupBy({ by: ["listingType"], _count: { _all: true } }),
+            this.prisma.property.groupBy({ by: ["locationId"], _count: { _all: true } }),
+            this.prisma.property.count(),
+        ]);
+        const locations = await this.prisma.location.findMany({
+            where: { id: { in: byLocation.map((row) => row.locationId) } },
+            include: { parent: { include: { parent: true } } },
         });
-        return list.map((p) => this.mapPropertyResponse(p));
+        const cityCounts = new Map();
+        for (const row of byLocation) {
+            const location = locations.find((l) => l.id === row.locationId);
+            if (!location)
+                continue;
+            const city = location.type === "city"
+                ? location
+                : location.parent?.type === "city"
+                    ? location.parent
+                    : location.parent?.parent?.type === "city"
+                        ? location.parent.parent
+                        : null;
+            if (!city)
+                continue;
+            const entry = cityCounts.get(city.id) || { id: city.id, name: city.name, count: 0 };
+            entry.count += row._count._all;
+            cityCounts.set(city.id, entry);
+        }
+        const capitalise = (value) => value.charAt(0).toUpperCase() + value.slice(1);
+        return {
+            total,
+            propertyTypes: byType
+                .map((row) => ({ value: row.propertyType, label: capitalise(row.propertyType), count: row._count._all }))
+                .sort((a, b) => b.count - a.count),
+            listingTypes: byListingType
+                .map((row) => ({ value: (row.listingType || "rent").toLowerCase(), count: row._count._all }))
+                .sort((a, b) => b.count - a.count),
+            cities: Array.from(cityCounts.values()).sort((a, b) => b.count - a.count),
+        };
     }
     async findOneBySlug(slugOrId) {
         const isUuid = isValidUuid(slugOrId);

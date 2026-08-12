@@ -41,12 +41,15 @@ let PropertiesController = class PropertiesController {
     findAll(query) {
         return this.propertiesService.findAll(query);
     }
+    facets() {
+        return this.propertiesService.facets();
+    }
     findOne(slug) {
         return this.propertiesService.findOneBySlug(slug);
     }
     async uploadImage(file) {
         if (!file)
-            return { url: "/images/hero_property.png" };
+            throw new common_1.BadRequestException("No image was received.");
         const url = await this.r2StorageService.uploadImage(file);
         return { url };
     }
@@ -79,13 +82,20 @@ let PropertiesController = class PropertiesController {
 exports.PropertiesController = PropertiesController;
 __decorate([
     (0, common_1.Get)(),
-    (0, swagger_1.ApiOperation)({ summary: "Get all verified approved marketplace property listings" }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: "Returns list of approved properties" }),
+    (0, swagger_1.ApiOperation)({ summary: "Search, filter, sort and page the marketplace listings" }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: "Returns { data, total, page, pageSize, totalPages }" }),
     __param(0, (0, common_1.Query)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], PropertiesController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)("facets"),
+    (0, swagger_1.ApiOperation)({ summary: "Counts by property type, listing type and city" }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], PropertiesController.prototype, "facets", null);
 __decorate([
     (0, common_1.Get)(":slug"),
     (0, swagger_1.ApiOperation)({ summary: "Get property details by slug" }),

@@ -62,6 +62,34 @@ let UsersController = class UsersController {
             createdAt: user.createdAt,
         };
     }
+    async verifiedPosters() {
+        const profiles = await this.prisma.profile.findMany({
+            where: {
+                OR: [{ phoneVerified: true }, { identityVerified: true }, { businessVerified: true }],
+            },
+            include: {
+                user: {
+                    include: { properties: { select: { id: true, status: true } } },
+                },
+            },
+            take: 12,
+        });
+        return profiles
+            .map((profile) => ({
+            id: profile.id,
+            fullName: [profile.firstName, profile.lastName].filter(Boolean).join(" ") || "Delala poster",
+            posterType: profile.posterType || null,
+            avatarUrl: profile.avatarUrl || null,
+            bio: profile.bio || "",
+            verification: {
+                phone: Boolean(profile.phoneVerified),
+                identity: Boolean(profile.identityVerified),
+                business: Boolean(profile.businessVerified),
+            },
+            activeListingCount: (profile.user?.properties || []).filter((p) => p.status === "approved").length,
+        }))
+            .sort((a, b) => b.activeListingCount - a.activeListingCount);
+    }
     async getPublicProfile(id) {
         const user = await this.prisma.user.findUnique({
             where: { id },
@@ -190,6 +218,13 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "getProfile", null);
+__decorate([
+    (0, common_1.Get)("verified-posters"),
+    (0, swagger_1.ApiOperation)({ summary: "Posters who have passed at least one verification check" }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "verifiedPosters", null);
 __decorate([
     (0, common_1.Get)(":id/public"),
     (0, swagger_1.ApiOperation)({ summary: "Publicly visible profile for a property poster" }),
