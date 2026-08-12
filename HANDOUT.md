@@ -229,18 +229,61 @@ properties, locations (Country → City → Sub-city → Neighborhood, with
 coordinates), favorites, notifications, visits, moderation, amenities,
 poster verification flags.
 
-Models that exist with **no public API**: `Review`, `Report`. Both are readable
-from the admin dashboard only — there is no way for a user to post a review or
-report a listing yet, which §20/§21 of the brief need.
+`Review` and `Report` now have public endpoints: `GET /reviews?propertyId=` or
+`?posterId=`, `POST /reviews` (session required, cannot review your own listing,
+one per property per person), and `POST /reports` (session required). Reports
+join the structured reason and the free text into the single `reason` column the
+admin queue already reads.
 
 No model at all, in brief priority order: saved searches, guides/articles,
 messaging, recently-viewed (localStorage is the right home — do not add
 tracking), property view counts, market insights.
 
-`GET /properties` has **no pagination, price filter, bedroom filter, sorting or
-text search** — it returns every property and the Explore page filters the whole
-set client-side. That is the first thing to fix before the Explore work in the
-brief, and before the listing count grows.
+### Still to build from the enrichment brief
+
+Done: data integrity, the query API, facets, reviews/reports endpoints, shared
+loading/error/empty components, the homepage discovery sequence, Explore with
+server-side filtering and paging, the safety centre, and report-a-listing.
+
+Not started, in the brief's own priority order:
+
+- **§4 navigation** — the header still predates the new sections; Explore, Buy,
+  Rent, Locations and Guides are not in it, and there is no mobile nav to match.
+- **§9 poster profiles** — `/profile/[id]` exists but does not yet show
+  verification badges, the review list or poster statistics, all of which now
+  have endpoints behind them.
+- **§7 property detail** — gallery is single-image with thumbnails; no
+  fullscreen viewer, no image count.
+- **§10/§11 location pages** — `/cities/[city]` and `/neighborhoods/[slug]`
+  work but are thin, and `Neighborhood` in `lib/types.ts` still declares
+  invented fields (`securityScore`, `generatorPenetration`, `waterReliability`,
+  `lifestyleTags`) with no columns behind them. **Do not start rendering those.**
+- **§14 compare**, **§15 saved searches**, **§13 recently viewed**,
+  **§18 guides**, **§19 market insights**, **§16 messaging**,
+  **§17 viewing request accept/decline** (`Visit` has no PATCH endpoint).
+- **Admin verification UI** — nothing can currently set `phone_verified`,
+  `identity_verified` or `business_verified`, so the trust badges and the
+  "verified posters" homepage section stay empty until that exists. This is the
+  highest-value next piece of the trust work.
+
+`GET /properties` now filters, sorts and pages **in Postgres**, and returns
+`{ data, total, page, pageSize, totalPages }` rather than a bare array. The
+client accepts both shapes, so a stale deployment of either side keeps working —
+but new code should assume the page object.
+
+Understood query params: `q` (free text over title, description, address and
+location names), `city` / `subCity` / `neighborhood` / `locationId`,
+`propertyType`, `listingType`, `minPrice` / `maxPrice`, `minArea` / `maxArea`,
+`minBedrooms` / `minBathrooms`, the seven amenity flags, `verifiedOnly`,
+`status`, `ownerId`, `sort` (`newest` | `oldest` | `price-asc` | `price-desc`),
+`page`, `pageSize` (capped at 60).
+
+Amenity filters only narrow when **true**. A false or absent flag must never
+exclude a listing whose answer is null.
+
+`GET /properties/facets` returns real counts by property type, listing type and
+city. The homepage's "browse by type" and city ordering are built from it, so
+neither advertises a category or an area with nothing in it.
 
 `product-website/DESIGN.md` is a **scraped Airbnb style reference**, not Delala's
 design system, and it contradicts the real tokens. The source of truth is the
