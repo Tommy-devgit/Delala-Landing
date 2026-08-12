@@ -9,15 +9,47 @@ import { LocationSelector } from "@/components/location-selector";
 import { LocationPicker } from "@/components/map";
 import { City, Coordinates } from "@/lib/types";
 import { EMPTY_LOCATION_SELECTION, LocationSelection, resolveLocationFocus } from "@/lib/locations";
-import { CheckCircle2, Lock, Phone, Star, Upload, X } from "lucide-react";
+import {
+  Car,
+  CheckCircle2,
+  Droplets,
+  Lock,
+  Phone,
+  ShieldCheck,
+  Sofa,
+  Star,
+  Upload,
+  Wifi,
+  Wind,
+  X,
+  Zap,
+} from "lucide-react";
 import { Button, FieldHint, FieldLabel, Input, Panel, Select, Textarea, buttonClasses } from "@/components/ui";
 
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 const MAX_IMAGES = 12;
 
-/** Amenities the marketplace assumes for new listings until a spec editor exists. */
-const DEFAULT_AMENITIES = { generator: true, waterTank: true, parking: true } as const;
+/**
+ * The amenities a poster is asked about.
+ *
+ * This was `DEFAULT_AMENITIES = { generator: true, waterTank: true, parking:
+ * true }`, sent on every submission and never shown to anyone. The API had no
+ * columns then, so the values were discarded and the read path invented `true`
+ * regardless; now that they persist, assuming an answer would write the fiction
+ * into the database permanently. Unticked is a real "no" — the poster was asked.
+ */
+const AMENITIES = [
+  { key: "generator", label: "Standby generator", Icon: Zap },
+  { key: "waterTank", label: "Reserve water tank", Icon: Droplets },
+  { key: "parking", label: "Parking", Icon: Car },
+  { key: "furnished", label: "Furnished", Icon: Sofa },
+  { key: "securityGuard", label: "Security guard", Icon: ShieldCheck },
+  { key: "balcony", label: "Balcony", Icon: Wind },
+  { key: "internet", label: "Internet", Icon: Wifi },
+] as const;
+
+type AmenityKey = (typeof AMENITIES)[number]["key"];
 
 interface SelectedImage {
   file: File;
@@ -64,6 +96,15 @@ export default function PublishListingPage() {
   const [bedrooms, setBedrooms] = useState("3");
   const [bathrooms, setBathrooms] = useState("2");
   const [area, setArea] = useState("250");
+  const [amenities, setAmenities] = useState<Record<AmenityKey, boolean>>({
+    generator: false,
+    waterTank: false,
+    parking: false,
+    furnished: false,
+    securityGuard: false,
+    balcony: false,
+    internet: false,
+  });
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
 
@@ -181,7 +222,7 @@ export default function PublishListingPage() {
           bathrooms,
           areaSqm: area,
           brokerId: session.user.id,
-          ...DEFAULT_AMENITIES,
+          ...amenities,
           latitude: pin?.latitude ?? null,
           longitude: pin?.longitude ?? null,
           images: orderedImages.map((image) => image.file),
@@ -451,6 +492,32 @@ export default function PublishListingPage() {
                   />
                 </div>
               </div>
+
+              {/* AMENITIES — asked, not assumed. These three used to be sent as
+                  a hardcoded `true` on every submission without appearing in
+                  the form at all. */}
+              <fieldset className="pt-2">
+                <legend className="font-mono-label text-label text-muted mb-2">
+                  What does this property have? Tick everything that applies.
+                </legend>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {AMENITIES.map(({ key, label, Icon }) => (
+                    <label
+                      key={key}
+                      className="flex items-center gap-2 p-3 rounded-control bg-canvas border border-line cursor-pointer hover:border-primary/40 transition-colors"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={amenities[key]}
+                        onChange={(e) => setAmenities((prev) => ({ ...prev, [key]: e.target.checked }))}
+                        className="w-4 h-4 accent-primary shrink-0"
+                      />
+                      <Icon className="w-4 h-4 text-muted shrink-0" aria-hidden="true" />
+                      <span className="text-micro text-body">{label}</span>
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
             </section>
 
             <hr className="border-line" />
