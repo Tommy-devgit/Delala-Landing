@@ -33,6 +33,7 @@ export default function FavoritesPage() {
         const data = await apiClient.getFavorites();
         if (!cancelled) {
           setProperties(data);
+          setRemoved(new Set());
           setError("");
         }
       } catch (err) {
@@ -49,9 +50,35 @@ export default function FavoritesPage() {
     };
   }, [userId, nonce]);
 
-  // Unsaving from a card drops the tile immediately rather than leaving a home
-  // on a page titled "Saved homes" until the next refetch.
-  const visible = properties.filter((p) => isSaved(p.id));
+  /**
+   * The server's list is the source of truth for this page.
+   *
+   * It used to render `properties.filter((p) => isSaved(p.id))`, where
+   * `isSaved` reads the separate id set that `useFavorites` loads. That set is
+   * empty until its own request lands and stays empty if that request fails, so
+   * a page that had successfully loaded the saved homes would still show "No
+   * saved homes yet" — the data was fetched and then filtered away by an
+   * unrelated request's failure.
+   *
+   * Unsaving from a card still needs the tile to disappear immediately, so that
+   * one case is tracked here rather than inferred from the id set.
+   */
+  const [removed, setRemoved] = useState<Set<string>>(new Set());
+  const visible = properties.filter((p) => !removed.has(p.id));
+
+  const handleToggleFavorite = useCallback(
+    (propertyId: string) => {
+      // The card has already toggled by the time this fires; re-saving a home
+      // that is still on screen should put it back.
+      setRemoved((prev) => {
+        const next = new Set(prev);
+        if (isSaved(propertyId)) next.delete(propertyId);
+        else next.add(propertyId);
+        return next;
+      });
+    },
+    [isSaved]
+  );
 
   if (!session?.user) {
     return (
@@ -120,7 +147,7 @@ export default function FavoritesPage() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
             {visible.map((property) => (
-              <PropertyCard key={property.id} property={property} onToggleFavorite={reload} />
+              <PropertyCard key={property.id} property={property} onToggleFavorite={handleToggleFavorite} />
             ))}
           </div>
         )}
