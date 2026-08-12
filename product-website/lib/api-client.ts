@@ -216,6 +216,30 @@ export interface PropertyPage {
   totalPages: number;
 }
 
+export interface FacetCount {
+  value: string;
+  label?: string;
+  count: number;
+}
+
+/** Aggregates over what is genuinely in the marketplace right now. */
+export interface PropertyFacets {
+  total: number;
+  propertyTypes: FacetCount[];
+  listingTypes: FacetCount[];
+  cities: { id: string; name: string; count: number }[];
+}
+
+export interface VerifiedPoster {
+  id: string;
+  fullName: string;
+  posterType: PosterType | null;
+  avatarUrl: string | null;
+  bio: string;
+  verification: PosterVerification;
+  activeListingCount: number;
+}
+
 /** One review, as rendered on a property or a poster profile. */
 export interface Review {
   id: string;
@@ -368,6 +392,32 @@ export const apiClient = {
     if (res.status === 404) return null;
     if (!res.ok) throw new Error(`Could not load this property (${res.status}).`);
     return mapProperty(await res.json());
+  },
+
+  /** Real counts behind the discovery sections. Never guessed client-side. */
+  async getFacets(): Promise<PropertyFacets> {
+    const res = await fetch(`${API_BASE}/properties/facets`, { cache: "no-store" });
+    if (!res.ok) throw new Error(`Could not load the marketplace summary (${res.status}).`);
+
+    const payload = await res.json();
+    return {
+      total: Number(payload?.total ?? 0),
+      propertyTypes: Array.isArray(payload?.propertyTypes) ? payload.propertyTypes : [],
+      listingTypes: Array.isArray(payload?.listingTypes) ? payload.listingTypes : [],
+      cities: Array.isArray(payload?.cities) ? payload.cities : [],
+    };
+  },
+
+  /**
+   * Posters with at least one verification check passed. Empty until somebody
+   * genuinely is — the section that renders this hides itself rather than
+   * padding the page with unverified accounts.
+   */
+  async getVerifiedPosters(): Promise<VerifiedPoster[]> {
+    const res = await fetch(`${API_BASE}/users/verified-posters`, { cache: "no-store" });
+    if (!res.ok) throw new Error(`Could not load posters (${res.status}).`);
+    const payload = await res.json();
+    return Array.isArray(payload) ? payload : [];
   },
 
   /** Reviews for one property, or across everything a poster has listed. */
