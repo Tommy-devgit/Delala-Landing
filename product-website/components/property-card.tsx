@@ -6,6 +6,7 @@ import { Heart, ShieldCheck, Zap, Droplets, Car, Phone, MapPin } from "lucide-re
 import { Property } from "@/lib/types";
 import { formatPostedAt, formatPostedDate } from "@/lib/format";
 import { useFavorites } from "@/lib/use-favorites";
+import { PropertyPhoto } from "@/components/property-photo";
 
 /** Overlay chip used for the badges that sit on top of the photo. */
 function PhotoChip({
@@ -45,6 +46,7 @@ export function PropertyCard({
   const fav = isSaved(property.id) || isFavorite;
 
   const contactPhone = property.phone || property.broker?.phone;
+  const isForSale = property.listingType === "sale";
   const postedAt = formatPostedAt(property.createdAt);
   const location = [property.subCity, property.city].filter(Boolean).join(" • ");
 
@@ -80,19 +82,21 @@ export function PropertyCard({
     >
       {/* Photo */}
       <div className="relative aspect-[16/11] w-full overflow-hidden bg-ink shrink-0">
-        <img
+        <PropertyPhoto
           src={property.heroImage}
           alt={property.title}
-          loading="lazy"
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+          className="transition-transform duration-500 group-hover:scale-[1.04]"
         />
 
-        {/* Top row: verification + save */}
+        {/* Top row: moderation state + save */}
         <div className="absolute inset-x-3 top-3 flex items-start justify-between gap-2">
-          {property.verified ? (
+          {property.approved ? (
+            // "Reviewed", not "Verified" — this reflects Delala's moderation
+            // queue, which is a real signal, but it is a statement about the
+            // listing and not about the person who posted it.
             <PhotoChip className="bg-surface/95 backdrop-blur-md text-primary border border-line">
               <ShieldCheck className="w-3 h-3" aria-hidden="true" />
-              <span>Verified</span>
+              <span>Reviewed</span>
             </PhotoChip>
           ) : (
             <span />
@@ -110,22 +114,25 @@ export function PropertyCard({
           </button>
         </div>
 
-        {/* Bottom row: amenities + map selection state */}
+        {/* Bottom row: amenities + map selection state.
+            Only `true` shows a chip. These were hardcoded true server-side, so
+            every card on the site carried all three regardless of the property;
+            a null (poster never asked) must not render as either answer. */}
         <div className="absolute inset-x-3 bottom-3 flex items-end justify-between gap-2">
           <div className="flex flex-wrap items-center gap-1.5">
-            {property.generator && (
+            {property.generator === true && (
               <PhotoChip className="bg-black/60 backdrop-blur-md text-white">
-                <Zap className="w-3 h-3 text-accent" aria-hidden="true" /> Gen
+                <Zap className="w-3 h-3 text-accent" aria-hidden="true" /> Generator
               </PhotoChip>
             )}
-            {property.waterTank && (
+            {property.waterTank === true && (
               <PhotoChip className="bg-black/60 backdrop-blur-md text-white">
-                <Droplets className="w-3 h-3 text-cyan-300" aria-hidden="true" /> Tank
+                <Droplets className="w-3 h-3 text-cyan-300" aria-hidden="true" /> Water tank
               </PhotoChip>
             )}
-            {property.parking && (
+            {property.parking === true && (
               <PhotoChip className="bg-black/60 backdrop-blur-md text-white">
-                <Car className="w-3 h-3 text-amber-300" aria-hidden="true" /> Park
+                <Car className="w-3 h-3 text-amber-300" aria-hidden="true" /> Parking
               </PhotoChip>
             )}
           </div>
@@ -144,9 +151,13 @@ export function PropertyCard({
         <div className="space-y-1.5">
           <div className="flex items-center justify-between gap-2">
             <span className="font-mono-label text-label text-muted truncate">{location}</span>
-            <span className="font-mono-label text-label font-bold text-primary bg-canvas px-2 py-0.5 rounded-full border border-line shrink-0">
-              {property.propertyType}
-            </span>
+            {/* Absent when the poster never classified the listing. It used to
+                default to "Villa", putting a category on the card nobody chose. */}
+            {property.propertyType && (
+              <span className="font-mono-label text-label font-bold text-primary bg-canvas px-2 py-0.5 rounded-full border border-line shrink-0">
+                {property.propertyType}
+              </span>
+            )}
           </div>
 
           <h3 className="font-serif-display text-base font-medium text-ink line-clamp-1 transition-colors group-hover:text-primary">
@@ -155,7 +166,7 @@ export function PropertyCard({
 
           <p className="text-micro text-muted">
             {property.bedrooms} Bed · {property.bathrooms} Bath · {property.areaSqm}m²
-            {property.furnished ? " · Furnished" : ""}
+            {property.furnished === true ? " · Furnished" : ""}
           </p>
 
           {postedAt && (
@@ -167,11 +178,15 @@ export function PropertyCard({
 
         {/* Price + direct call. A button, not an anchor, to avoid nesting links. */}
         <div className="mt-auto pt-3 border-t border-line flex items-end justify-between gap-2">
+          {/* `listingType` was never returned by the API, so a property for
+              sale advertised its asking price as monthly rent. */}
           <div className="min-w-0">
-            <span className="font-mono-label text-label text-muted block mb-0.5">Monthly rent</span>
+            <span className="font-mono-label text-label text-muted block mb-0.5">
+              {isForSale ? "Asking price" : "Monthly rent"}
+            </span>
             <span className="text-base font-bold text-primary">
               ETB {property.rentETB.toLocaleString()}
-              <span className="text-micro font-normal text-muted"> /mo</span>
+              {!isForSale && <span className="text-micro font-normal text-muted"> /mo</span>}
             </span>
           </div>
 
