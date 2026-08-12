@@ -76,18 +76,48 @@ export class UsersController {
     const profile: any = user.profile || {};
     const listings = user.properties || [];
 
+    // Reviews are written against properties, so a poster's rating is the
+    // aggregate across everything they have listed. Computed here rather than
+    // on each property payload, where it would be an N+1 — and where it used to
+    // be the literal 4.9 / 12 reviews attached to every poster on the site.
+    const propertyIds = listings.map((p: any) => p.id);
+    const reviewStats = propertyIds.length
+      ? await this.prisma.review.aggregate({
+          where: { propertyId: { in: propertyIds }, rating: { not: null } },
+          _avg: { rating: true },
+          _count: { rating: true },
+        })
+      : null;
+
+    const reviewCount = reviewStats?._count.rating ?? 0;
+    const average = reviewStats?._avg.rating;
+
     // Deliberately omits email and anything else the marketplace does not need
     // to show. The phone is included because it is already published on every
     // listing this person posts.
     return {
       id: user.id,
-      fullName: [profile.firstName, profile.lastName].filter(Boolean).join(" ") || "Property owner",
+      fullName: [profile.firstName, profile.lastName].filter(Boolean).join(" ") || "Delala poster",
       role: (profile.role || "user").toLowerCase(),
+      // owner | broker | agency — what this person is on the marketplace, as
+      // opposed to `role`, which is what they may do in the admin dashboard.
+      posterType: profile.posterType || null,
       avatarUrl: profile.avatarUrl || null,
       bio: profile.bio || "",
       phone: profile.phone || null,
+      // Every one of these was `true` for every poster before there were
+      // columns to hold them. False now means genuinely unverified.
+      verification: {
+        phone: Boolean(profile.phoneVerified),
+        identity: Boolean(profile.identityVerified),
+        business: Boolean(profile.businessVerified),
+      },
       listingCount: listings.length,
       activeListingCount: listings.filter((p: any) => p.status === "approved").length,
+      // null, not 0 and not 4.9 — "no reviews yet" is a different statement
+      // from "rated zero", and the UI renders them differently.
+      rating: reviewCount > 0 && average !== null && average !== undefined ? Number(average.toFixed(1)) : null,
+      reviewCount,
       memberSince: user.createdAt,
     };
   }
