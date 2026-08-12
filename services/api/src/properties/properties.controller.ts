@@ -20,22 +20,24 @@ import { CreatePropertyDto, ModeratePropertyDto } from "./dto/create-property.dt
 import { R2StorageService } from "../storage/r2-storage.service";
 import { Roles } from "../common/decorators/roles.decorator";
 import { RolesGuard } from "../common/guards/roles.guard";
-import { SessionAuthGuard } from "../common/guards/session-auth.guard";
+import { SessionAuthGuard, bearerToken } from "../common/guards/session-auth.guard";
+import { verifySessionToken } from "../common/session-token";
 import { AdminService } from "../admin/admin.service";
 import { NotificationsService } from "../notifications/notifications.service";
 
 /**
- * Session tokens are issued as `betterauth-session-<uuid>-<timestamp>`, so the
- * owning user can be read back out of the Authorization header instead of being
- * taken from a client-supplied body field.
+ * The owning user is read back out of the Authorization header rather than taken
+ * from a client-supplied body field.
+ *
+ * This parsed the token with its own regex and no signature check, which made
+ * "who owns this listing" assertable by anyone who could type a uuid. It shares
+ * the verifier with the guard now, so an unsigned or tampered token yields no
+ * owner at all.
  */
 const userIdFromAuthHeader = (authorization?: string): string | undefined => {
   if (!authorization) return undefined;
-  const token = authorization.replace(/^Bearer\s+/i, "");
-  const match = token.match(
-    /^betterauth-session-([0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})-\d+$/i
-  );
-  return match?.[1];
+  const token = bearerToken(authorization);
+  return token ? verifySessionToken(token)?.userId : undefined;
 };
 
 @ApiTags("properties")
