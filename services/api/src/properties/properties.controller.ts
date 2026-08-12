@@ -58,6 +58,14 @@ export class PropertiesController {
     return this.propertiesService.findAll(query);
   }
 
+  // Declared before `:slug` — Nest matches in order, so a route registered
+  // after the wildcard would be swallowed by it.
+  @Get("facets")
+  @ApiOperation({ summary: "Counts by property type, listing type and city" })
+  facets() {
+    return this.propertiesService.facets();
+  }
+
   @Get(":slug")
   @ApiOperation({ summary: "Get property details by slug" })
   findOne(@Param("slug") slug: string) {
