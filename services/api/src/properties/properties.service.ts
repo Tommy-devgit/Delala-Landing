@@ -17,44 +17,198 @@ const toCoordinate = (value: unknown, max: number): number | null => {
   return parsed;
 };
 
+const DEFAULT_PAGE_SIZE = 24;
+/** A ceiling so a hand-written `?pageSize=100000` cannot ask for the table. */
+const MAX_PAGE_SIZE = 60;
+
+const AMENITY_FILTERS = [
+  "generator",
+  "waterTank",
+  "parking",
+  "furnished",
+  "securityGuard",
+  "balcony",
+  "internet",
+] as const;
+
+export interface PropertyQuery {
+  city?: string;
+  subCity?: string;
+  neighborhood?: string;
+  locationId?: string;
+  propertyType?: string;
+  listingType?: string;
+  minPrice?: string | number;
+  maxPrice?: string | number;
+  minArea?: string | number;
+  maxArea?: string | number;
+  minBedrooms?: string | number;
+  minBathrooms?: string | number;
+  q?: string;
+  sort?: string;
+  page?: string | number;
+  pageSize?: string | number;
+  verifiedOnly?: boolean | string;
+  status?: string;
+  ownerId?: string;
+  generator?: boolean | string;
+  waterTank?: boolean | string;
+  parking?: boolean | string;
+  furnished?: boolean | string;
+  securityGuard?: boolean | string;
+  balcony?: boolean | string;
+  internet?: boolean | string;
+}
+
+/** Query strings arrive as text, so "true" and true both have to count. */
+const isTrue = (value: unknown): boolean => value === true || value === "true";
+
+const toFiniteNumber = (value: unknown): number | undefined => {
+  if (value === null || value === undefined || value === "") return undefined;
+  const parsed = typeof value === "number" ? value : Number(value);
+  return Number.isFinite(parsed) ? parsed : undefined;
+};
+
+const atLeast = (value: unknown): number | undefined => {
+  const parsed = toFiniteNumber(value);
+  return parsed === undefined || parsed <= 0 ? undefined : parsed;
+};
+
+/** `{ gte, lte }` for Prisma, or undefined when neither bound was given. */
+const numericRange = (min: unknown, max: unknown) => {
+  const gte = toFiniteNumber(min);
+  const lte = toFiniteNumber(max);
+  if (gte === undefined && lte === undefined) return undefined;
+  return { ...(gte !== undefined ? { gte } : {}), ...(lte !== undefined ? { lte } : {}) };
+};
+
+/**
+ * Matches against the location hierarchy by name at whichever level was given.
+ *
+ * A neighborhood filter has to match properties attached directly to that
+ * neighborhood; a sub-city filter has to match both properties on the sub-city
+ * itself and properties on any neighborhood beneath it. Names rather than ids
+ * because that is what the marketplace URLs carry.
+ */
+const locationFilter = (query: PropertyQuery) => {
+  if (isValidUuid(query.locationId)) return { locationId: query.locationId };
+
+  const name = query.neighborhood || query.subCity || query.city;
+  if (!name) return {};
+
+  const match = { name: { equals: name, mode: "insensitive" as const } };
+  return {
+    location: {
+      OR: [
+        match,
+        { parent: match },
+        { parent: { parent: match } },
+      ],
+    },
+  };
+};
+
+/** Free-text search across the fields a person would actually type into. */
+const textSearch = (q?: string) => {
+  const term = q?.trim();
+  if (!term) return {};
+  const contains = { contains: term, mode: "insensitive" as const };
+  return {
+    OR: [
+      { title: contains },
+      { description: contains },
+      { address: contains },
+      { location: { name: contains } },
+      { location: { parent: { name: contains } } },
+    ],
+  };
+};
+
+type SortKey = "newest" | "oldest" | "price-asc" | "price-desc";
+
+const SORT_ORDERS: Record<SortKey, any> = {
+  newest: { createdAt: "desc" },
+  oldest: { createdAt: "asc" },
+  "price-asc": { price: "asc" },
+  "price-desc": { price: "desc" },
+};
+
 @Injectable()
 export class PropertiesService {
   constructor(private prisma: PrismaService) {}
 
-  async findAll(query: {
-    city?: string;
-    subCity?: string;
-    propertyType?: string;
-    verifiedOnly?: boolean;
-    status?: string;
-    ownerId?: string;
-  }) {
+  /**
+   * Filtering, sorting and paging all happen in Postgres.
+   *
+   * This used to accept four fields, ignore the rest, and return every property
+   * in the table on every call — the marketplace then filtered and sorted the
+   * whole set in the browser. That is fine at ten listings and untenable at a
+   * thousand, and it made price, bedroom and text filters impossible to apply
+   * to anything the client had not already downloaded.
+   *
+   * The response shape changed from a bare array to `{ data, total, page,
+   * pageSize, totalPages }`. `mapPropertiesResponse` on the client accepts both,
+   * so an older deployment of either side keeps working.
+   */
+  async findAll(query: PropertyQuery) {
     const status = query.status?.toLowerCase();
-    const list = await this.prisma.property.findMany({
-      where: {
-        ...(query.propertyType ? { propertyType: query.propertyType.toLowerCase() } : {}),
-        ...(status && status !== "all" ? { status } : {}),
-        ...(query.verifiedOnly ? { status: "approved" } : {}),
-        // Powers the public poster profile: "other homes by this owner".
-        ...(isValidUuid(query.ownerId) ? { ownerId: query.ownerId } : {}),
-      },
-      include: {
-        location: {
-          include: {
-            parent: {
-              include: { parent: true },
+    const page = Math.max(1, Number(query.page) || 1);
+    const pageSize = Math.min(MAX_PAGE_SIZE, Math.max(1, Number(query.pageSize) || DEFAULT_PAGE_SIZE));
+
+    const price = numericRange(query.minPrice, query.maxPrice);
+    const area = numericRange(query.minArea, query.maxArea);
+
+    const where: any = {
+      ...(query.propertyType ? { propertyType: query.propertyType.toLowerCase() } : {}),
+      ...(query.listingType ? { listingType: query.listingType.toLowerCase() } : {}),
+      ...(status && status !== "all" ? { status } : {}),
+      ...(query.verifiedOnly ? { status: "approved" } : {}),
+      // Powers the public poster profile: "other homes by this owner".
+      ...(isValidUuid(query.ownerId) ? { ownerId: query.ownerId } : {}),
+      ...(price ? { price } : {}),
+      ...(area ? { area } : {}),
+      // `gte` rather than equality: "2+ bedrooms" is what the filter means.
+      ...(atLeast(query.minBedrooms) !== undefined ? { bedrooms: { gte: atLeast(query.minBedrooms) } } : {}),
+      ...(atLeast(query.minBathrooms) !== undefined ? { bathrooms: { gte: atLeast(query.minBathrooms) } } : {}),
+      // Only `true` narrows. A false or absent amenity filter must not exclude
+      // listings whose answer is null — "not asked" is not "does not have".
+      ...Object.fromEntries(
+        AMENITY_FILTERS.filter((key) => isTrue(query[key])).map((key) => [key, true])
+      ),
+      ...locationFilter(query),
+      ...textSearch(query.q),
+    };
+
+    const [total, list] = await this.prisma.$transaction([
+      this.prisma.property.count({ where }),
+      this.prisma.property.findMany({
+        where,
+        include: {
+          location: {
+            include: {
+              parent: {
+                include: { parent: true },
+              },
             },
           },
+          images: true,
+          owner: {
+            include: { profile: true },
+          },
         },
-        images: true,
-        owner: {
-          include: { profile: true },
-        },
-      },
-      orderBy: { createdAt: "desc" },
-    });
+        orderBy: SORT_ORDERS[query.sort as SortKey] || SORT_ORDERS.newest,
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+      }),
+    ]);
 
-    return list.map((p) => this.mapPropertyResponse(p));
+    return {
+      data: list.map((p) => this.mapPropertyResponse(p)),
+      total,
+      page,
+      pageSize,
+      totalPages: Math.max(1, Math.ceil(total / pageSize)),
+    };
   }
 
   async findOneBySlug(slugOrId: string) {
