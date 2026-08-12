@@ -1,48 +1,58 @@
 "use client";
 
-import { useState, useEffect, useMemo, useCallback, Suspense } from "react";
+import { useState, useMemo, useCallback, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { PropertyCard } from "@/components/property-card";
 import { FilterModal } from "@/components/filter-modal";
 import { PropertyMap } from "@/components/map";
 import { SearchFilters } from "@/components/search-filters";
 import { apiClient } from "@/lib/api-client";
+import { useAsync } from "@/lib/use-async";
+import { EmptyState } from "@/components/empty-state";
+import { ErrorNotice } from "@/components/error-notice";
 import { Badge, Button, Skeleton } from "@/components/ui";
 import { City, Property, FilterState } from "@/lib/types";
 import { SlidersHorizontal, Map, Grid, List, ArrowUpDown, Building2 } from "lucide-react";
 
-/** Shown in the results column when no listing matches the active filters. */
-function EmptyResults() {
-  return (
-    <div className="col-span-full py-14 text-center space-y-3 max-w-sm mx-auto">
-      <div className="w-14 h-14 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto">
-        <Building2 className="w-7 h-7" aria-hidden="true" />
-      </div>
-      <h2 className="font-serif-display text-2xl text-ink">No homes match those filters</h2>
-      <p className="text-micro text-muted leading-relaxed">
-        Try widening your budget, or clearing the city and sub-city filters.
-      </p>
-    </div>
-  );
-}
+const PAGE_SIZE = 24;
+
+/** The unfiltered starting point, also what "clear filters" restores. */
+const emptyFilters = (): FilterState => ({
+  q: "",
+  city: "",
+  subCity: "",
+  neighborhood: "",
+  propertyType: "",
+  listingType: "",
+  minPrice: 0,
+  maxPrice: 0,
+  bedrooms: "",
+  bathrooms: "",
+  generator: false,
+  waterTank: false,
+  parking: false,
+  furnished: false,
+  verifiedOnly: false,
+  sortBy: "newest",
+});
 
 function SearchContent() {
   const searchParams = useSearchParams();
 
   const [viewMode, setViewMode] = useState<"grid" | "split" | "map">("split");
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
-  const [properties, setProperties] = useState<Property[]>([]);
-  const [cities, setCities] = useState<City[]>([]);
-  const [loading, setLoading] = useState(true);
   const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
 
-  const [filters, setFilters] = useState<FilterState>({
+  const [filters, setFilters] = useState<FilterState>(() => ({
+    ...emptyFilters(),
+    q: searchParams.get("q") || "",
     city: searchParams.get("city") || "",
     subCity: searchParams.get("subCity") || "",
     neighborhood: searchParams.get("neighborhood") || "",
     propertyType: searchParams.get("propertyType") || "",
-    minPrice: 0,
-    maxPrice: Number(searchParams.get("maxPrice")) || 150000,
+    listingType: (searchParams.get("listingType") as FilterState["listingType"]) || "",
+    maxPrice: Number(searchParams.get("maxPrice")) || 0,
     bedrooms: searchParams.get("bedrooms") || "",
     bathrooms: searchParams.get("bathrooms") || "",
     generator: searchParams.get("generator") === "true",
@@ -50,54 +60,65 @@ function SearchContent() {
     parking: searchParams.get("parking") === "true",
     furnished: searchParams.get("furnished") === "true",
     verifiedOnly: searchParams.get("verifiedOnly") === "true",
-    sortBy: "newest",
-  });
+    sortBy: (searchParams.get("sort") as FilterState["sortBy"]) || "newest",
+  }));
 
-  // Fetch live properties from NestJS REST API connected to Supabase PostgreSQL
-  useEffect(() => {
-    async function loadProperties() {
-      setLoading(true);
-      const data = await apiClient.getProperties({
-        city: filters.city,
-        subCity: filters.subCity,
-        propertyType: filters.propertyType,
-      });
-      setProperties(data);
-      setLoading(false);
-    }
-    loadProperties();
-  }, [filters.city, filters.subCity, filters.propertyType]);
+  /**
+   * Every filter is now a query parameter.
+   *
+   * This page used to fetch the entire properties table and filter it in a
+   * `useMemo`, which meant the price, bedroom and amenity controls only ever
+   * applied to whatever had already been downloaded, and sorting could not
+   * reach past it either. Postgres does all of it now, so results are correct
+   * regardless of how many listings exist.
+   */
+  const query = useMemo(
+    () => ({
+      q: filters.q || undefined,
+      city: filters.city || undefined,
+      subCity: filters.subCity || undefined,
+      neighborhood: filters.neighborhood || undefined,
+      propertyType: filters.propertyType || undefined,
+      listingType: filters.listingType || undefined,
+      minPrice: filters.minPrice > 0 ? filters.minPrice : undefined,
+      maxPrice: filters.maxPrice > 0 ? filters.maxPrice : undefined,
+      minBedrooms: filters.bedrooms ? Number(filters.bedrooms) : undefined,
+      minBathrooms: filters.bathrooms ? Number(filters.bathrooms) : undefined,
+      generator: filters.generator || undefined,
+      waterTank: filters.waterTank || undefined,
+      parking: filters.parking || undefined,
+      furnished: filters.furnished || undefined,
+      verifiedOnly: filters.verifiedOnly || undefined,
+      sort: filters.sortBy,
+      page,
+      pageSize: PAGE_SIZE,
+    }),
+    [filters, page]
+  );
 
-  // Location filter options come from the API, not a hardcoded list.
-  useEffect(() => {
-    apiClient.getCities().then(setCities);
+  const results = useAsync(() => apiClient.searchProperties(query), [JSON.stringify(query)]);
+  const cityData = useAsync(() => apiClient.getCities(), []);
+
+  const cities: City[] = cityData.data || [];
+  const listings: Property[] = results.data?.data || [];
+  const total = results.data?.total ?? 0;
+  const totalPages = results.data?.totalPages ?? 1;
+  const loading = results.loading;
+
+  /** Applying a filter has to return to page one, or the results look empty. */
+  const applyFilters = useCallback((next: FilterState) => {
+    setFilters(next);
+    setPage(1);
   }, []);
 
-  // Client-side filtering & sorting
-  const filteredListings = useMemo(() => {
-    return properties.filter((p) => {
-      if (filters.city && p.city.toLowerCase() !== filters.city.toLowerCase()) return false;
-      if (filters.subCity && !p.subCity.toLowerCase().includes(filters.subCity.toLowerCase())) return false;
-      if (filters.neighborhood && !p.neighborhood.toLowerCase().includes(filters.neighborhood.toLowerCase())) return false;
-      if (filters.propertyType && p.propertyType !== filters.propertyType) return false;
-      if (p.rentETB > filters.maxPrice) return false;
-      if (filters.bedrooms && p.bedrooms < Number(filters.bedrooms)) return false;
-      if (filters.bathrooms && p.bathrooms < Number(filters.bathrooms)) return false;
-      // `=== true` rather than truthiness: a null amenity means the poster was
-      // never asked, and a filter for "has a generator" must exclude unknowns
-      // rather than treat them as a no — or, worse, as a yes.
-      if (filters.generator && p.generator !== true) return false;
-      if (filters.waterTank && p.waterTank !== true) return false;
-      if (filters.parking && p.parking !== true) return false;
-      if (filters.furnished && p.furnished !== true) return false;
-      if (filters.verifiedOnly && !p.approved) return false;
-      return true;
-    }).sort((a, b) => {
-      if (filters.sortBy === "price-asc") return a.rentETB - b.rentETB;
-      if (filters.sortBy === "price-desc") return b.rentETB - a.rentETB;
-      return 0;
-    });
-  }, [properties, filters]);
+  const filtersActive = useMemo(() => {
+    const base = emptyFilters();
+    return (Object.keys(base) as (keyof FilterState)[]).some(
+      (key) => key !== "sortBy" && filters[key] !== base[key]
+    );
+  }, [filters]);
+
+  const filteredListings = listings;
 
   // A selection only counts while its property survives the active filters, so
   // it is derived rather than cleared from an effect.
@@ -126,6 +147,53 @@ function SearchContent() {
       active ? "bg-surface text-primary shadow-sm" : "text-muted hover:text-ink"
     }`;
 
+  // Two different situations, two different messages: no listings at all is not
+  // the same problem as filters that exclude everything, and only one of them
+  // has "clear the filters" as an answer.
+  const emptyResults = (
+    <div className="col-span-full py-10">
+      <EmptyState
+        icon={Building2}
+        title={filtersActive ? "No homes match those filters" : "No listings yet"}
+        description={
+          filtersActive
+            ? "Nothing on Delala matches every filter you have set. Clearing a couple of them usually helps."
+            : "There are no properties on the marketplace at the moment. Check back soon, or post the first one."
+        }
+        actionText={filtersActive ? "Clear all filters" : "Post a property"}
+        actionHref={filtersActive ? undefined : "/publish"}
+        onAction={filtersActive ? () => applyFilters(emptyFilters()) : undefined}
+      />
+    </div>
+  );
+
+  const pagination = totalPages > 1 && (
+    <nav
+      className="col-span-full flex items-center justify-center gap-3 pt-8"
+      aria-label="Result pages"
+    >
+      <Button
+        variant="secondary"
+        size="sm"
+        disabled={page <= 1}
+        onClick={() => setPage((p) => Math.max(1, p - 1))}
+      >
+        Previous
+      </Button>
+      <span className="text-micro text-muted" aria-live="polite">
+        Page {page} of {totalPages}
+      </span>
+      <Button
+        variant="secondary"
+        size="sm"
+        disabled={page >= totalPages}
+        onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+      >
+        Next
+      </Button>
+    </nav>
+  );
+
   const mapPane = (
     <PropertyMap
       properties={filteredListings}
@@ -142,13 +210,31 @@ function SearchContent() {
         <div className="max-w-[1440px] mx-auto flex flex-wrap items-center justify-between gap-3">
 
           <div className="flex items-center gap-3 min-w-0">
-            <h1 className="font-serif-display text-2xl font-light text-ink">Marketplace</h1>
+            <h1 className="font-serif-display text-2xl font-light text-ink">Explore</h1>
+            {/* The real total from the database, not the length of one page. */}
             <Badge tone="accent" aria-live="polite">
-              {loading ? "Loading…" : `${filteredListings.length} homes`}
+              {loading ? "Loading…" : `${total} ${total === 1 ? "home" : "homes"}`}
             </Badge>
           </div>
 
           <div className="flex items-center gap-2">
+            <label htmlFor="search-query" className="sr-only">
+              Search listings
+            </label>
+            <input
+              id="search-query"
+              type="search"
+              defaultValue={filters.q}
+              placeholder="Area, landmark or keyword"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") applyFilters({ ...filters, q: e.currentTarget.value });
+              }}
+              onBlur={(e) => {
+                if (e.currentTarget.value !== filters.q) applyFilters({ ...filters, q: e.currentTarget.value });
+              }}
+              className="h-8 px-3 rounded-full bg-canvas border border-line text-micro text-body w-44 sm:w-56 focus:outline-none focus:border-primary/40"
+            />
+
             <Button variant="secondary" size="sm" onClick={() => setIsFilterModalOpen(true)}>
               <SlidersHorizontal className="w-3.5 h-3.5" aria-hidden="true" />
               <span>Filters</span>
@@ -159,10 +245,11 @@ function SearchContent() {
               <select
                 value={filters.sortBy}
                 aria-label="Sort results"
-                onChange={(e) => setFilters({ ...filters, sortBy: e.target.value as FilterState["sortBy"] })}
+                onChange={(e) => applyFilters({ ...filters, sortBy: e.target.value as FilterState["sortBy"] })}
                 className="bg-transparent text-micro text-body cursor-pointer pr-1 focus:outline-none"
               >
-                <option value="newest">Newest</option>
+                <option value="newest">Newest first</option>
+                <option value="oldest">Oldest first</option>
                 <option value="price-asc">Price: low to high</option>
                 <option value="price-desc">Price: high to low</option>
               </select>
@@ -234,7 +321,9 @@ function SearchContent() {
 
       {/* Results */}
       <div className="flex-1 max-w-[1440px] w-full mx-auto p-4 sm:p-6 lg:p-6">
-        {loading ? (
+        {results.error ? (
+          <ErrorNotice message={results.error} onRetry={results.retry} className="my-8" />
+        ) : loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
             {Array.from({ length: 10 }, (_, i) => (
               <Skeleton key={i} className="h-[22rem]" />
@@ -244,14 +333,16 @@ function SearchContent() {
           <>
             {viewMode === "grid" && (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
-                {filteredListings.length === 0 ? <EmptyResults /> : renderCards(filteredListings)}
+                {filteredListings.length === 0 ? emptyResults : renderCards(filteredListings)}
+                {pagination}
               </div>
             )}
 
             {viewMode === "split" && (
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:h-[calc(100vh-172px)]">
                 <div className="lg:col-span-7 lg:overflow-y-auto lg:pr-1 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5 items-start content-start auto-rows-max">
-                  {filteredListings.length === 0 ? <EmptyResults /> : renderCards(filteredListings)}
+                  {filteredListings.length === 0 ? emptyResults : renderCards(filteredListings)}
+                  {pagination}
                 </div>
                 <div className="hidden lg:block lg:col-span-5 rounded-panel overflow-hidden border border-line shadow-sm sticky top-0 h-full">
                   {mapPane}
@@ -273,7 +364,7 @@ function SearchContent() {
         isOpen={isFilterModalOpen}
         onClose={() => setIsFilterModalOpen(false)}
         initialFilters={filters}
-        onApply={(newFilters) => setFilters(newFilters)}
+        onApply={applyFilters}
         cities={cities}
       />
 
