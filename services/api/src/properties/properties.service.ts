@@ -210,12 +210,10 @@ export class PropertiesService {
       new Set([...uploadedImageUrls, ...(createDto.imageUrls || [])])
     );
 
-    const imageRecords = finalImageUrls.length > 0
-      ? finalImageUrls.map((url) => ({ imageUrl: url }))
-      : [
-          { imageUrl: "/images/hero_property.png" },
-          { imageUrl: "/images/hero_home_away.jpg" },
-        ];
+    // A listing with no photographs gets no photographs. Seeding two stock
+    // interiors made every empty listing look like it had been photographed,
+    // and the marketplace showed the same two rooms over and over.
+    const imageRecords = finalImageUrls.map((url) => ({ imageUrl: url }));
 
     const computedAddress = createDto.address || [createDto.subCity, createDto.city].filter(Boolean).join(", ");
 
@@ -236,6 +234,17 @@ export class PropertiesService {
         latitude: toCoordinate(createDto.latitude, 90) as any,
         longitude: toCoordinate(createDto.longitude, 180) as any,
         contactPhone: createDto.phone || null,
+        // The DTO has always declared these six; there were no columns to put
+        // them in, so every submission's answers were discarded and the read
+        // path invented `true` for all of them. `?? null` keeps "not asked"
+        // distinct from "answered no".
+        generator: createDto.generator ?? null,
+        waterTank: createDto.waterTank ?? null,
+        parking: createDto.parking ?? null,
+        furnished: createDto.furnished ?? null,
+        securityGuard: createDto.securityGuard ?? null,
+        balcony: createDto.balcony ?? null,
+        internet: createDto.internet ?? null,
         // New submissions enter the moderation queue. Auto-approving on create
         // meant the approvals screen could never have anything in it.
         status: "pending",
@@ -291,7 +300,10 @@ export class PropertiesService {
   /** Public so other modules (favourites) reuse one property shape. */
   mapPropertyResponse(p: any) {
     const slug = p.title.toLowerCase().replace(/[^a-z0-9]+/g, "-") + "-" + (p.id ? p.id.slice(0, 4) : "prop");
-    const ownerName = [p.owner?.profile?.firstName, p.owner?.profile?.lastName].filter(Boolean).join(" ") || "Verified Owner";
+    // "Verified Owner" was the fallback for a poster with no name on file — a
+    // trust claim and an ownership claim, both invented, in the one string most
+    // likely to be read.
+    const ownerName = [p.owner?.profile?.firstName, p.owner?.profile?.lastName].filter(Boolean).join(" ") || "Delala poster";
     const phone = p.contactPhone || p.owner?.profile?.phone || null;
 
     let city = "";
@@ -339,17 +351,25 @@ export class PropertiesService {
       slug,
       title: p.title,
       description: p.description || "",
-      propertyType: p.propertyType ? p.propertyType.charAt(0).toUpperCase() + p.propertyType.slice(1) : "Villa",
+      // No default property type. Calling an unclassified listing a "Villa"
+      // put a category on the card that nobody chose.
+      propertyType: p.propertyType ? p.propertyType.charAt(0).toUpperCase() + p.propertyType.slice(1) : null,
+      // Rent and sale listings were indistinguishable to the frontend because
+      // this was never returned, so every price rendered as "/mo".
+      listingType: (p.listingType || "rent").toLowerCase(),
       rentETB: Number(p.price || 0),
       bedrooms: p.bedrooms || 0,
       bathrooms: Number(p.bathrooms || 0),
       areaSqm: Number(p.area || 0),
-      generator: true,
-      waterTank: true,
-      parking: true,
-      furnished: true,
-      securityGuard: true,
-      balcony: true,
+      // Passed through as stored: true, false, or null for "not specified".
+      // These were hardcoded `true` for every property on the marketplace.
+      generator: p.generator ?? null,
+      waterTank: p.waterTank ?? null,
+      parking: p.parking ?? null,
+      furnished: p.furnished ?? null,
+      securityGuard: p.securityGuard ?? null,
+      balcony: p.balcony ?? null,
+      internet: p.internet ?? null,
       status: p.status === "approved" ? "APPROVED" : "PENDING_APPROVAL",
       subCity,
       city,
@@ -373,33 +393,39 @@ export class PropertiesService {
         name: neighborhood,
         subCity,
       },
+      // Enough to render "posted by" and link to the profile. The rating,
+      // review count and response time that used to sit here were constants —
+      // 4.9, 12, "Under 15 mins" — attached to every poster on the site.
+      // Anything aggregated now comes from GET /users/:id/public, where it is
+      // computed from real reviews instead of guessed per row.
       broker: {
         id: p.ownerId,
         agencyName: ownerName,
         name: ownerName,
         phone: phone || "",
-        verified: true,
-        rating: 4.9,
-        reviewsCount: 12,
-        responseTime: "Under 15 mins",
+        posterType: p.owner?.profile?.posterType || null,
+        verification: {
+          phone: Boolean(p.owner?.profile?.phoneVerified),
+          identity: Boolean(p.owner?.profile?.identityVerified),
+          business: Boolean(p.owner?.profile?.businessVerified),
+        },
         user: {
           profile: {
             fullName: ownerName,
-            avatarUrl: p.owner?.profile?.avatarUrl || "/images/hero_home_away.jpg",
+            // No stock portrait. The avatar component falls back to initials.
+            avatarUrl: p.owner?.profile?.avatarUrl || null,
           },
         },
       },
-      images: p.images && p.images.length > 0
-        ? p.images.map((img: any, i: number) => ({
-            id: img.id,
-            url: img.imageUrl,
-            displayOrder: i + 1,
-            isHero: i === 0,
-          }))
-        : [
-            { id: "1", url: "/images/hero_property.png", displayOrder: 1, isHero: true },
-            { id: "2", url: "/images/hero_home_away.jpg", displayOrder: 2, isHero: false },
-          ],
+      // An empty array when the listing has no photographs, so the UI can show
+      // a real "no photos yet" state instead of two stock rooms that belong to
+      // no property.
+      images: (p.images || []).map((img: any, i: number) => ({
+        id: img.id,
+        url: img.imageUrl,
+        displayOrder: i + 1,
+        isHero: i === 0,
+      })),
     };
   }
 }
