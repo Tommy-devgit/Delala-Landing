@@ -1,4 +1,4 @@
-import { Property, City, Broker, LocationNode, PropertyType, PosterType, PosterVerification } from "./types";
+import { Property, City, Broker, LocationNode, PropertyType, ListingType, PosterType, PosterVerification } from "./types";
 import { toCoordinates } from "./map";
 
 /**
@@ -175,6 +175,74 @@ const mapProperty = (p: ApiProperty): Property => {
   };
 };
 
+/** Everything `GET /properties` understands. All of it is optional. */
+export interface PropertySearchQuery {
+  city?: string;
+  subCity?: string;
+  neighborhood?: string;
+  locationId?: string;
+  propertyType?: string;
+  listingType?: ListingType;
+  minPrice?: number;
+  maxPrice?: number;
+  minArea?: number;
+  maxArea?: number;
+  minBedrooms?: number;
+  minBathrooms?: number;
+  /** Free text across title, description, address and location names. */
+  q?: string;
+  sort?: PropertySort;
+  page?: number;
+  pageSize?: number;
+  verifiedOnly?: boolean;
+  status?: string;
+  ownerId?: string;
+  generator?: boolean;
+  waterTank?: boolean;
+  parking?: boolean;
+  furnished?: boolean;
+  securityGuard?: boolean;
+  balcony?: boolean;
+  internet?: boolean;
+}
+
+export type PropertySort = "newest" | "oldest" | "price-asc" | "price-desc";
+
+export interface PropertyPage {
+  data: Property[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}
+
+/** One review, as rendered on a property or a poster profile. */
+export interface Review {
+  id: string;
+  rating: number | null;
+  comment: string;
+  createdAt: string | null;
+  property?: { id: string; title: string };
+  author: { id: string | null; name: string; avatarUrl: string | null };
+}
+
+export interface ReviewSummary {
+  /** null when nobody has reviewed yet — never 0. */
+  average: number | null;
+  count: number;
+  data: Review[];
+}
+
+export const REPORT_REASONS = [
+  { value: "scam", label: "It looks like a scam" },
+  { value: "incorrect_information", label: "The information is wrong" },
+  { value: "duplicate_listing", label: "It is a duplicate listing" },
+  { value: "inappropriate_content", label: "The content is inappropriate" },
+  { value: "fake_property", label: "The property does not exist" },
+  { value: "suspicious_behaviour", label: "The poster is behaving suspiciously" },
+  { value: "other", label: "Something else" },
+] as const;
+
 /** Payload accepted by `apiClient.createProperty`. Mirrors the NestJS CreatePropertyDto. */
 export interface CreatePropertyInput {
   title: string;
@@ -244,41 +312,110 @@ export interface AppNotification {
 
 export const apiClient = {
   // Fetch properties directly from NestJS REST API
-  async getProperties(filters?: {
-    city?: string;
-    subCity?: string;
-    propertyType?: string;
-    ownerId?: string;
-    status?: string;
-  }): Promise<Property[]> {
-    try {
-      const queryParams = new URLSearchParams();
-      if (filters?.city) queryParams.set("city", filters.city);
-      if (filters?.subCity) queryParams.set("subCity", filters.subCity);
-      if (filters?.propertyType && filters.propertyType !== "all") queryParams.set("propertyType", filters.propertyType);
-      if (filters?.ownerId) queryParams.set("ownerId", filters.ownerId);
-      if (filters?.status) queryParams.set("status", filters.status);
-
-      const res = await fetch(`${API_BASE}/properties?${queryParams.toString()}`, { cache: "no-store" });
-      if (res.ok) {
-        const data = await res.json();
-        if (Array.isArray(data)) return data.map(mapProperty);
-      }
-    } catch (err) {
-      console.warn("NestJS API fetch error:", err);
+  /**
+   * The marketplace query. Filtering, sorting and paging happen server-side.
+   *
+   * Throws when the request fails. It used to catch everything and return an
+   * empty array, which rendered a network outage as "no properties match your
+   * search" — indistinguishable from a genuinely empty result, and impossible
+   * to offer a retry for.
+   */
+  async searchProperties(query: PropertySearchQuery = {}): Promise<PropertyPage> {
+    const params = new URLSearchParams();
+    for (const [key, value] of Object.entries(query)) {
+      if (value === undefined || value === null || value === "" || value === false) continue;
+      if (key === "propertyType" && value === "all") continue;
+      params.set(key, String(value));
     }
-    return [];
+
+    const res = await fetch(`${API_BASE}/properties?${params.toString()}`, { cache: "no-store" });
+    if (!res.ok) {
+      throw new Error(`Could not load properties (${res.status}).`);
+    }
+
+    const payload = await res.json();
+
+    // The API used to return a bare array and now returns a page object. Both
+    // are accepted so a stale deployment of either side keeps working.
+    if (Array.isArray(payload)) {
+      const data = payload.map(mapProperty);
+      return { data, total: data.length, page: 1, pageSize: data.length, totalPages: 1 };
+    }
+
+    const data = Array.isArray(payload?.data) ? payload.data.map(mapProperty) : [];
+    return {
+      data,
+      total: Number(payload?.total ?? data.length),
+      page: Number(payload?.page ?? 1),
+      pageSize: Number(payload?.pageSize ?? data.length),
+      totalPages: Number(payload?.totalPages ?? 1),
+    };
   },
 
-  // Fetch single property details by slug
+  /** Convenience wrapper for callers that only want the rows. Also throws. */
+  async getProperties(filters?: PropertySearchQuery): Promise<Property[]> {
+    const page = await apiClient.searchProperties(filters);
+    return page.data;
+  },
+
+  /**
+   * One property. Returns null only for a genuine 404; anything else throws so
+   * the page can tell "this listing does not exist" apart from "the API is
+   * down" and offer a retry for the second.
+   */
   async getPropertyBySlug(slug: string): Promise<Property | null> {
-    try {
-      const res = await fetch(`${API_BASE}/properties/${slug}`, { cache: "no-store" });
-      if (res.ok) return mapProperty(await res.json());
-    } catch (err) {
-      console.warn("NestJS API fetch error:", err);
+    const res = await fetch(`${API_BASE}/properties/${slug}`, { cache: "no-store" });
+    if (res.status === 404) return null;
+    if (!res.ok) throw new Error(`Could not load this property (${res.status}).`);
+    return mapProperty(await res.json());
+  },
+
+  /** Reviews for one property, or across everything a poster has listed. */
+  async getReviews(target: { propertyId?: string; posterId?: string }): Promise<ReviewSummary> {
+    const params = new URLSearchParams();
+    if (target.propertyId) params.set("propertyId", target.propertyId);
+    if (target.posterId) params.set("posterId", target.posterId);
+
+    const res = await fetch(`${API_BASE}/reviews?${params.toString()}`, { cache: "no-store" });
+    if (!res.ok) throw new Error(`Could not load reviews (${res.status}).`);
+
+    const payload = await res.json();
+    return {
+      average: payload?.average ?? null,
+      count: Number(payload?.count ?? 0),
+      data: Array.isArray(payload?.data) ? payload.data : [],
+    };
+  },
+
+  async createReview(input: { propertyId: string; rating: number; comment?: string }): Promise<Review> {
+    const res = await fetch(`${API_BASE}/reviews`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...authHeaders() },
+      body: JSON.stringify(input),
+    });
+
+    const payload = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error(
+        Array.isArray(payload?.message) ? payload.message.join(", ") : payload?.message || "Could not post that review."
+      );
     }
-    return null;
+    return payload;
+  },
+
+  async reportProperty(input: { propertyId: string; reason: string; details?: string }): Promise<void> {
+    const res = await fetch(`${API_BASE}/reports`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...authHeaders() },
+      body: JSON.stringify(input),
+    });
+
+    if (!res.ok) {
+      const payload = await res.json().catch(() => ({}));
+      throw new Error(
+        Array.isArray(payload?.message) ? payload.message.join(", ") : payload?.message || "Could not send that report."
+      );
+    }
   },
 
   /**
