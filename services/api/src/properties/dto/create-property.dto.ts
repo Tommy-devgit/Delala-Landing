@@ -145,6 +145,12 @@ export class CreatePropertyDto {
   @IsBoolean()
   balcony?: boolean;
 
+  @ApiProperty({ example: true, required: false })
+  @IsOptional()
+  @Transform(({ value }) => value === "true" || value === true)
+  @IsBoolean()
+  internet?: boolean;
+
   @ApiProperty({ example: "b1", required: false })
   @IsOptional()
   @IsString()
