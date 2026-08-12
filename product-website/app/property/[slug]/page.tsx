@@ -31,6 +31,7 @@ import { Skeleton, buttonClasses } from "@/components/ui";
 import { PropertyMap } from "@/components/map";
 import { Avatar } from "@/components/avatar";
 import { useFavorites } from "@/lib/use-favorites";
+import { PropertyPhoto } from "@/components/property-photo";
 
 export default function PropertyDetailPage() {
   const params = useParams();
@@ -41,7 +42,9 @@ export default function PropertyDetailPage() {
   const [similarListings, setSimilarListings] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [isScheduleOpen, setIsScheduleOpen] = useState(false);
-  const [activeImage, setActiveImage] = useState<string>("/images/hero_property.png");
+  // Null until a property with photographs loads. The old default was a stock
+  // interior, so the gallery opened on a room belonging to no listing.
+  const [activeImage, setActiveImage] = useState<string | null>(null);
   const { isSaved, toggle } = useFavorites();
 
   useEffect(() => {
@@ -159,13 +162,15 @@ export default function PropertyDetailPage() {
         <div className="mb-4 flex flex-col md:flex-row md:items-end justify-between gap-3">
           <div>
             <div className="flex flex-wrap items-center gap-2 mb-1.5">
-              {property.verified && (
+              {property.approved && (
                 <span className="inline-flex items-center gap-1 font-mono-label text-label text-primary bg-accent/25 border border-accent/50 px-2 py-0.5 rounded-full font-bold">
                   <ShieldCheck className="w-3 h-3" aria-hidden="true" />
-                  Verified
+                  Reviewed by Delala
                 </span>
               )}
-              <span className="font-mono-label text-label text-muted">{property.propertyType}</span>
+              {property.propertyType && (
+                <span className="font-mono-label text-label text-muted">{property.propertyType}</span>
+              )}
               {postedAt && (
                 <span className="font-mono-label text-label text-muted" title={formatPostedDate(property.createdAt)}>
                   · Posted {postedAt}
@@ -196,7 +201,7 @@ export default function PropertyDetailPage() {
         {/* Image Gallery */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 mb-6">
           <div className="lg:col-span-8 aspect-[16/10] rounded-panel overflow-hidden border border-line bg-ink relative shadow-md">
-            <img src={activeImage} alt={property.title} className="w-full h-full object-cover" />
+            <PropertyPhoto src={activeImage} alt={property.title} sizeHint="hero" />
           </div>
 
           <div className="lg:col-span-4 grid grid-cols-2 gap-3">
