@@ -16,6 +16,7 @@ import {
   Filter,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui";
+import { PropertyPhoto } from "@/components/property-photo";
 
 export default function MyListingsPage() {
   const [activeTab, setActiveTab] = useState<"all" | "approved" | "pending" | "archived">("all");
@@ -33,8 +34,8 @@ export default function MyListingsPage() {
   }, []);
 
   const filteredProperties = properties.filter((p) => {
-    if (activeTab === "approved") return p.verified;
-    if (activeTab === "pending") return !p.verified;
+    if (activeTab === "approved") return p.approved;
+    if (activeTab === "pending") return !p.approved;
     return true;
   });
 
@@ -73,13 +74,13 @@ export default function MyListingsPage() {
           <div className="p-6 rounded-panel bg-surface border border-line shadow-xs">
             <div className="text-xs font-mono-label text-emerald-700">Approved &amp; live</div>
             <div className="font-serif-display text-3xl text-ink mt-1">
-              {properties.filter((p) => p.verified).length}
+              {properties.filter((p) => p.approved).length}
             </div>
           </div>
           <div className="p-6 rounded-panel bg-surface border border-line shadow-xs">
             <div className="text-xs font-mono-label text-amber-700">Pending review</div>
             <div className="font-serif-display text-3xl text-ink mt-1">
-              {properties.filter((p) => !p.verified).length}
+              {properties.filter((p) => !p.approved).length}
             </div>
           </div>
           <div className="p-6 rounded-panel bg-surface border border-line shadow-xs">
@@ -125,7 +126,9 @@ export default function MyListingsPage() {
                   className="p-5 rounded-card bg-canvas border border-line flex flex-col sm:flex-row sm:items-center justify-between gap-4"
                 >
                   <div className="flex items-center gap-4">
-                    <img src={property.heroImage} alt="" className="w-16 h-16 rounded-control object-cover" />
+                    <div className="w-16 h-16 rounded-control overflow-hidden shrink-0">
+                      <PropertyPhoto src={property.heroImage} alt={property.title} sizeHint="thumb" />
+                    </div>
                     <div>
                       <h4 className="font-serif-display text-lg text-ink">{property.title}</h4>
                       <p className="text-xs text-muted font-mono-label">
