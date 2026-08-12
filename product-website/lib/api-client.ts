@@ -193,6 +193,10 @@ export interface CreatePropertyInput {
   generator: boolean;
   waterTank: boolean;
   parking: boolean;
+  furnished: boolean;
+  securityGuard: boolean;
+  balcony: boolean;
+  internet: boolean;
   /** Owning user. The API prefers the id in the session token over this. */
   brokerId?: string;
   /** Approximate map pin. Omitted from the request when the publisher set none. */
@@ -318,9 +322,11 @@ export const apiClient = {
     formData.append("bedrooms", String(input.bedrooms));
     formData.append("bathrooms", String(input.bathrooms));
     formData.append("areaSqm", String(input.areaSqm));
-    formData.append("generator", String(input.generator));
-    formData.append("waterTank", String(input.waterTank));
-    formData.append("parking", String(input.parking));
+    // All seven, so an answer the poster actually gave is not dropped between
+    // the form and the request. Only the first three were serialized before.
+    for (const key of ["generator", "waterTank", "parking", "furnished", "securityGuard", "balcony", "internet"] as const) {
+      formData.append(key, String(input[key]));
+    }
     if (input.brokerId) formData.append("brokerId", input.brokerId);
 
     // Only send a pin when it is a genuine coordinate pair.
