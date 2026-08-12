@@ -26,14 +26,24 @@ export function FilterModal({
 
   const subCities = getSubCities(cities, filters.city);
 
+  /**
+   * Resetting clears the filters but keeps the free-text query and the sort
+   * order, which are set outside this modal — wiping them from in here would
+   * discard a search the person did not ask to clear.
+   *
+   * `maxPrice: 0` means "no ceiling". It was 150,000, which silently hid every
+   * listing above that price the moment anyone opened and applied the filters.
+   */
   const handleReset = () => {
     setFilters({
+      ...filters,
       city: "",
       subCity: "",
       neighborhood: "",
       propertyType: "",
+      listingType: "",
       minPrice: 0,
-      maxPrice: 150000,
+      maxPrice: 0,
       bedrooms: "",
       bathrooms: "",
       generator: false,
@@ -41,7 +51,6 @@ export function FilterModal({
       parking: false,
       furnished: false,
       verifiedOnly: false,
-      sortBy: "newest",
     });
   };
 
