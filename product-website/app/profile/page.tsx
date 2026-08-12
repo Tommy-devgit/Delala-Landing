@@ -79,9 +79,14 @@ export default function ProfilePage() {
         populateForm(freshUser || activeSession!.user);
       }
 
-      const properties = await apiClient.getProperties();
+      // Scoped by owner rather than downloading the whole marketplace and
+      // filtering it in the browser. A failure here must not take the profile
+      // form down with it — the listings strip simply stays empty.
+      const properties = await apiClient
+        .getProperties({ ownerId: userId, status: "all" })
+        .catch(() => []);
       if (cancelled) return;
-      setUserProperties(properties.filter((p) => p.broker?.id === userId));
+      setUserProperties(properties);
     }
 
     loadUserSession();
