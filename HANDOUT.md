@@ -183,6 +183,70 @@ secrecy of the id, that makes it safe.
 
 ---
 
+## 3b. Data integrity — read before adding any trust feature
+
+The marketplace used to invent every trust signal it displayed, in three layers
+at once. This has been removed; the point of writing it down is that it was not
+obvious from reading any single file, and it is easy to reintroduce.
+
+What was fabricated, and where:
+
+| Where | What it claimed |
+|---|---|
+| `properties.service.ts` `mapPropertyResponse()` | `generator/waterTank/parking/furnished/securityGuard/balcony` hardcoded `true` for every property |
+| same | `broker.verified: true`, `rating: 4.9`, `reviewsCount: 12`, `responseTime: "Under 15 mins"` |
+| same | `propertyType` defaulted to `"Villa"`; missing photos replaced with two stock interiors; nameless posters called `"Verified Owner"` |
+| `properties.service.ts` `create()` | inserted two stock images when the poster uploaded none |
+| `product-website/lib/api-client.ts` | invented *again* on top: `fieldAgentNotes: "Physically verified by Delala field inspector."`, `reviewsCount: 14`, `activeListingsCount: 8`, `languages`, `availableDate: "Immediate"` |
+| `product-website/app/publish/page.tsx` | `DEFAULT_AMENITIES` sent `generator/waterTank/parking: true` on every submission, never shown to the poster |
+
+None of those columns existed. The publish form collected amenity answers the
+DTO declared, `create()` discarded them for want of columns, and the read path
+asserted `true` regardless.
+
+**The rules now:**
+
+- Amenity columns are **nullable on purpose**. `null` = the poster was never
+  asked (every listing predating this), `false` = asked and said no, `true` =
+  yes. Render only `true`. Filters must test `=== true`, not truthiness, or an
+  unknown becomes a yes.
+- `profiles.phone_verified / identity_verified / business_verified` default
+  **false**. Nobody is verified until a human verifies them. There is no admin UI
+  for granting these yet — that is the next piece of the trust work.
+- A listing's `approved` flag (from `status === "approved"`) is real, but it is a
+  statement about the **listing** passing moderation, not about the poster. It is
+  surfaced as "Reviewed", never "Verified". The frontend field was renamed
+  `verified` → `approved` to stop the two ideas sharing a word.
+- Poster rating and review count come from `GET /users/:id/public`, aggregated
+  from real reviews, and are **null when there are none** — never 0, never 4.9.
+- Listings with no photographs return `images: []` and render
+  `components/property-photo.tsx`, which draws the absence honestly.
+
+## 3c. Where the product stands against the enrichment brief
+
+Audited against the marketplace enrichment brief. Backed by real data today:
+properties, locations (Country → City → Sub-city → Neighborhood, with
+coordinates), favorites, notifications, visits, moderation, amenities,
+poster verification flags.
+
+Models that exist with **no public API**: `Review`, `Report`. Both are readable
+from the admin dashboard only — there is no way for a user to post a review or
+report a listing yet, which §20/§21 of the brief need.
+
+No model at all, in brief priority order: saved searches, guides/articles,
+messaging, recently-viewed (localStorage is the right home — do not add
+tracking), property view counts, market insights.
+
+`GET /properties` has **no pagination, price filter, bedroom filter, sorting or
+text search** — it returns every property and the Explore page filters the whole
+set client-side. That is the first thing to fix before the Explore work in the
+brief, and before the listing count grows.
+
+`product-website/DESIGN.md` is a **scraped Airbnb style reference**, not Delala's
+design system, and it contradicts the real tokens. The source of truth is the
+`@theme` block in `app/globals.css` — it already carries the burgundy/sage/bronze
+palette and the Manrope + Inter pairing. Do not follow DESIGN.md.
+
 ## 4. Product behaviour worth knowing
 
 **New listings are `pending`, not `approved`.** `properties.service.create()`
