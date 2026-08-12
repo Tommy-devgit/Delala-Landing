@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { apiClient } from "@/lib/api-client";
 import { Property } from "@/lib/types";
@@ -17,21 +17,29 @@ import {
 } from "lucide-react";
 import { Skeleton } from "@/components/ui";
 import { PropertyPhoto } from "@/components/property-photo";
+import { ErrorNotice } from "@/components/error-notice";
+import { useAsync } from "@/lib/use-async";
+import { useSession } from "@/lib/use-session";
 
 export default function MyListingsPage() {
   const [activeTab, setActiveTab] = useState<"all" | "approved" | "pending" | "archived">("all");
-  const [properties, setProperties] = useState<Property[]>([]);
-  const [loading, setLoading] = useState(true);
+  const session = useSession();
+  const ownerId = session?.user.id;
 
-  useEffect(() => {
-    async function loadProperties() {
-      setLoading(true);
-      const data = await apiClient.getProperties();
-      setProperties(data);
-      setLoading(false);
-    }
-    loadProperties();
-  }, []);
+  /**
+   * Only this user's listings.
+   *
+   * This called `getProperties()` with no owner, so "My listings" showed every
+   * property on the marketplace — including the counts above it, which meant
+   * the approved/pending tallies belonged to the whole site rather than to the
+   * person reading them.
+   */
+  const { data, loading, error, retry } = useAsync(
+    async () => (ownerId ? apiClient.getProperties({ ownerId, status: "all" }) : []),
+    [ownerId]
+  );
+
+  const properties: Property[] = data || [];
 
   const filteredProperties = properties.filter((p) => {
     if (activeTab === "approved") return p.approved;
@@ -66,7 +74,7 @@ export default function MyListingsPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 mt-8 space-y-4">
         
         {/* Metric Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="p-6 rounded-panel bg-surface border border-line shadow-xs">
             <div className="text-xs font-mono-label text-muted">Total properties</div>
             <div className="font-serif-display text-3xl text-ink mt-1">{properties.length}</div>
@@ -82,10 +90,6 @@ export default function MyListingsPage() {
             <div className="font-serif-display text-3xl text-ink mt-1">
               {properties.filter((p) => !p.approved).length}
             </div>
-          </div>
-          <div className="p-6 rounded-panel bg-surface border border-line shadow-xs">
-            <div className="text-xs font-mono-label text-primary">Walkthrough requests</div>
-            <div className="font-serif-display text-3xl text-ink mt-1">12</div>
           </div>
         </div>
 
@@ -106,7 +110,15 @@ export default function MyListingsPage() {
             ))}
           </div>
 
-          {loading ? (
+          {!ownerId ? (
+            <div className="py-10 text-center space-y-3">
+              <Building2 className="w-12 h-12 text-muted mx-auto opacity-50" />
+              <h3 className="font-serif-display text-xl text-ink">Sign in to see your listings</h3>
+              <p className="text-xs text-muted">Your properties appear here once you are signed in.</p>
+            </div>
+          ) : error ? (
+            <ErrorNotice message={error} onRetry={retry} />
+          ) : loading ? (
             <div className="space-y-4">
               {[1, 2, 3].map((i) => (
                 <Skeleton key={i} className="h-24" />
