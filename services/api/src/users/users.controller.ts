@@ -61,6 +61,42 @@ export class UsersController {
     };
   }
 
+  @Get("verified-posters")
+  @ApiOperation({ summary: "Posters who have passed at least one verification check" })
+  async verifiedPosters() {
+    // Deliberately returns nothing until somebody is genuinely verified. The
+    // homepage section that reads this hides itself on an empty list rather
+    // than filling the space with unverified accounts — which is what the old
+    // `verified: true` on every poster amounted to.
+    const profiles = await this.prisma.profile.findMany({
+      where: {
+        OR: [{ phoneVerified: true }, { identityVerified: true }, { businessVerified: true }],
+      },
+      include: {
+        user: {
+          include: { properties: { select: { id: true, status: true } } },
+        },
+      },
+      take: 12,
+    });
+
+    return profiles
+      .map((profile: any) => ({
+        id: profile.id,
+        fullName: [profile.firstName, profile.lastName].filter(Boolean).join(" ") || "Delala poster",
+        posterType: profile.posterType || null,
+        avatarUrl: profile.avatarUrl || null,
+        bio: profile.bio || "",
+        verification: {
+          phone: Boolean(profile.phoneVerified),
+          identity: Boolean(profile.identityVerified),
+          business: Boolean(profile.businessVerified),
+        },
+        activeListingCount: (profile.user?.properties || []).filter((p: any) => p.status === "approved").length,
+      }))
+      .sort((a, b) => b.activeListingCount - a.activeListingCount);
+  }
+
   @Get(":id/public")
   @ApiOperation({ summary: "Publicly visible profile for a property poster" })
   async getPublicProfile(@Param("id") id: string) {
