@@ -143,12 +143,20 @@ export interface Neighborhood {
   description: string;
 }
 
+/**
+ * The Explore controls. Every field here maps onto a query parameter the API
+ * understands — nothing is filtered in the browser any more, so a filter that
+ * cannot be expressed as a query does not belong in this type.
+ */
 export interface FilterState {
+  /** Free text across title, description, address and location names. */
+  q: string;
   city: string;
   subCity: string;
   /** Most specific location level; the modal previously stopped at sub-city. */
   neighborhood: string;
   propertyType: string;
+  listingType: ListingType | "";
   minPrice: number;
   maxPrice: number;
   bedrooms: string;
@@ -157,6 +165,9 @@ export interface FilterState {
   waterTank: boolean;
   parking: boolean;
   furnished: boolean;
+  /** Listings that have passed Delala's moderation review. */
   verifiedOnly: boolean;
-  sortBy: "newest" | "price-asc" | "price-desc" | "popular";
+  // "popular" was an option with nothing behind it — there is no view or
+  // favourite count to order by — so it is not offered.
+  sortBy: "newest" | "oldest" | "price-asc" | "price-desc";
 }
