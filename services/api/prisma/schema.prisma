@@ -46,6 +46,9 @@ model Profile {
   businessVerified Boolean @default(false) @map("business_verified")
   /// owner | broker | agency. Distinct from `role`, which is authorization.
   posterType       String? @map("poster_type") @db.VarChar(20)
+  /// Hashed like a password: a reset token is a bearer credential.
+  passwordResetHash    String?   @map("password_reset_hash")
+  passwordResetExpires DateTime? @map("password_reset_expires") @db.Timestamp(6)
   createdAt DateTime? @default(now()) @map("created_at") @db.Timestamp(6)
   updatedAt DateTime? @default(now()) @map("updated_at") @db.Timestamp(6)
 
