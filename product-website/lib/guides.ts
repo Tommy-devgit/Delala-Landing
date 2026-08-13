@@ -1,3 +1,5 @@
+import type { ImageSlot } from "./imagery";
+
 /**
  * Editorial content for the guides section.
  *
@@ -34,6 +36,14 @@ export interface Guide {
   readingMinutes: number;
   /** ISO date. Shown so a reader can judge how current the advice is. */
   updatedAt: string;
+  /**
+   * Optional header photograph, by slot name from `lib/imagery.ts`.
+   *
+   * Optional on purpose. Four of the six guides have a picture that genuinely
+   * belongs to the subject; the other two open on typography rather than
+   * borrowing an unrelated image to fill the space.
+   */
+  image?: ImageSlot;
   sections: GuideSection[];
 }
 
@@ -46,6 +56,7 @@ export const GUIDES: Guide[] = [
     category: "Renting",
     readingMinutes: 6,
     updatedAt: "2026-07-28",
+    image: "editorial-gables",
     sections: [
       {
         heading: "Start with the sub-city, not the city",
@@ -132,6 +143,7 @@ export const GUIDES: Guide[] = [
     category: "Renting",
     readingMinutes: 7,
     updatedAt: "2026-07-28",
+    image: "guide-bedroom",
     sections: [
       {
         heading: "Confirm the person can actually let the property",
@@ -214,6 +226,7 @@ export const GUIDES: Guide[] = [
     category: "Safety",
     readingMinutes: 6,
     updatedAt: "2026-08-04",
+    image: "guide-keys-in-door",
     sections: [
       {
         heading: "Almost every scam needs one thing: payment before verification",
@@ -361,6 +374,7 @@ export const GUIDES: Guide[] = [
     category: "Money",
     readingMinutes: 5,
     updatedAt: "2026-07-14",
+    image: "editorial-interior",
     sections: [
       {
         heading: "Compare like with like, in the same area",
@@ -424,6 +438,7 @@ export const GUIDES: Guide[] = [
     category: "Renting",
     readingMinutes: 4,
     updatedAt: "2026-07-14",
+    image: "guide-handover",
     sections: [
       {
         heading: "On the day you get the keys",

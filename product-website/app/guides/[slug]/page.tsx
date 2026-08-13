@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { AlertTriangle, ArrowLeft, Check, Clock, Info } from "lucide-react";
 import { GUIDES, getGuide, type GuideBlock } from "@/lib/guides";
+import { Photo } from "@/components/photo";
+import { image } from "@/lib/imagery";
 
 /** Prerenders every guide, so they are static rather than rendered per request. */
 export function generateStaticParams() {
@@ -95,6 +97,16 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
           All guides
         </Link>
 
+        {guide.image && (
+          <div className="relative aspect-16/9 rounded-card overflow-hidden bg-ink border border-line">
+            <Photo
+              slot={guide.image}
+              sizes="(min-width: 768px) 42rem, 100vw"
+              className="absolute inset-0"
+            />
+          </div>
+        )}
+
         <header className="space-y-3 pb-6 border-b border-line">
           <span className="text-label text-primary">{guide.category}</span>
           <h1 className="font-serif-display text-3xl sm:text-4xl font-light text-ink leading-tight">
@@ -149,12 +161,19 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
             </section>
           )}
 
-          <div className="p-5 rounded-card bg-surface border border-line">
+          <div className="p-5 rounded-card bg-surface border border-line space-y-2">
             <p className="text-micro text-muted leading-relaxed">
               This is general guidance, not legal or financial advice. Anything involving ownership,
               transfer or a contract is worth confirming with a professional for your specific
               situation.
             </p>
+            {/* The header image is a library photograph, not a picture of any
+                property on Delala, and the credit says whose it is. */}
+            {guide.image && (
+              <p className="text-label text-muted">
+                Header photograph by {image(guide.image).credit}.
+              </p>
+            )}
           </div>
 
           <Link
