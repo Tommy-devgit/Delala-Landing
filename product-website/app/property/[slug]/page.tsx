@@ -33,7 +33,7 @@ import { Skeleton, buttonClasses } from "@/components/ui";
 import { PropertyMap } from "@/components/map";
 import { Avatar } from "@/components/avatar";
 import { useFavorites } from "@/lib/use-favorites";
-import { PropertyPhoto } from "@/components/property-photo";
+import { PropertyGallery } from "@/components/property-gallery";
 import { ErrorNotice } from "@/components/error-notice";
 import { ReportListingModal } from "@/components/report-listing-modal";
 import { ReviewsSection } from "@/components/reviews-section";
@@ -48,9 +48,6 @@ export default function PropertyDetailPage() {
   const [similarListings, setSimilarListings] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [isScheduleOpen, setIsScheduleOpen] = useState(false);
-  // Null until a property with photographs loads. The old default was a stock
-  // interior, so the gallery opened on a room belonging to no listing.
-  const [activeImage, setActiveImage] = useState<string | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [reloadNonce, setReloadNonce] = useState(0);
   const [isReportOpen, setIsReportOpen] = useState(false);
@@ -80,7 +77,6 @@ export default function PropertyDetailPage() {
         setProperty(fetchedProperty);
 
         if (fetchedProperty) {
-          setActiveImage(fetchedProperty.heroImage);
           // Similar homes are a nicety; if they fail, the listing itself still
           // renders rather than the whole page reporting an error.
           const nearby = await apiClient
@@ -263,26 +259,7 @@ export default function PropertyDetailPage() {
           </div>
         </div>
 
-        {/* Image Gallery */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 mb-6">
-          <div className="lg:col-span-8 aspect-[16/10] rounded-panel overflow-hidden border border-line bg-ink relative shadow-md">
-            <PropertyPhoto src={activeImage} alt={property.title} sizeHint="hero" />
-          </div>
-
-          <div className="lg:col-span-4 grid grid-cols-2 gap-3">
-            {property.galleryImages.slice(0, 4).map((img, idx) => (
-              <button
-                key={idx}
-                onClick={() => setActiveImage(img)}
-                className={`rounded-card overflow-hidden border border-line aspect-[4/3] relative ${
-                  activeImage === img ? "ring-2 ring-primary" : ""
-                }`}
-              >
-                <img src={img} alt="" className="w-full h-full object-cover" />
-              </button>
-            ))}
-          </div>
-        </div>
+        <PropertyGallery images={property.galleryImages} title={property.title} />
 
         {/* Main Content Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
