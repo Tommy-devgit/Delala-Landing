@@ -6,13 +6,11 @@ import { Heart, Lock, Search } from "lucide-react";
 import { apiClient } from "@/lib/api-client";
 import { Property } from "@/lib/types";
 import { useSession } from "@/lib/use-session";
-import { useFavorites } from "@/lib/use-favorites";
 import { PropertyCard } from "@/components/property-card";
 import { Skeleton, buttonClasses } from "@/components/ui";
 
 export default function FavoritesPage() {
   const session = useSession();
-  const { isSaved } = useFavorites();
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -20,6 +18,21 @@ export default function FavoritesPage() {
   const [nonce, setNonce] = useState(0);
   const reload = useCallback(() => setNonce((n) => n + 1), []);
   const userId = session?.user?.id ?? null;
+
+  /**
+   * Ids unsaved on this page since the list was fetched.
+   *
+   * The server's list is the source of truth here. The page used to render
+   * `properties.filter((p) => isSaved(p.id))`, where `isSaved` reads the id set
+   * that `useFavorites` loads separately — empty until that request lands, and
+   * empty forever if it fails. A page that had successfully loaded the saved
+   * homes would still show "No saved homes yet", because an unrelated request's
+   * failure filtered them all away.
+   *
+   * An array rather than a Set: the updates below stay immutable, which keeps
+   * the component compilable by the React compiler.
+   */
+  const [removedIds, setRemovedIds] = useState<string[]>([]);
 
   useEffect(() => {
     let cancelled = false;
@@ -33,7 +46,7 @@ export default function FavoritesPage() {
         const data = await apiClient.getFavorites();
         if (!cancelled) {
           setProperties(data);
-          setRemoved(new Set());
+          setRemovedIds([]);
           setError("");
         }
       } catch (err) {
@@ -50,34 +63,17 @@ export default function FavoritesPage() {
     };
   }, [userId, nonce]);
 
-  /**
-   * The server's list is the source of truth for this page.
-   *
-   * It used to render `properties.filter((p) => isSaved(p.id))`, where
-   * `isSaved` reads the separate id set that `useFavorites` loads. That set is
-   * empty until its own request lands and stays empty if that request fails, so
-   * a page that had successfully loaded the saved homes would still show "No
-   * saved homes yet" — the data was fetched and then filtered away by an
-   * unrelated request's failure.
-   *
-   * Unsaving from a card still needs the tile to disappear immediately, so that
-   * one case is tracked here rather than inferred from the id set.
-   */
-  const [removed, setRemoved] = useState<Set<string>>(new Set());
-  const visible = properties.filter((p) => !removed.has(p.id));
+  const visible = properties.filter((p) => !removedIds.includes(p.id));
 
+  // Unsaving from a card drops the tile immediately rather than leaving a home
+  // on a page titled "Saved homes"; re-saving one still on screen puts it back.
   const handleToggleFavorite = useCallback(
     (propertyId: string) => {
-      // The card has already toggled by the time this fires; re-saving a home
-      // that is still on screen should put it back.
-      setRemoved((prev) => {
-        const next = new Set(prev);
-        if (isSaved(propertyId)) next.delete(propertyId);
-        else next.add(propertyId);
-        return next;
-      });
+      setRemovedIds((prev) =>
+        prev.includes(propertyId) ? prev.filter((id) => id !== propertyId) : [...prev, propertyId]
+      );
     },
-    [isSaved]
+    []
   );
 
   if (!session?.user) {
