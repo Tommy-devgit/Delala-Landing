@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CheckCircle2, Loader2, X, XCircle } from "lucide-react";
+import { CheckCircle2, ImageOff, Loader2, X, XCircle } from "lucide-react";
 import { AdminProperty, formatETB, formatDate } from "@/lib/admin-api";
 import { Badge, Button, statusLabel, statusTone } from "@/components/ui";
 
@@ -65,6 +65,17 @@ export function ApprovalModal({
             <h2 className="font-serif-display text-lg text-ink truncate">{property.title}</h2>
             <p className="text-label text-muted mt-0.5">
               Submitted {formatDate(property.submittedAt)} by {property.ownerName}
+              {property.ownerPhone && (
+                <>
+                  {" · "}
+                  <a href={`tel:${property.ownerPhone}`} className="text-primary hover:underline">
+                    {property.ownerPhone}
+                  </a>
+                </>
+              )}
+            </p>
+            <p className="text-label text-muted mt-0.5">
+              {[property.subCity, property.city].filter(Boolean).join(", ") || "No location given"}
             </p>
           </div>
           <button
@@ -78,6 +89,26 @@ export function ApprovalModal({
         </div>
 
         <div className="p-5 space-y-4">
+          {/* The photograph, which this modal did not show at all — an operator
+              was approving a listing without seeing the thing being listed. A
+              listing with none is itself a moderation signal, so the absence is
+              stated rather than hidden behind a placeholder. */}
+          <div className="aspect-16/9 rounded-card overflow-hidden bg-canvas border border-line">
+            {property.heroImage ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={property.heroImage}
+                alt={property.title}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full flex flex-col items-center justify-center gap-1.5 text-muted">
+                <ImageOff className="w-5 h-5" aria-hidden="true" />
+                <span className="text-label">No photographs submitted</span>
+              </div>
+            )}
+          </div>
+
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
               { label: "Rent", value: formatETB(property.rentETB) },
