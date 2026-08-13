@@ -6,6 +6,7 @@ import { HomeHero } from "@/components/home-hero";
 import { CityCard } from "@/components/city-card";
 import { PropertyRail } from "@/components/property-rail";
 import { BrowseByType } from "@/components/home/browse-by-type";
+import { GuidesStrip } from "@/components/home/guides-strip";
 import { HowItWorks } from "@/components/home/how-it-works";
 import { TrustedPosters } from "@/components/home/trusted-posters";
 import { ErrorNotice } from "@/components/error-notice";
@@ -148,6 +149,8 @@ export default function HomePage() {
           </section>
 
           <TrustedPosters posters={data?.posters || []} />
+
+          <GuidesStrip />
 
           <HowItWorks />
 
