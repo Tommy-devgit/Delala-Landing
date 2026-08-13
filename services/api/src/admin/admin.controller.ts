@@ -51,10 +51,21 @@ export class AdminController {
 
   @Patch("users/:id")
   @Roles("ADMIN")
-  @ApiOperation({ summary: "Change a user's role or suspend/reactivate them" })
+  @ApiOperation({ summary: "Change a user's role, status, poster type or verification" })
   updateUser(
     @Param("id") id: string,
-    @Body() body: { role?: string; status?: string },
+    @Body()
+    body: {
+      role?: string;
+      status?: string;
+      posterType?: string;
+      // The only way any verification badge is ever granted. Nothing else in
+      // the system writes these, deliberately: a badge that software can award
+      // itself is not evidence of anything.
+      phoneVerified?: boolean;
+      identityVerified?: boolean;
+      businessVerified?: boolean;
+    },
     @Req() req: any
   ) {
     return this.adminService.updateUser(id, body, this.actorId(req));
