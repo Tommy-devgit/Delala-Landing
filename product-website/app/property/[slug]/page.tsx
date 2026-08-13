@@ -32,6 +32,11 @@ import {
 import { Skeleton, buttonClasses } from "@/components/ui";
 import { PropertyMap } from "@/components/map";
 import { Avatar } from "@/components/avatar";
+import {
+  NoVerificationNote,
+  POSTER_TYPE_LABELS,
+  VerificationBadges,
+} from "@/components/verification-badges";
 import { useFavorites } from "@/lib/use-favorites";
 import { PropertyGallery } from "@/components/property-gallery";
 import { ErrorNotice } from "@/components/error-notice";
@@ -351,7 +356,13 @@ export default function PropertyDetailPage() {
                   ) : (
                     <h4 className="font-serif-display text-base text-ink truncate">{posterName}</h4>
                   )}
-                  <p className="text-label text-muted">Listed by owner</p>
+                  {/* Was hardcoded "Listed by owner", which asserted the
+                      poster owns the property whoever they actually are. */}
+                  <p className="text-label text-muted">
+                    {property.broker?.posterType
+                      ? POSTER_TYPE_LABELS[property.broker.posterType]
+                      : "Posted on Delala"}
+                  </p>
                   {(property.phone || property.broker?.phone) && (
                     <p className="text-label font-mono-label text-primary font-bold mt-0.5">
                       {property.phone || property.broker?.phone}
@@ -359,6 +370,18 @@ export default function PropertyDetailPage() {
                   )}
                 </div>
               </div>
+
+              {/* What this poster has actually proved. Renders nothing when
+                  they have proved nothing, and the note below says so rather
+                  than leaving a silence that reads as approval. */}
+              {property.broker && (
+                <div className="space-y-1.5">
+                  <VerificationBadges verification={property.broker.verification} />
+                  {!property.broker.verification.phone &&
+                    !property.broker.verification.identity &&
+                    !property.broker.verification.business && <NoVerificationNote />}
+                </div>
+              )}
 
               <div className="space-y-3">
                 {(property.phone || property.broker?.phone) ? (
