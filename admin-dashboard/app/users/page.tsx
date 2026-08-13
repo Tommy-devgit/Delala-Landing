@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Search, Users as UsersIcon } from "lucide-react";
+import { BadgeCheck, Search, Users as UsersIcon } from "lucide-react";
 import { adminApi, formatDate } from "@/lib/admin-api";
+import type { AdminUserChanges, AdminVerification } from "@/lib/admin-api";
 import { useAdminSession, useResource } from "@/lib/use-admin";
 import {
   Badge,
@@ -20,6 +21,24 @@ import { Avatar } from "@/components/avatar";
 
 const ROLES = ["USER", "BROKER", "MODERATOR", "ADMIN"];
 
+/**
+ * The three checks an administrator can grant, and the field each one sets.
+ *
+ * This is the only place in the entire system that writes these. Until somebody
+ * ticks one here, every trust badge on the marketplace and the "verified
+ * posters" section of the homepage are empty — which is correct, and was the
+ * point of removing the `verified: true` that used to be attached to every
+ * poster automatically.
+ *
+ * The labels say precisely what was checked, because that is what a visitor
+ * reads on the listing. Only tick one when you have actually seen the evidence.
+ */
+const CHECKS: { key: keyof AdminVerification; field: keyof AdminUserChanges; label: string; hint: string }[] = [
+  { key: "phone", field: "phoneVerified", label: "Phone", hint: "The poster controls the number on their profile" },
+  { key: "identity", field: "identityVerified", label: "ID", hint: "Identification checked against the profile name" },
+  { key: "business", field: "businessVerified", label: "Business", hint: "A registered agency showed its registration" },
+];
+
 export default function UsersPage() {
   const [search, setSearch] = useState("");
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -32,7 +51,7 @@ export default function UsersPage() {
     [search]
   );
 
-  const mutate = async (id: string, changes: { role?: string; status?: string }) => {
+  const mutate = async (id: string, changes: AdminUserChanges) => {
     setBusyId(id);
     setActionError("");
     try {
@@ -72,7 +91,7 @@ export default function UsersPage() {
         <ErrorNotice message={error} onRetry={reload} />
       ) : (
         <DataTable
-          columns={["Account", "Role", "Status", "Listings", "Joined", ""]}
+          columns={["Account", "Role", "Status", "Verification", "Listings", "Joined", ""]}
           loading={loading}
           empty={
             users.length === 0 ? (
@@ -120,6 +139,41 @@ export default function UsersPage() {
                 </td>
                 <td className="px-4 py-3">
                   <Badge tone={statusTone(u.status)}>{statusLabel(u.status)}</Badge>
+                </td>
+                <td className="px-4 py-3">
+                  {isAdmin ? (
+                    <fieldset className="flex items-center gap-2.5">
+                      <legend className="sr-only">Verification checks for {u.email}</legend>
+                      {CHECKS.map((check) => (
+                        <label
+                          key={check.key}
+                          title={check.hint}
+                          className="flex items-center gap-1 text-label text-body cursor-pointer"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={u.verification[check.key]}
+                            disabled={busyId === u.id}
+                            onChange={(e) => mutate(u.id, { [check.field]: e.target.checked })}
+                            className="w-3.5 h-3.5 accent-primary"
+                          />
+                          {check.label}
+                        </label>
+                      ))}
+                    </fieldset>
+                  ) : (
+                    <div className="flex items-center gap-1.5">
+                      {CHECKS.filter((check) => u.verification[check.key]).map((check) => (
+                        <Badge key={check.key} tone="ok">
+                          <BadgeCheck className="w-3 h-3" aria-hidden="true" />
+                          {check.label}
+                        </Badge>
+                      ))}
+                      {!CHECKS.some((check) => u.verification[check.key]) && (
+                        <span className="text-label text-muted">None</span>
+                      )}
+                    </div>
+                  )}
                 </td>
                 <td className="px-4 py-3 text-micro text-body tabular">{u.listingCount}</td>
                 <td className="px-4 py-3 text-label text-muted whitespace-nowrap">{formatDate(u.joinedAt)}</td>
