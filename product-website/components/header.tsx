@@ -77,8 +77,19 @@ export function Header() {
   const [scrolled, setScrolled] = useState(false);
   const navRef = useRef<HTMLDivElement>(null);
 
-  // A hero sits behind the bar only on the homepage; everywhere else the solid
-  // treatment applies immediately so text never lands on a light background.
+  /**
+   * Transparent only where something dark is actually behind the bar.
+   *
+   * The header is `sticky` and sits *above* `<main>` in the document flow, so a
+   * transparent bar shows the page background — `--color-canvas`, a warm
+   * near-white — not the hero. White logo, white links and white-bordered
+   * buttons on that are invisible, which is exactly what happened.
+   *
+   * The homepage hero is pulled up by `-mt-[4.5rem]` (see `home-hero.tsx`) so
+   * it genuinely runs underneath this bar. That negative margin and the height
+   * here must stay in step; if the hero is ever removed from the homepage, this
+   * has to go back to always-solid.
+   */
   const overlay = pathname === "/" && !scrolled;
 
   useEffect(() => {
@@ -149,7 +160,7 @@ export function Header() {
         }`}
       >
         <div ref={navRef} className="max-w-[1440px] mx-auto px-4 sm:px-8">
-          <div className="flex items-center justify-between h-18 gap-4 py-3">
+          <div className="flex items-center justify-between h-[4.5rem] gap-4">
             {/* Logo, with room around it. */}
             <Link
               href="/"
@@ -363,7 +374,7 @@ export function Header() {
           <div className="absolute inset-0 bg-ink/50" onClick={() => setDrawerOpen(false)} />
 
           <div className="absolute inset-y-0 right-0 w-full max-w-sm bg-canvas overflow-y-auto">
-            <div className="flex items-center justify-between px-4 h-18 border-b border-line sticky top-0 bg-canvas">
+            <div className="flex items-center justify-between px-4 h-[4.5rem] border-b border-line sticky top-0 bg-canvas">
               <span className="font-serif-display font-light text-xl text-primary">ደላላ</span>
               <button
                 type="button"
