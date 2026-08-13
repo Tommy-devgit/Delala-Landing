@@ -201,21 +201,35 @@ accounts appears in Supabase and why no recovery email is ever sent by it.
 provider configured anywhere in `services/api`. Nothing in this system can send
 an email to anybody.
 
-The consequence: **self-service password reset cannot work.** `POST
-/auth/forgot-password` mints a token and returns `{ delivered: false }` with a
-message saying so. It is honest rather than useful, which is an improvement on
-what it replaced — the endpoints did not exist at all, and the client caught the
-404 and returned `{ success: true }` every time, so the reset page reported
-success for a request that never happened.
+**The reset flow is fully built and switches itself on the moment SMTP exists.**
+`src/common/mailer.service.ts` reads its configuration from the environment and
+disables itself cleanly when it is absent, so `POST /auth/forgot-password`
+returns `{ delivered: false }` and says so rather than pretending. Set these and
+it starts sending, with no code change:
 
-**The working recovery path is the admin dashboard.** Users → *Set password*
-sets a password directly and clears any outstanding reset token; the
-administrator passes it to the person out of band. It is audited as
-`user.password.set` and the password itself is never written to the log.
+```bash
+SMTP_HOST=smtp.your-provider.com
+SMTP_PORT=587
+SMTP_USER=...
+SMTP_PASSWORD=...
+MAIL_FROM="Delala <no-reply@yourdomain.et>"
+APP_URL=https://your-marketplace-domain     # used to build the reset link
+```
 
-To wire real email later: send the token from `AuthService.requestPasswordReset`
-and change `delivered` to true. Everything else — hashed single-use tokens, an
-hour's expiry, `POST /auth/reset-password`, the reset page — already works.
+Any SMTP provider works — Resend, Postmark, SES, or Gmail with an app password.
+Reset tokens are 256-bit, stored **hashed** like passwords, single use, and
+expire after an hour.
+
+**There is deliberately no way for an administrator to set someone else's
+password.** A password belongs to the person who chose it. That endpoint existed
+briefly and was removed: recovery is the emailed link, and for the handful of
+accounts predating password storage entirely, `npm run set-password` is the
+operator tool — run against the database by someone with shell access, not
+exposed as a button in a web UI.
+
+The response never says whether an email has an account. Reporting "no such
+account" would turn the endpoint into a way to enumerate who has one, so a
+stranger's address and a real one produce the same answer.
 
 ### Passwords
 
