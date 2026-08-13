@@ -5,11 +5,14 @@ export const dynamic = "force-dynamic";
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { Building2, MessageSquare, Phone, ShieldCheck, UserRound } from "lucide-react";
+import { Building2, MessageSquare, Phone, UserRound } from "lucide-react";
 import { PublicProfile, apiClient } from "@/lib/api-client";
 import { Property } from "@/lib/types";
 import { formatPostedDate } from "@/lib/format";
 import { Avatar } from "@/components/avatar";
+import { NoVerificationNote, POSTER_TYPE_LABELS, VerificationBadges } from "@/components/verification-badges";
+import { ReviewsSection } from "@/components/reviews-section";
+import { useAsync } from "@/lib/use-async";
 import { PropertyCard } from "@/components/property-card";
 import { Skeleton, buttonClasses } from "@/components/ui";
 
@@ -28,6 +31,9 @@ export default function PublicProfilePage() {
   const [profile, setProfile] = useState<PublicProfile | null>(null);
   const [listings, setListings] = useState<Property[]>([]);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  // Declared here rather than beside the section that renders it: hooks
+  // cannot live below the loading and error returns further down.
+  const reviews = useAsync(() => apiClient.getReviews({ posterId: id }), [id]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -104,7 +110,6 @@ export default function PublicProfilePage() {
     );
   }
 
-  const isAgent = profile.role === "broker" || profile.role === "agent";
   const visible = listings.slice(0, visibleCount);
 
   return (
@@ -118,10 +123,22 @@ export default function PublicProfilePage() {
             <div className="flex-1 min-w-0">
               <div className="flex flex-wrap items-center gap-2">
                 <h1 className="font-serif-display text-2xl text-ink">{profile.fullName}</h1>
-                <span className="inline-flex items-center gap-1 rounded-full border border-accent/50 bg-accent/25 px-2 py-0.5 text-label font-bold text-primary">
-                  <ShieldCheck className="w-3 h-3" aria-hidden="true" />
-                  {isAgent ? "Agent" : "Owner"}
-                </span>
+                {/* What this poster is on the marketplace — a plain label, not
+                    a trust badge. It was a shield-iconed accent pill reading
+                    "Agent" or "Owner", shown to every poster and derived from
+                    `role`, which is an authorization field. */}
+                {profile.posterType && (
+                  <span className="text-label text-muted border border-line rounded-full px-2 py-0.5">
+                    {POSTER_TYPE_LABELS[profile.posterType]}
+                  </span>
+                )}
+              </div>
+
+              <div className="mt-2 space-y-1.5">
+                <VerificationBadges verification={profile.verification} />
+                {!profile.verification.phone &&
+                  !profile.verification.identity &&
+                  !profile.verification.business && <NoVerificationNote />}
               </div>
 
               {profile.bio && (
@@ -129,6 +146,14 @@ export default function PublicProfilePage() {
               )}
 
               <p className="text-label text-muted mt-1.5">
+                {/* null until somebody reviews, and rendered as absent rather
+                    than as a zero. */}
+                {profile.rating !== null && (
+                  <>
+                    <span className="text-ink">{profile.rating.toFixed(1)}</span> from{" "}
+                    {profile.reviewCount} {profile.reviewCount === 1 ? "review" : "reviews"} ·{" "}
+                  </>
+                )}
                 {profile.activeListingCount} live{" "}
                 {profile.activeListingCount === 1 ? "listing" : "listings"}
                 {profile.listingCount !== profile.activeListingCount &&
@@ -194,6 +219,19 @@ export default function PublicProfilePage() {
             )}
           </>
         )}
+
+        {/* Reviews across everything this poster has listed. Loaded separately
+            so a failure here leaves the listings above intact. */}
+        <div className="mt-8">
+          <ReviewsSection
+            summary={reviews.data}
+            loading={reviews.loading}
+            error={reviews.error}
+            onRetry={reviews.retry}
+            title={`Reviews of ${profile.fullName}`}
+            emptyMessage="Nobody has reviewed this poster's properties yet."
+          />
+        </div>
       </div>
     </div>
   );
