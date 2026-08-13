@@ -3,7 +3,13 @@ import { PrismaService } from "../prisma/prisma.service";
 import { RegisterDto } from "./dto/register.dto";
 import { LoginDto } from "./dto/login.dto";
 import { randomUUID } from "crypto";
-import { hashPassword, verifyPassword } from "../common/password";
+import {
+  generateResetToken,
+  hashPassword,
+  hashResetToken,
+  resetTokenMatches,
+  verifyPassword,
+} from "../common/password";
 import { issueSessionToken, verifySessionToken } from "../common/session-token";
 
 /**
@@ -140,6 +146,75 @@ export class AuthService {
       this.logger.error(`Login failed for ${dto.email}: ${err.message}`, err.stack);
       throw new BadRequestException(err.message || "Invalid credentials.");
     }
+  }
+
+  /**
+   * Starts a password reset.
+   *
+   * **Delala cannot send email.** There is no mailer configured anywhere in the
+   * service, and it does not use Supabase Auth either — rows are written into
+   * `auth.users` but `encrypted_password` and GoTrue's whole recovery machinery
+   * go unused, which is why no recovery mail appears in the Supabase dashboard
+   * and why the reset page never delivered anything.
+   *
+   * So this issues a token and says plainly that it cannot deliver it. An
+   * administrator can hand the link over out of band from the dashboard, which
+   * is how a reset actually completes today. When a mail provider is wired up,
+   * the only change needed is to send `token` from here.
+   *
+   * The response never reveals whether the email exists — that would turn this
+   * endpoint into an account-enumeration oracle.
+   */
+  async requestPasswordReset(email: string): Promise<{ delivered: boolean; message: string }> {
+    const user = await this.prisma.user.findFirst({ where: { email }, include: { profile: true } });
+
+    if (user?.profile) {
+      const token = generateResetToken();
+      await this.prisma.profile.update({
+        where: { id: user.id },
+        data: {
+          passwordResetHash: hashResetToken(token),
+          // An hour is long enough to act on and short enough to limit a leak.
+          passwordResetExpires: new Date(Date.now() + 60 * 60 * 1000),
+        },
+      });
+    }
+
+    return {
+      delivered: false,
+      message:
+        "Delala cannot send password reset emails yet. Ask an administrator to reset your password for you.",
+    };
+  }
+
+  /** Completes a reset. Single use: the token is cleared once spent. */
+  async resetPassword(email: string, token: string, newPassword: string) {
+    if (!newPassword || newPassword.length < 6) {
+      throw new BadRequestException("Choose a password of at least 6 characters.");
+    }
+
+    const user = await this.prisma.user.findFirst({
+      where: { email },
+      include: { profile: { select: { passwordResetHash: true, passwordResetExpires: true } } },
+    });
+
+    const profile: any = user?.profile;
+    const expired = !profile?.passwordResetExpires || profile.passwordResetExpires.getTime() < Date.now();
+
+    if (!user || !profile || expired || !resetTokenMatches(token, profile.passwordResetHash)) {
+      throw new UnauthorizedException("That reset link is invalid or has expired.");
+    }
+
+    await this.prisma.profile.update({
+      where: { id: user.id },
+      data: {
+        passwordHash: await hashPassword(newPassword),
+        passwordResetHash: null,
+        passwordResetExpires: null,
+      },
+    });
+
+    return { ok: true };
   }
 
   async validateSession(token: string) {

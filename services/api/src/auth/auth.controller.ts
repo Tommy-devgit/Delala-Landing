@@ -21,6 +21,18 @@ export class AuthController {
     return this.authService.login(dto);
   }
 
+  @Post("forgot-password")
+  @ApiOperation({ summary: "Begin a password reset. Delala cannot deliver it by email yet." })
+  forgotPassword(@Body() body: { email: string }) {
+    return this.authService.requestPasswordReset(body.email);
+  }
+
+  @Post("reset-password")
+  @ApiOperation({ summary: "Complete a password reset with a token" })
+  resetPassword(@Body() body: { email: string; token: string; password: string }) {
+    return this.authService.resetPassword(body.email, body.token, body.password);
+  }
+
   @Get("me")
   @ApiOperation({ summary: "Validate session and fetch user profile" })
   getProfile(@Headers("authorization") authHeader?: string) {
