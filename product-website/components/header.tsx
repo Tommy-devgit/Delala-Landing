@@ -14,8 +14,10 @@ import {
   ShieldCheck,
   Plus,
   Bell,
+  BookOpen,
   Building2,
   CalendarClock,
+  Home,
   HelpCircle,
   Settings,
   ChevronDown,
@@ -29,10 +31,26 @@ export function Header({ onOpenFilters }: { onOpenFilters?: () => void }) {
   const unreadCount = useUnreadNotifications();
   const session = useSession();
 
+  /**
+   * The primary destinations.
+   *
+   * Rent and Buy are separate entries rather than a filter buried in Explore,
+   * because they are the first question every visitor has already answered
+   * before arriving. Support moved into the account menu — it is a destination
+   * people look for deliberately, not one that needs a permanent slot.
+   *
+   * Labels are sentence case. They were typed as "EXPLORE", "CITIES" and
+   * "SUPPORT" — and since `.font-mono-label` stopped applying a text transform,
+   * literal capitals in the markup are exactly what reaches the screen. §5 of
+   * HANDOUT.md asks for sentence case written into the markup; this is the
+   * navigation finally doing that.
+   */
   const navLinks = [
-    { label: "EXPLORE", href: "/search", icon: Compass },
-    { label: "CITIES", href: "/cities", icon: MapPin },
-    { label: "SUPPORT", href: "/help", icon: HelpCircle },
+    { label: "Explore", href: "/search", icon: Compass },
+    { label: "Rent", href: "/search?listingType=rent", icon: Building2 },
+    { label: "Buy", href: "/search?listingType=sale", icon: Home },
+    { label: "Locations", href: "/cities", icon: MapPin },
+    { label: "Guides", href: "/guides", icon: BookOpen },
   ];
 
   const user = session?.user;
@@ -53,13 +71,23 @@ export function Header({ onOpenFilters }: { onOpenFilters?: () => void }) {
           <nav className="hidden md:flex items-center gap-1 lg:gap-2">
             {navLinks.map((item) => {
               const Icon = item.icon;
-              const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
+              // Path only, and only for links without a query string.
+              //
+              // Rent and Buy are both `/search`, so a path comparison would
+              // light up all three at once. Reading the query to tell them
+              // apart needs `useSearchParams`, which forces every page into
+              // client rendering from here in the root layout and fails the
+              // static build outright — so those two simply do not carry an
+              // active state.
+              const isActive =
+                !item.href.includes("?") &&
+                (pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href)));
               return (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-mono-label tracking-wide transition-all ${isActive
-                    ? "bg-primary text-white font-bold shadow-xs"
+                  className={`flex items-center gap-1.5 px-3 lg:px-4 py-2.5 rounded-full text-micro transition-colors ${isActive
+                    ? "bg-primary text-white font-medium"
                     : "text-muted hover:text-primary hover:bg-canvas"
                     }`}
                 >
