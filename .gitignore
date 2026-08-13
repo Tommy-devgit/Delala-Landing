@@ -8,3 +8,10 @@ design.md
 .env.*.local
 .env.example
 *.env
+# Master photographs, kept out of git for size — 14 files, ~33 MB.
+#
+# They are the *source* for product-website/scripts/build-images.mjs, which
+# writes the web-sized WebP derivatives into product-website/public/images.
+# Those derivatives ARE committed, so the site builds and deploys without this
+# directory present. It is only needed to add a new photograph or a new width.
+/new-images/
