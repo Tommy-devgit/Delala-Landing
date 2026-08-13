@@ -142,6 +142,22 @@ export interface AdminProperty {
   submittedAt: string;
 }
 
+/** owner | broker | agency. What the account is on the marketplace. */
+export type PosterType = "owner" | "broker" | "agency";
+
+/**
+ * Which checks this account has passed.
+ *
+ * All three default to false and this dashboard is the only thing that can
+ * change them. Nothing grants a badge automatically, by design: a badge that
+ * software awards itself is not evidence of anything.
+ */
+export interface AdminVerification {
+  phone: boolean;
+  identity: boolean;
+  business: boolean;
+}
+
 export interface AdminUser {
   id: string;
   email: string;
@@ -150,8 +166,19 @@ export interface AdminUser {
   status: string;
   phone: string;
   avatarUrl: string | null;
+  posterType: PosterType | null;
+  verification: AdminVerification;
   listingCount: number;
   joinedAt: string;
+}
+
+export interface AdminUserChanges {
+  role?: string;
+  status?: string;
+  posterType?: PosterType;
+  phoneVerified?: boolean;
+  identityVerified?: boolean;
+  businessVerified?: boolean;
 }
 
 export interface AdminReport {
@@ -243,7 +270,7 @@ export const adminApi = {
   getUsers: (search?: string) =>
     request<AdminUser[]>(`/admin/users${search ? `?search=${encodeURIComponent(search)}` : ""}`),
 
-  updateUser: (id: string, changes: { role?: string; status?: string }) =>
+  updateUser: (id: string, changes: AdminUserChanges) =>
     request<AdminUser>(`/admin/users/${id}`, { method: "PATCH", body: JSON.stringify(changes) }),
 
   getReports: () => request<AdminReport[]>("/admin/reports"),
