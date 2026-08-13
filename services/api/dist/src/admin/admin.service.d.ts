@@ -9,7 +9,9 @@ export declare class AdminService {
             activeListings: number;
             pendingApprovals: number;
             rejectedListings: number;
-            verifiedBrokers: number;
+            totalProperties: number;
+            brokerAccounts: number;
+            verifiedPosters: number;
             pendingReports: number;
             totalVisitsThisMonth: number;
             averageRentETB: number;
@@ -103,6 +105,9 @@ export declare class AdminService {
         };
         listingCount: any;
         joinedAt: any;
+    }>;
+    setUserPassword(id: string, newPassword: string, actorId?: string): Promise<{
+        ok: boolean;
     }>;
     listReports(): Promise<{
         id: any;

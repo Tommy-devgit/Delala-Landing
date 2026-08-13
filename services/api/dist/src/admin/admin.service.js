@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AdminService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
+const password_1 = require("../common/password");
 const DAY_MS = 24 * 60 * 60 * 1000;
 const startOfDay = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
 const propertyStatus = (raw) => {
@@ -40,7 +41,7 @@ let AdminService = class AdminService {
         const now = new Date();
         const weekAgo = new Date(now.getTime() - 7 * DAY_MS);
         const twoWeeksAgo = new Date(now.getTime() - 14 * DAY_MS);
-        const [totalUsers, usersThisWeek, usersLastWeek, approvedListings, pendingApprovals, rejectedListings, listingsThisWeek, listingsLastWeek, brokers, openReports, visitsThisMonth, priceAggregate,] = await Promise.all([
+        const [totalUsers, usersThisWeek, usersLastWeek, approvedListings, pendingApprovals, rejectedListings, listingsThisWeek, listingsLastWeek, brokers, verifiedPosters, totalProperties, openReports, visitsThisMonth, priceAggregate,] = await Promise.all([
             this.prisma.user.count(),
             this.prisma.user.count({ where: { createdAt: { gte: weekAgo } } }),
             this.prisma.user.count({ where: { createdAt: { gte: twoWeeksAgo, lt: weekAgo } } }),
@@ -50,6 +51,10 @@ let AdminService = class AdminService {
             this.prisma.property.count({ where: { createdAt: { gte: weekAgo } } }),
             this.prisma.property.count({ where: { createdAt: { gte: twoWeeksAgo, lt: weekAgo } } }),
             this.prisma.profile.count({ where: { role: "broker" } }),
+            this.prisma.profile.count({
+                where: { OR: [{ phoneVerified: true }, { identityVerified: true }, { businessVerified: true }] },
+            }),
+            this.prisma.property.count(),
             this.prisma.report.count({ where: { status: "open" } }),
             this.prisma.visit.count({
                 where: { createdAt: { gte: new Date(now.getFullYear(), now.getMonth(), 1) } },
@@ -67,7 +72,9 @@ let AdminService = class AdminService {
                 activeListings: approvedListings,
                 pendingApprovals,
                 rejectedListings,
-                verifiedBrokers: brokers,
+                totalProperties,
+                brokerAccounts: brokers,
+                verifiedPosters,
                 pendingReports: openReports,
                 totalVisitsThisMonth: visitsThisMonth,
                 averageRentETB: Math.round(Number(priceAggregate._avg.price || 0)),
@@ -256,6 +263,32 @@ let AdminService = class AdminService {
             await this.recordAudit(actorId, action, "profiles", id);
         }
         return (await this.listUsers()).find((u) => u.id === id);
+    }
+    async setUserPassword(id, newPassword, actorId) {
+        if (!newPassword || newPassword.length < 6) {
+            throw new common_1.BadRequestException("Choose a password of at least 6 characters.");
+        }
+        const user = await this.prisma.user.findUnique({ where: { id } });
+        if (!user)
+            throw new common_1.NotFoundException(`No user with id ${id}`);
+        await this.prisma.profile.upsert({
+            where: { id },
+            create: {
+                id,
+                firstName: "User",
+                lastName: "",
+                role: "user",
+                status: "active",
+                passwordHash: await (0, password_1.hashPassword)(newPassword),
+            },
+            update: {
+                passwordHash: await (0, password_1.hashPassword)(newPassword),
+                passwordResetHash: null,
+                passwordResetExpires: null,
+            },
+        });
+        await this.recordAudit(actorId, "user.password.set", "profiles", id);
+        return { ok: true };
     }
     async listReports() {
         const reports = await this.prisma.report.findMany({

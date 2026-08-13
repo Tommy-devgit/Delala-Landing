@@ -27,6 +27,13 @@ export declare class AuthService {
             phone: string;
         };
     }>;
+    requestPasswordReset(email: string): Promise<{
+        delivered: boolean;
+        message: string;
+    }>;
+    resetPassword(email: string, token: string, newPassword: string): Promise<{
+        ok: boolean;
+    }>;
     validateSession(token: string): Promise<{
         id: string;
         email: string;

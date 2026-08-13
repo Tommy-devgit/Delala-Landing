@@ -9,11 +9,11 @@ export declare class VisitsService {
     constructor(prisma: PrismaService, notifications: NotificationsService);
     create(userId: string, dto: CreateVisitDto): Promise<{
         id: string;
+        createdAt: Date | null;
+        status: string | null;
         userId: string | null;
         propertyId: string | null;
         visitDate: Date | null;
-        status: string | null;
-        createdAt: Date | null;
     }>;
     findForUser(userId: string): Promise<{
         id: any;
@@ -30,10 +30,10 @@ export declare class VisitsService {
     }[]>;
     updateStatus(userId: string, visitId: string, dto: UpdateVisitStatusDto): Promise<{
         id: string;
+        createdAt: Date | null;
+        status: string | null;
         userId: string | null;
         propertyId: string | null;
         visitDate: Date | null;
-        status: string | null;
-        createdAt: Date | null;
     }>;
 }

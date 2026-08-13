@@ -26,6 +26,19 @@ export declare class AuthController {
             phone: string;
         };
     }>;
+    forgotPassword(body: {
+        email: string;
+    }): Promise<{
+        delivered: boolean;
+        message: string;
+    }>;
+    resetPassword(body: {
+        email: string;
+        token: string;
+        password: string;
+    }): Promise<{
+        ok: boolean;
+    }>;
     getProfile(authHeader?: string): Promise<{
         id: string;
         email: string;

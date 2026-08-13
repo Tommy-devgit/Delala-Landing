@@ -28,6 +28,12 @@ let AuthController = class AuthController {
     login(dto) {
         return this.authService.login(dto);
     }
+    forgotPassword(body) {
+        return this.authService.requestPasswordReset(body.email);
+    }
+    resetPassword(body) {
+        return this.authService.resetPassword(body.email, body.token, body.password);
+    }
     getProfile(authHeader) {
         const token = authHeader?.replace("Bearer ", "") || "";
         return this.authService.validateSession(token);
@@ -50,6 +56,22 @@ __decorate([
     __metadata("design:paramtypes", [login_dto_1.LoginDto]),
     __metadata("design:returntype", void 0)
 ], AuthController.prototype, "login", null);
+__decorate([
+    (0, common_1.Post)("forgot-password"),
+    (0, swagger_1.ApiOperation)({ summary: "Begin a password reset. Delala cannot deliver it by email yet." }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], AuthController.prototype, "forgotPassword", null);
+__decorate([
+    (0, common_1.Post)("reset-password"),
+    (0, swagger_1.ApiOperation)({ summary: "Complete a password reset with a token" }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], AuthController.prototype, "resetPassword", null);
 __decorate([
     (0, common_1.Get)("me"),
     (0, swagger_1.ApiOperation)({ summary: "Validate session and fetch user profile" }),

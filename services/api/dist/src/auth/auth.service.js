@@ -113,6 +113,46 @@ let AuthService = AuthService_1 = class AuthService {
             throw new common_1.BadRequestException(err.message || "Invalid credentials.");
         }
     }
+    async requestPasswordReset(email) {
+        const user = await this.prisma.user.findFirst({ where: { email }, include: { profile: true } });
+        if (user?.profile) {
+            const token = (0, password_1.generateResetToken)();
+            await this.prisma.profile.update({
+                where: { id: user.id },
+                data: {
+                    passwordResetHash: (0, password_1.hashResetToken)(token),
+                    passwordResetExpires: new Date(Date.now() + 60 * 60 * 1000),
+                },
+            });
+        }
+        return {
+            delivered: false,
+            message: "Delala cannot send password reset emails yet. Ask an administrator to reset your password for you.",
+        };
+    }
+    async resetPassword(email, token, newPassword) {
+        if (!newPassword || newPassword.length < 6) {
+            throw new common_1.BadRequestException("Choose a password of at least 6 characters.");
+        }
+        const user = await this.prisma.user.findFirst({
+            where: { email },
+            include: { profile: { select: { passwordResetHash: true, passwordResetExpires: true } } },
+        });
+        const profile = user?.profile;
+        const expired = !profile?.passwordResetExpires || profile.passwordResetExpires.getTime() < Date.now();
+        if (!user || !profile || expired || !(0, password_1.resetTokenMatches)(token, profile.passwordResetHash)) {
+            throw new common_1.UnauthorizedException("That reset link is invalid or has expired.");
+        }
+        await this.prisma.profile.update({
+            where: { id: user.id },
+            data: {
+                passwordHash: await (0, password_1.hashPassword)(newPassword),
+                passwordResetHash: null,
+                passwordResetExpires: null,
+            },
+        });
+        return { ok: true };
+    }
     async validateSession(token) {
         const claims = (0, session_token_1.verifySessionToken)(token);
         if (!claims)

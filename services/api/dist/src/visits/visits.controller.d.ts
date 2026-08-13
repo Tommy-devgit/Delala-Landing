@@ -5,11 +5,11 @@ export declare class VisitsController {
     constructor(visitsService: VisitsService);
     create(dto: CreateVisitDto, req: any): Promise<{
         id: string;
+        createdAt: Date | null;
+        status: string | null;
         userId: string | null;
         propertyId: string | null;
         visitDate: Date | null;
-        status: string | null;
-        createdAt: Date | null;
     }>;
     findMine(req: any): Promise<{
         id: any;
@@ -26,10 +26,10 @@ export declare class VisitsController {
     }[]>;
     updateStatus(id: string, dto: UpdateVisitStatusDto, req: any): Promise<{
         id: string;
+        createdAt: Date | null;
+        status: string | null;
         userId: string | null;
         propertyId: string | null;
         visitDate: Date | null;
-        status: string | null;
-        createdAt: Date | null;
     }>;
 }

@@ -9,7 +9,9 @@ export declare class AdminController {
             activeListings: number;
             pendingApprovals: number;
             rejectedListings: number;
-            verifiedBrokers: number;
+            totalProperties: number;
+            brokerAccounts: number;
+            verifiedPosters: number;
             pendingReports: number;
             totalVisitsThisMonth: number;
             averageRentETB: number;
@@ -103,6 +105,11 @@ export declare class AdminController {
         };
         listingCount: any;
         joinedAt: any;
+    }>;
+    setUserPassword(id: string, body: {
+        password: string;
+    }, req: any): Promise<{
+        ok: boolean;
     }>;
     listReports(): Promise<{
         id: any;

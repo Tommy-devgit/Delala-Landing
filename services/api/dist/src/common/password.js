@@ -2,6 +2,9 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.hashPassword = hashPassword;
 exports.verifyPassword = verifyPassword;
+exports.generateResetToken = generateResetToken;
+exports.hashResetToken = hashResetToken;
+exports.resetTokenMatches = resetTokenMatches;
 const crypto_1 = require("crypto");
 const util_1 = require("util");
 const scryptAsync = (0, util_1.promisify)(crypto_1.scrypt);
@@ -38,5 +41,18 @@ async function verifyPassword(password, digest) {
     catch {
         return false;
     }
+}
+function generateResetToken() {
+    return (0, crypto_1.randomBytes)(32).toString("base64url");
+}
+function hashResetToken(token) {
+    return (0, crypto_1.createHash)("sha256").update(token).digest("hex");
+}
+function resetTokenMatches(token, digest) {
+    if (!digest)
+        return false;
+    const actual = Buffer.from(hashResetToken(token), "utf8");
+    const expected = Buffer.from(digest, "utf8");
+    return actual.length === expected.length && (0, crypto_1.timingSafeEqual)(actual, expected);
 }
 //# sourceMappingURL=password.js.map
