@@ -97,7 +97,7 @@ __decorate([
 __decorate([
     (0, common_1.Patch)("users/:id"),
     (0, roles_decorator_1.Roles)("ADMIN"),
-    (0, swagger_1.ApiOperation)({ summary: "Change a user's role or suspend/reactivate them" }),
+    (0, swagger_1.ApiOperation)({ summary: "Change a user's role, status, poster type or verification" }),
     __param(0, (0, common_1.Param)("id")),
     __param(1, (0, common_1.Body)()),
     __param(2, (0, common_1.Req)()),

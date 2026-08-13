@@ -71,12 +71,22 @@ export declare class AdminService {
         status: any;
         phone: any;
         avatarUrl: any;
+        posterType: any;
+        verification: {
+            phone: boolean;
+            identity: boolean;
+            business: boolean;
+        };
         listingCount: any;
         joinedAt: any;
     }[]>;
     updateUser(id: string, changes: {
         role?: string;
         status?: string;
+        posterType?: string;
+        phoneVerified?: boolean;
+        identityVerified?: boolean;
+        businessVerified?: boolean;
     }, actorId?: string): Promise<{
         id: any;
         email: any;
@@ -85,6 +95,12 @@ export declare class AdminService {
         status: any;
         phone: any;
         avatarUrl: any;
+        posterType: any;
+        verification: {
+            phone: boolean;
+            identity: boolean;
+            business: boolean;
+        };
         listingCount: any;
         joinedAt: any;
     }>;

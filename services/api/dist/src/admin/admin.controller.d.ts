@@ -71,12 +71,22 @@ export declare class AdminController {
         status: any;
         phone: any;
         avatarUrl: any;
+        posterType: any;
+        verification: {
+            phone: boolean;
+            identity: boolean;
+            business: boolean;
+        };
         listingCount: any;
         joinedAt: any;
     }[]>;
     updateUser(id: string, body: {
         role?: string;
         status?: string;
+        posterType?: string;
+        phoneVerified?: boolean;
+        identityVerified?: boolean;
+        businessVerified?: boolean;
     }, req: any): Promise<{
         id: any;
         email: any;
@@ -85,6 +95,12 @@ export declare class AdminController {
         status: any;
         phone: any;
         avatarUrl: any;
+        posterType: any;
+        verification: {
+            phone: boolean;
+            identity: boolean;
+            business: boolean;
+        };
         listingCount: any;
         joinedAt: any;
     }>;

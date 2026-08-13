@@ -205,6 +205,12 @@ let AdminService = class AdminService {
             status: (u.profile?.status || "active").toUpperCase(),
             phone: u.profile?.phone || "",
             avatarUrl: u.profile?.avatarUrl || null,
+            posterType: u.profile?.posterType || null,
+            verification: {
+                phone: Boolean(u.profile?.phoneVerified),
+                identity: Boolean(u.profile?.identityVerified),
+                business: Boolean(u.profile?.businessVerified),
+            },
             listingCount: u.properties.length,
             joinedAt: u.createdAt,
         }));
@@ -213,6 +219,11 @@ let AdminService = class AdminService {
         const user = await this.prisma.user.findUnique({ where: { id } });
         if (!user)
             throw new common_1.NotFoundException(`No user with id ${id}`);
+        const verification = {
+            ...(changes.phoneVerified !== undefined ? { phoneVerified: changes.phoneVerified } : {}),
+            ...(changes.identityVerified !== undefined ? { identityVerified: changes.identityVerified } : {}),
+            ...(changes.businessVerified !== undefined ? { businessVerified: changes.businessVerified } : {}),
+        };
         await this.prisma.profile.upsert({
             where: { id },
             create: {
@@ -221,13 +232,29 @@ let AdminService = class AdminService {
                 lastName: "",
                 role: changes.role?.toLowerCase() ?? "user",
                 status: changes.status?.toLowerCase() ?? "active",
+                ...(changes.posterType ? { posterType: changes.posterType.toLowerCase() } : {}),
+                ...verification,
             },
             update: {
                 ...(changes.role ? { role: changes.role.toLowerCase() } : {}),
                 ...(changes.status ? { status: changes.status.toLowerCase() } : {}),
+                ...(changes.posterType ? { posterType: changes.posterType.toLowerCase() } : {}),
+                ...verification,
             },
         });
-        await this.recordAudit(actorId, `user.${changes.role ? "role" : "status"}.update -> ${changes.role ?? changes.status}`, "profiles", id);
+        const audited = [];
+        if (changes.role)
+            audited.push(`user.role.update -> ${changes.role}`);
+        if (changes.status)
+            audited.push(`user.status.update -> ${changes.status}`);
+        if (changes.posterType)
+            audited.push(`user.posterType.update -> ${changes.posterType}`);
+        for (const [key, value] of Object.entries(verification)) {
+            audited.push(`user.${key}.${value ? "granted" : "revoked"}`);
+        }
+        for (const action of audited) {
+            await this.recordAudit(actorId, action, "profiles", id);
+        }
         return (await this.listUsers()).find((u) => u.id === id);
     }
     async listReports() {
