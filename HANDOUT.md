@@ -144,6 +144,30 @@ touching the database, loads the user, rejects expired (>30 days) and suspended
 accounts, and sets `request.user = { id, email, role, status }`. `RolesGuard`
 reads `user.role`.
 
+### Sessions issued before signing are rejected — and that used to be a trap
+
+Signing tokens invalidated every session that existed beforehand, which is
+correct. What was not handled is what the browser does next: the old token stays
+in `localStorage`, `useSession` keeps reporting a signed-in user, and every
+authenticated request answers **401 forever** with nothing in the interface to
+explain it. The symptom is a wall of console errors and dead favourites and
+notifications on an account that looks signed in:
+
+```
+/api/v1/notifications/unread-count  401
+/api/v1/favorites/ids               401
+```
+
+`authedFetch` in `product-website/lib/api-client.ts` now carries every
+authenticated call, and a 401 clears the stored session and fires
+`delala_auth_change`, so the app drops to signed-out and says
+"Your session has ended. Please sign in again." **Route new authenticated calls
+through `authedFetch`, not bare `fetch`** — a call that bypasses it reintroduces
+the trap for that one endpoint.
+
+The same thing happens naturally to any session older than thirty days, so this
+is not only a migration artefact.
+
 Anything that needs the user id from a header must go through
 `verifySessionToken`. `properties.controller.ts` used to re-parse the token with
 its own regex, which meant listing ownership could be asserted by anyone able to
@@ -290,11 +314,9 @@ Not started, in the brief's own priority order:
   `lifestyleTags`) with no columns behind them. **Do not start rendering those.**
 - **§14 compare**, **§15 saved searches**, **§13 recently viewed**,
   **§18 guides**, **§19 market insights**, **§16 messaging**.
-- **§17 viewing requests** — the API is complete (request, list, accept,
-  decline, cancel, with notifications on both sides) but there is **no UI for
-  the owner side**. A poster gets a notification saying somebody wants to view
-  their property and currently has nowhere to accept or decline it. That is the
-  next thing to build.
+- **§4 navigation** is the largest remaining gap. `/viewings`, `/safety` and
+  `/my-listings` are reachable only from the account menu, and Explore, Buy,
+  Rent, Locations and Guides are not in the header at all.
 - **Admin verification UI** — nothing can currently set `phone_verified`,
   `identity_verified` or `business_verified`, so the trust badges and the
   "verified posters" homepage section stay empty until that exists. This is the
