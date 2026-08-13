@@ -71,9 +71,7 @@ interface ApiCity {
   id: string;
   name: string;
   slug?: string;
-  image?: string;
-  tagline?: string;
-  startingRentETB?: number;
+  startingRentETB?: number | null;
   propertiesCount?: number;
   description?: string;
   latitude?: number | string | null;
@@ -682,9 +680,9 @@ export const apiClient = {
               id: c.id,
               name: c.name,
               slug: c.slug || toSlug(c.name || ""),
-              image: c.image || "/images/hero_property.png",
-              tagline: c.tagline || "",
-              startingRentETB: c.startingRentETB ?? 0,
+              // null when the city has no listings to measure. Zero would
+              // read as "free", which is a different and false claim.
+              startingRentETB: c.startingRentETB ?? null,
               propertiesCount: c.propertiesCount ?? 0,
               description: c.description || "",
               subCities: Array.isArray(c.subCities) ? c.subCities.map(mapLocationNode) : [],

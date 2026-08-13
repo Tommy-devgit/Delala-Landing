@@ -116,9 +116,12 @@ export interface City {
   id: string;
   slug: string;
   name: string;
-  image: string;
-  tagline: string;
-  startingRentETB: number;
+  /**
+   * The cheapest listing in this city right now, or null when there is nothing
+   * to measure. Never zero — that would read as "free" rather than "unknown" —
+   * and never a placeholder: this was a hardcoded 35,000 per city.
+   */
+  startingRentETB: number | null;
   propertiesCount: number;
   /** Sub-cities of this city, each carrying its neighborhoods in `children`. */
   subCities: LocationNode[];
