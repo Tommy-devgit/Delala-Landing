@@ -2,11 +2,20 @@ import { Controller, Get, Param } from "@nestjs/common";
 import { ApiTags, ApiOperation } from "@nestjs/swagger";
 import { PrismaService } from "../prisma/prisma.service";
 
+/**
+ * Geographic reference data only.
+ *
+ * This used to carry `tagline`, `startingRentETB`, `propertiesCount` and
+ * `image` per city. All four were invented: "starting ETB 35,000/mo" was a
+ * number nobody measured, `propertiesCount` was a hardcoded 24/12/9 used
+ * whenever the real count came back empty — so a city with no listings
+ * advertised two dozen — and the images pointed at generated city photographs
+ * that have since been deleted.
+ *
+ * Coordinates and sub-city names stay because they are ordinary geographic
+ * fact and do not change with the contents of the database.
+ */
 type CityMeta = {
-  tagline: string;
-  startingRentETB: number;
-  propertiesCount: number;
-  image: string;
   latitude: number;
   longitude: number;
   subCities: string[];
@@ -14,66 +23,35 @@ type CityMeta = {
 
 const CITY_METADATA: Record<string, CityMeta> = {
   "Addis Ababa": {
-    tagline: "Diplomatic Capital & Financial Hub",
-    startingRentETB: 35000,
-    propertiesCount: 24,
-    image: "/images/hero-img.jpg",
     latitude: 9.0192,
     longitude: 38.7525,
     subCities: ["Bole", "Kazanchis", "Old Airport", "CMC", "Sarbet", "Atlas", "Nifas Silk", "Kirkos"],
   },
   "Hawassa": {
-    tagline: "Rift Valley Lakeside Living",
-    startingRentETB: 22000,
-    propertiesCount: 12,
-    image: "/images/hero_home_away.jpg",
     latitude: 7.0621,
     longitude: 38.4764,
     subCities: ["Tabor", "Haile Resort Area", "Industrial Park", "Bole Hawassa"],
   },
   "Adama": {
-    tagline: "Fastest Growing Expressway Corridor",
-    startingRentETB: 18000,
-    propertiesCount: 9,
-    image: "/images/hero_property.png",
     latitude: 8.5414,
     longitude: 39.2689,
     subCities: ["Posta Bet", "Expressway Junction", "Kebele 04", "Melka Adama"],
   },
   "Bahir Dar": {
-    tagline: "Lake Tana Tourism & Commercial Hub",
-    startingRentETB: 20000,
-    propertiesCount: 8,
-    image: "/images/hero_home_away.jpg",
     latitude: 11.5936,
     longitude: 37.3908,
     subCities: ["Tana Waterfront", "Kebele 14", "Poly", "Abay Mado"],
   },
   "Dire Dawa": {
-    tagline: "Eastern Trade & Industrial Charter City",
-    startingRentETB: 16000,
-    propertiesCount: 7,
-    image: "/images/hero_property.png",
     latitude: 9.5931,
     longitude: 41.8661,
     subCities: ["Kezira", "Megala", "Taiwan Market", "Sabian"],
   },
   "Gondar": {
-    tagline: "Historic Royal City & Cultural Heritage",
-    startingRentETB: 17000,
-    propertiesCount: 6,
-    image: "/images/hero_home_away.jpg",
     latitude: 12.603,
     longitude: 37.4521,
     subCities: ["Fasil Ghebbi Area", "Azezo", "Maraki", "Piazza"],
   },
-};
-
-const DEFAULT_META = {
-  tagline: "Prime Real Estate Location",
-  startingRentETB: 25000,
-  propertiesCount: 5,
-  image: "/images/hero_property.png",
 };
 
 const toSlug = (name: string): string => name.toLowerCase().replace(/\s+/g, "-");
@@ -120,8 +98,17 @@ export class CitiesController {
     const locations = await this.prisma.location.findMany({
       where: { type: "city" },
       include: {
-        children: { include: { children: true } },
-        properties: true,
+        // Properties hang off whichever level the poster chose, so counting
+        // `loc.properties` alone missed everything attached to a sub-city or a
+        // neighborhood — which is most of them. That is why the count so often
+        // came back zero and fell through to the hardcoded figure.
+        properties: { select: { price: true } },
+        children: {
+          include: {
+            properties: { select: { price: true } },
+            children: { include: { properties: { select: { price: true } } } },
+          },
+        },
       },
     });
 
@@ -138,17 +125,25 @@ export class CitiesController {
           )
         );
 
+        // Every property in the city, at whatever depth it is attached.
+        const prices = [
+          ...(loc.properties || []),
+          ...(loc.children || []).flatMap((sub: any) => [
+            ...(sub.properties || []),
+            ...(sub.children || []).flatMap((n: any) => n.properties || []),
+          ]),
+        ].map((p: any) => Number(p.price)).filter((n: number) => Number.isFinite(n) && n > 0);
+
         return {
           id: loc.id,
           name: loc.name,
           slug: toSlug(loc.name),
-          tagline: meta?.tagline ?? DEFAULT_META.tagline,
-          startingRentETB: meta?.startingRentETB ?? DEFAULT_META.startingRentETB,
-          propertiesCount:
-            loc.properties?.length > 0
-              ? loc.properties.length
-              : meta?.propertiesCount ?? DEFAULT_META.propertiesCount,
-          image: meta?.image ?? DEFAULT_META.image,
+          // The real count, including zero. A city with nothing in it says so.
+          propertiesCount: prices.length,
+          // The genuine cheapest listing, or null when there is nothing to
+          // measure — never a placeholder, and never rounded into a claim
+          // about the market as a whole.
+          startingRentETB: prices.length > 0 ? Math.min(...prices) : null,
           latitude: toCoordinate(loc.latitude, 90) ?? fallbackLat,
           longitude: toCoordinate(loc.longitude, 180) ?? fallbackLng,
           subCities,
@@ -157,14 +152,14 @@ export class CitiesController {
     }
 
     // Default fallback cities list if DB locations are not populated
+    // Only reached when the locations table is empty. These are place names
+    // and coordinates, with no listings behind them, and they say so.
     return Object.entries(CITY_METADATA).map(([name, meta], index) => ({
       id: `c${index + 1}`,
       name,
       slug: toSlug(name),
-      tagline: meta.tagline,
-      startingRentETB: meta.startingRentETB,
-      propertiesCount: meta.propertiesCount,
-      image: meta.image,
+      propertiesCount: 0,
+      startingRentETB: null,
       latitude: meta.latitude,
       longitude: meta.longitude,
       subCities: meta.subCities.map((subCityName) => ({
