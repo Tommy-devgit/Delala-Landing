@@ -332,17 +332,31 @@ the `properties_property_type_check` constraint makes impossible, so both always
 landed on an empty result; and it advertised "100% Field Audited Homes", which
 nobody does. Both are gone.
 
+### Granting verification
+
+The **Users** screen of the admin dashboard is the only thing in the entire
+system that can set `phone_verified`, `identity_verified` or
+`business_verified`. Nothing grants a badge automatically, deliberately — a
+badge software awards itself is not evidence of anything. Each grant and each
+revocation writes its own audit line.
+
+Everything downstream is already wired to it: the badges on a poster profile,
+the `broker.verification` block on every property payload, and the "posters who
+have verified themselves" section of the homepage, which hides itself entirely
+while nobody is verified. As of this writing **nobody is**, and that is the
+correct state rather than a bug.
+
+Only tick a box when you have actually seen the evidence. The labels on the
+marketplace say precisely what each one claims.
+
 Still missing, in priority order:
 
-- **Admin verification UI** — nothing can currently set `phone_verified`,
-  `identity_verified` or `business_verified`, so the trust badges and the
-  "verified posters" homepage section stay empty until that exists. This is the
-  highest-value next piece of the trust work.
-- **§9 poster profiles** — `/profile/[id]` still does not render the
-  verification badges, the review list or the poster statistics, all of which
-  have endpoints behind them already.
 - **§14 compare**, **§15 saved searches**, **§13 recently viewed**,
   **§19 market insights**, **§16 messaging**.
+- **Writing a review has no UI.** `POST /reviews` works and both the property
+  page and the poster profile render the list, but there is no form anywhere
+  that calls it, so every review list is empty in practice.
+- Location pages (`/cities/[city]`, `/neighborhoods/[slug]`) are still thin.
 
 `GET /properties` now filters, sorts and pages **in Postgres**, and returns
 `{ data, total, page, pageSize, totalPages }` rather than a bare array. The
