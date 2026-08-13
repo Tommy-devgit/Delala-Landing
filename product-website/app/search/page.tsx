@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useCallback, Suspense } from "react";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { PropertyCard } from "@/components/property-card";
 import { FilterModal } from "@/components/filter-modal";
@@ -8,11 +9,16 @@ import { PropertyMap } from "@/components/map";
 import { SearchFilters } from "@/components/search-filters";
 import { apiClient } from "@/lib/api-client";
 import { useAsync } from "@/lib/use-async";
+import {
+  SAVED_SEARCH_KEY,
+  SavedSearch,
+  useLocalCollection,
+} from "@/lib/use-local-collection";
 import { EmptyState } from "@/components/empty-state";
 import { ErrorNotice } from "@/components/error-notice";
 import { Badge, Button, Skeleton } from "@/components/ui";
 import { City, Property, FilterState } from "@/lib/types";
-import { SlidersHorizontal, Map, Grid, List, ArrowUpDown, Building2 } from "lucide-react";
+import { SlidersHorizontal, Map, Grid, List, ArrowUpDown, Bookmark, Building2 } from "lucide-react";
 
 const PAGE_SIZE = 24;
 
@@ -43,6 +49,8 @@ function SearchContent() {
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null);
   const [page, setPage] = useState(1);
+  const savedSearches = useLocalCollection<SavedSearch>(SAVED_SEARCH_KEY);
+  const [savedNotice, setSavedNotice] = useState("");
 
   const [filters, setFilters] = useState<FilterState>(() => ({
     ...emptyFilters(),
@@ -119,6 +127,41 @@ function SearchContent() {
   }, [filters]);
 
   const filteredListings = listings;
+
+  /**
+   * Stores the active filters as a query string, which is all Explore needs to
+   * restore them. Named from what is actually set, so a list of saved searches
+   * reads as descriptions rather than "Search 1", "Search 2".
+   */
+  const saveCurrentSearch = useCallback(() => {
+    const params = new URLSearchParams();
+    for (const [key, value] of Object.entries(query)) {
+      // Undefined and empty are both "unset"; the query object never carries false.
+      if (value === undefined || value === "") continue;
+      if (key === "page" || key === "pageSize") continue;
+      params.set(key === "sort" ? "sort" : key, String(value));
+    }
+
+    const label =
+      [
+        filters.listingType === "sale" ? "For sale" : filters.listingType === "rent" ? "To rent" : "",
+        filters.propertyType ? filters.propertyType : "",
+        filters.bedrooms ? `${filters.bedrooms}+ bed` : "",
+        filters.neighborhood || filters.subCity || filters.city
+          ? `in ${filters.neighborhood || filters.subCity || filters.city}`
+          : "",
+      ]
+        .filter(Boolean)
+        .join(" ") || "All properties";
+
+    savedSearches.add({
+      id: `${Date.now()}`,
+      name: label,
+      query: params.toString(),
+      createdAt: new Date().toISOString(),
+    });
+    setSavedNotice(label);
+  }, [query, filters, savedSearches]);
 
   // A selection only counts while its property survives the active filters, so
   // it is derived rather than cleared from an effect.
@@ -240,6 +283,11 @@ function SearchContent() {
               <span>Filters</span>
             </Button>
 
+            <Button variant="secondary" size="sm" onClick={saveCurrentSearch}>
+              <Bookmark className="w-3.5 h-3.5" aria-hidden="true" />
+              <span className="hidden sm:inline">Save search</span>
+            </Button>
+
             <div className="flex items-center gap-1.5 h-8 pl-3 pr-1 rounded-full bg-canvas border border-line">
               <ArrowUpDown className="w-3.5 h-3.5 text-primary shrink-0" aria-hidden="true" />
               <select
@@ -320,6 +368,28 @@ function SearchContent() {
       </div>
 
       {/* Results */}
+      {savedNotice && (
+        <div className="bg-accent/20 border-b border-accent/40" role="status">
+          <div className="max-w-[1440px] mx-auto px-4 sm:px-8 py-2.5 flex items-center justify-between gap-3">
+            <p className="text-micro text-primary">
+              Saved &ldquo;{savedNotice}&rdquo; to this device.
+            </p>
+            <div className="flex items-center gap-2 shrink-0">
+              <Link href="/saved-searches" className="text-micro text-primary underline">
+                View saved searches
+              </Link>
+              <button
+                type="button"
+                onClick={() => setSavedNotice("")}
+                className="text-micro text-primary/70 hover:text-primary"
+              >
+                Dismiss
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="flex-1 max-w-[1440px] w-full mx-auto p-4 sm:p-6 lg:p-6">
         {results.error ? (
           <ErrorNotice message={results.error} onRetry={results.retry} className="my-8" />

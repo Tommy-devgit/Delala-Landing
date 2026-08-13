@@ -27,6 +27,7 @@ import {
   MessageSquare,
   Building2,
   Flag,
+  GitCompare,
   Wifi,
 } from "lucide-react";
 import { Skeleton, buttonClasses } from "@/components/ui";
@@ -39,6 +40,12 @@ import {
 } from "@/components/verification-badges";
 import { useFavorites } from "@/lib/use-favorites";
 import { PropertyGallery } from "@/components/property-gallery";
+import {
+  COMPARE_KEY,
+  COMPARE_LIMIT,
+  RECENT_KEY,
+  useLocalCollection,
+} from "@/lib/use-local-collection";
 import { ErrorNotice } from "@/components/error-notice";
 import { ReportListingModal } from "@/components/report-listing-modal";
 import { ReviewsSection } from "@/components/reviews-section";
@@ -63,6 +70,8 @@ export default function PropertyDetailPage() {
     [property?.id]
   );
   const { isSaved, toggle } = useFavorites();
+  const recent = useLocalCollection<string>(RECENT_KEY, { limit: 24 });
+  const compare = useLocalCollection<string>(COMPARE_KEY, { limit: COMPARE_LIMIT });
 
   useEffect(() => {
     if (!slug) return;
@@ -107,6 +116,15 @@ export default function PropertyDetailPage() {
       cancelled = true;
     };
   }, [slug, reloadNonce]);
+
+  // Recorded on this device only — see lib/use-local-collection.ts. Runs after
+  // the property resolves so a failed load never enters the history.
+  useEffect(() => {
+    if (!property?.id) return;
+    recent.add(property.id);
+    // `recent` is recreated each render; depending on it would loop.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [property?.id]);
 
   if (loading) {
     return (
@@ -212,6 +230,27 @@ export default function PropertyDetailPage() {
               className="p-2.5 rounded-full bg-surface border border-line text-muted hover:text-primary transition-colors"
             >
               <Share2 className="w-4 h-4" aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                compare.has((id) => id === property.id)
+                  ? compare.remove((id) => id === property.id)
+                  : compare.add(property.id)
+              }
+              aria-pressed={compare.has((id) => id === property.id)}
+              aria-label={
+                compare.has((id) => id === property.id)
+                  ? "Remove from comparison"
+                  : "Add to comparison"
+              }
+              className={`p-2.5 rounded-full border transition-colors ${
+                compare.has((id) => id === property.id)
+                  ? "bg-primary text-white border-primary"
+                  : "bg-surface text-muted border-line hover:text-primary"
+              }`}
+            >
+              <GitCompare className="w-4 h-4" aria-hidden="true" />
             </button>
             <button
               type="button"
