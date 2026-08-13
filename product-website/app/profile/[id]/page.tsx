@@ -112,6 +112,26 @@ export default function PublicProfilePage() {
 
   const visible = listings.slice(0, visibleCount);
 
+  /**
+   * Areas served, counted from this poster's own listings rather than declared.
+   * A self-reported "specialised areas" field would be a claim; this is a fact
+   * about where their properties are.
+   */
+  const areas = (() => {
+    const counts = new Map<string, number>();
+    listings.forEach((p) => {
+      const area = p.subCity || p.city;
+      if (!area) return;
+      counts.set(area, (counts.get(area) ?? 0) + 1);
+    });
+    return Array.from(counts.entries())
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count);
+  })();
+
+  const forRent = listings.filter((p) => p.listingType === "rent").length;
+  const forSale = listings.filter((p) => p.listingType === "sale").length;
+
   return (
     <div className="bg-canvas min-h-screen">
       <div className="max-w-[1440px] mx-auto px-4 sm:px-8 py-8">
@@ -181,6 +201,56 @@ export default function PublicProfilePage() {
             )}
           </div>
         </div>
+
+        {/* Statistics — every figure counted, none declared. There is no
+            response-rate or response-time here because nothing measures either;
+            they were previously shown as "95%" and "Under 15 minutes" on every
+            poster on the site. */}
+        <dl className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+          {[
+            { label: "Live listings", value: String(profile.activeListingCount) },
+            { label: "Listings in total", value: String(profile.listingCount) },
+            {
+              label: "Rating",
+              value: profile.rating !== null ? profile.rating.toFixed(1) : "No reviews yet",
+            },
+            {
+              label: "On Delala since",
+              value: profile.memberSince ? formatPostedDate(profile.memberSince) : "Unknown",
+            },
+          ].map((stat) => (
+            <div key={stat.label} className="p-4 rounded-card bg-surface border border-line">
+              <dt className="text-label text-muted">{stat.label}</dt>
+              <dd className="text-sm text-ink mt-1">{stat.value}</dd>
+            </div>
+          ))}
+        </dl>
+
+        {/* Areas served, derived from where their properties actually are. */}
+        {areas.length > 0 && (
+          <section className="mb-6">
+            <h2 className="font-serif-display text-xl text-ink mb-2">Where they list</h2>
+            <div className="flex flex-wrap gap-2">
+              {areas.map((area) => (
+                <Link
+                  key={area.name}
+                  href={`/search?subCity=${encodeURIComponent(area.name)}`}
+                  className="inline-flex items-center gap-2 px-3.5 py-2 rounded-control border border-line bg-surface text-micro hover:border-primary/40 transition-colors"
+                >
+                  <span className="text-ink">{area.name}</span>
+                  <span className="text-muted">{area.count}</span>
+                </Link>
+              ))}
+            </div>
+            {(forRent > 0 || forSale > 0) && (
+              <p className="text-label text-muted mt-2.5">
+                {forRent > 0 && `${forRent} to rent`}
+                {forRent > 0 && forSale > 0 && " · "}
+                {forSale > 0 && `${forSale} for sale`}
+              </p>
+            )}
+          </section>
+        )}
 
         {/* Their homes */}
         <div className="flex items-end justify-between gap-3 pb-3 mb-4 border-b border-line">
