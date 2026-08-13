@@ -230,14 +230,54 @@ export class AdminService {
       status: (u.profile?.status || "active").toUpperCase(),
       phone: u.profile?.phone || "",
       avatarUrl: u.profile?.avatarUrl || null,
+      // What this account is on the marketplace, and which checks it has
+      // actually passed — the dashboard needs both to show current state before
+      // an administrator changes it.
+      posterType: u.profile?.posterType || null,
+      verification: {
+        phone: Boolean(u.profile?.phoneVerified),
+        identity: Boolean(u.profile?.identityVerified),
+        business: Boolean(u.profile?.businessVerified),
+      },
       listingCount: u.properties.length,
       joinedAt: u.createdAt,
     }));
   }
 
-  async updateUser(id: string, changes: { role?: string; status?: string }, actorId?: string) {
+  /**
+   * Role, suspension, poster type and verification.
+   *
+   * The verification flags are the reason this accepts more than role and
+   * status. They default to false and nothing else in the system can set them,
+   * so until an administrator grants one here, every trust badge on the
+   * marketplace and the "verified posters" section of the homepage stay empty —
+   * which is correct, but only useful once there is a way to move them.
+   *
+   * Each change is audited separately and by name. The audit line used to be
+   * built as `changes.role ? "role" : "status"`, which mislabelled a status-only
+   * update as a role change whenever both were sent, and could not describe
+   * anything else at all.
+   */
+  async updateUser(
+    id: string,
+    changes: {
+      role?: string;
+      status?: string;
+      posterType?: string;
+      phoneVerified?: boolean;
+      identityVerified?: boolean;
+      businessVerified?: boolean;
+    },
+    actorId?: string
+  ) {
     const user = await this.prisma.user.findUnique({ where: { id } });
     if (!user) throw new NotFoundException(`No user with id ${id}`);
+
+    const verification = {
+      ...(changes.phoneVerified !== undefined ? { phoneVerified: changes.phoneVerified } : {}),
+      ...(changes.identityVerified !== undefined ? { identityVerified: changes.identityVerified } : {}),
+      ...(changes.businessVerified !== undefined ? { businessVerified: changes.businessVerified } : {}),
+    };
 
     await this.prisma.profile.upsert({
       where: { id },
@@ -247,19 +287,30 @@ export class AdminService {
         lastName: "",
         role: changes.role?.toLowerCase() ?? "user",
         status: changes.status?.toLowerCase() ?? "active",
+        ...(changes.posterType ? { posterType: changes.posterType.toLowerCase() } : {}),
+        ...verification,
       },
       update: {
         ...(changes.role ? { role: changes.role.toLowerCase() } : {}),
         ...(changes.status ? { status: changes.status.toLowerCase() } : {}),
+        ...(changes.posterType ? { posterType: changes.posterType.toLowerCase() } : {}),
+        ...verification,
       },
     });
 
-    await this.recordAudit(
-      actorId,
-      `user.${changes.role ? "role" : "status"}.update -> ${changes.role ?? changes.status}`,
-      "profiles",
-      id
-    );
+    // One audit line per thing that actually changed. Granting somebody a
+    // verification badge is exactly the sort of action a log exists for.
+    const audited: string[] = [];
+    if (changes.role) audited.push(`user.role.update -> ${changes.role}`);
+    if (changes.status) audited.push(`user.status.update -> ${changes.status}`);
+    if (changes.posterType) audited.push(`user.posterType.update -> ${changes.posterType}`);
+    for (const [key, value] of Object.entries(verification)) {
+      audited.push(`user.${key}.${value ? "granted" : "revoked"}`);
+    }
+
+    for (const action of audited) {
+      await this.recordAudit(actorId, action, "profiles", id);
+    }
 
     return (await this.listUsers()).find((u) => u.id === id);
   }
