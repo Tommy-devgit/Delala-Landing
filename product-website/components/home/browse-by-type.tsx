@@ -4,6 +4,8 @@ import Link from "next/link";
 import { Building, Building2, Home, Hotel, LandPlot, Store, Warehouse } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { FacetCount } from "@/lib/api-client";
+import type { ImageSlot } from "@/lib/imagery";
+import { Photo } from "@/components/photo";
 import { Skeleton } from "@/components/ui";
 
 /**
@@ -20,6 +22,22 @@ const TYPE_ICONS: Record<string, LucideIcon> = {
   land: LandPlot,
   commercial: Store,
   office: Warehouse,
+};
+
+/**
+ * Photographs for the types the library actually covers.
+ *
+ * Three of the five have a picture that genuinely represents them. Land and
+ * Commercial do not, and rather than press an unrelated photograph into service
+ * — §28: every image needs a reason — those cards stay typographic. A mixed
+ * grid is the honest outcome of a library that covers some things and not
+ * others, and it reads as deliberate because the two card shapes are designed
+ * to sit together.
+ */
+const TYPE_PHOTOS: Record<string, ImageSlot> = {
+  apartment: "type-apartments",
+  villa: "type-villas",
+  house: "type-houses",
 };
 
 /**
@@ -54,28 +72,57 @@ export function BrowseByType({
       </div>
 
       {loading ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-          {Array.from({ length: 6 }, (_, i) => (
-            <Skeleton key={i} className="h-24" />
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+          {Array.from({ length: 5 }, (_, i) => (
+            <Skeleton key={i} className="aspect-4/5" />
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
           {types.map((type) => {
-            const Icon = TYPE_ICONS[type.value.toLowerCase()] || Building2;
+            const key = type.value.toLowerCase();
+            const Icon = TYPE_ICONS[key] || Building2;
+            const photo = TYPE_PHOTOS[key];
+            const label = type.label || type.value;
+            const count = `${type.count} ${type.count === 1 ? "listing" : "listings"}`;
+
+            if (photo) {
+              return (
+                <Link
+                  key={type.value}
+                  href={`/search?propertyType=${encodeURIComponent(type.value)}`}
+                  className="group relative flex flex-col justify-end overflow-hidden rounded-card border border-line bg-ink aspect-4/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                >
+                  <Photo
+                    slot={photo}
+                    sizes="(min-width: 1024px) 20vw, (min-width: 640px) 33vw, 50vw"
+                    className="absolute inset-0 transition-transform duration-500 group-hover:scale-[1.04]"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-ink/90 via-ink/25 to-transparent" />
+                  <div className="relative p-4 text-white">
+                    <h3 className="text-sm font-medium">{label}</h3>
+                    <p className="text-label text-white/75 mt-0.5">{count}</p>
+                  </div>
+                </Link>
+              );
+            }
+
             return (
               <Link
                 key={type.value}
                 href={`/search?propertyType=${encodeURIComponent(type.value)}`}
-                className="group flex flex-col gap-2 p-4 rounded-card bg-surface border border-line hover:border-primary/40 transition-colors"
+                className="group relative flex flex-col justify-end overflow-hidden rounded-card bg-surface border border-line p-4 aspect-4/5 hover:border-primary/50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
               >
-                <Icon className="w-5 h-5 text-primary" aria-hidden="true" />
-                <span className="text-micro font-medium text-ink group-hover:text-primary transition-colors">
-                  {type.label || type.value}
-                </span>
-                <span className="text-label text-muted">
-                  {type.count} {type.count === 1 ? "listing" : "listings"}
-                </span>
+                <Icon
+                  className="absolute right-3 top-3 w-8 h-8 text-canvas transition-colors group-hover:text-accent/40"
+                  aria-hidden="true"
+                />
+                <div className="relative">
+                  <h3 className="text-sm font-medium text-ink group-hover:text-primary transition-colors">
+                    {label}
+                  </h3>
+                  <p className="text-label text-muted mt-0.5">{count}</p>
+                </div>
               </Link>
             );
           })}
