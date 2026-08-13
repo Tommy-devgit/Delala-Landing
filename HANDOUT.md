@@ -314,13 +314,35 @@ Not started, in the brief's own priority order:
   `lifestyleTags`) with no columns behind them. **Do not start rendering those.**
 - **§14 compare**, **§15 saved searches**, **§13 recently viewed**,
   **§18 guides**, **§19 market insights**, **§16 messaging**.
-- **§4 navigation** is the largest remaining gap. `/viewings`, `/safety` and
-  `/my-listings` are reachable only from the account menu, and Explore, Buy,
-  Rent, Locations and Guides are not in the header at all.
+**Guides** (`/guides`, `/guides/[slug]`) are six long-form articles in
+`product-website/lib/guides.ts`. A guide is `{ meta, sections[] }` and a section
+is a heading plus typed blocks (paragraph, list, checklist, callout), which is
+deliberate: moving the content into the database and the admin dashboard is then
+a change of source, not a rewrite of the rendering. Add a guide by adding an
+object — `generateStaticParams` prerenders whatever is in the array.
+
+The writing is cautious about anything legal or numeric on purpose. Where a
+figure varies by area or landlord it is described as a range people report
+rather than stated as fact. **Do not add specific prices, deposit amounts or
+legal requirements to these guides without a source** — an invented figure here
+is the same failure as the 4.9 ratings this codebase was cleared of.
+
+Note also: the footer used to link `propertyType=Studio` and `Penthouse`, which
+the `properties_property_type_check` constraint makes impossible, so both always
+landed on an empty result; and it advertised "100% Field Audited Homes", which
+nobody does. Both are gone.
+
+Still missing, in priority order:
+
 - **Admin verification UI** — nothing can currently set `phone_verified`,
   `identity_verified` or `business_verified`, so the trust badges and the
   "verified posters" homepage section stay empty until that exists. This is the
   highest-value next piece of the trust work.
+- **§9 poster profiles** — `/profile/[id]` still does not render the
+  verification badges, the review list or the poster statistics, all of which
+  have endpoints behind them already.
+- **§14 compare**, **§15 saved searches**, **§13 recently viewed**,
+  **§19 market insights**, **§16 messaging**.
 
 `GET /properties` now filters, sorts and pages **in Postgres**, and returns
 `{ data, total, page, pageSize, totalPages }` rather than a bare array. The
