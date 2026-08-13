@@ -14,6 +14,7 @@ export function EmptyState({
   title,
   description,
   icon: Icon = SearchX,
+  illustration: Illustration,
   actionText,
   actionHref,
   onAction,
@@ -22,6 +23,11 @@ export function EmptyState({
   title: string;
   description: string;
   icon?: LucideIcon;
+  /**
+   * Preferred over `icon` where one fits — see `components/illustrations.tsx`.
+   * The icon remains the fallback so an empty state is never a bare paragraph.
+   */
+  illustration?: React.ComponentType<{ className?: string }>;
   actionText?: string;
   /** Use for navigation; `onAction` for in-place actions like resetting filters. */
   actionHref?: string;
@@ -35,9 +41,13 @@ export function EmptyState({
     <div
       className={`p-10 text-center bg-surface rounded-card border border-line space-y-3 max-w-lg mx-auto ${className}`}
     >
-      <div className="w-14 h-14 rounded-full bg-canvas border border-line text-primary flex items-center justify-center mx-auto">
-        <Icon className="w-6 h-6" aria-hidden="true" />
-      </div>
+      {Illustration ? (
+        <Illustration className="mx-auto" />
+      ) : (
+        <div className="w-14 h-14 rounded-full bg-canvas border border-line text-primary flex items-center justify-center mx-auto">
+          <Icon className="w-6 h-6" aria-hidden="true" />
+        </div>
+      )}
       <h3 className="font-serif-display text-xl text-ink">{title}</h3>
       <p className="text-micro text-muted leading-relaxed max-w-sm mx-auto">{description}</p>
 

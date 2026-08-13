@@ -15,6 +15,7 @@ import {
   useLocalCollection,
 } from "@/lib/use-local-collection";
 import { EmptyState } from "@/components/empty-state";
+import { SearchIllustration } from "@/components/illustrations";
 import { ErrorNotice } from "@/components/error-notice";
 import { Badge, Button, Skeleton } from "@/components/ui";
 import { City, Property, FilterState } from "@/lib/types";
@@ -196,7 +197,7 @@ function SearchContent() {
   const emptyResults = (
     <div className="col-span-full py-10">
       <EmptyState
-        icon={Building2}
+        illustration={SearchIllustration}
         title={filtersActive ? "No homes match those filters" : "No listings yet"}
         description={
           filtersActive

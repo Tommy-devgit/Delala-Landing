@@ -18,6 +18,8 @@ import {
 import { Skeleton } from "@/components/ui";
 import { PropertyPhoto } from "@/components/property-photo";
 import { ErrorNotice } from "@/components/error-notice";
+import { EmptyState } from "@/components/empty-state";
+import { ListingsIllustration } from "@/components/illustrations";
 import { useAsync } from "@/lib/use-async";
 import { useSession } from "@/lib/use-session";
 
@@ -125,11 +127,13 @@ export default function MyListingsPage() {
               ))}
             </div>
           ) : filteredProperties.length === 0 ? (
-            <div className="py-10 text-center space-y-3">
-              <Building2 className="w-12 h-12 text-muted mx-auto opacity-50" />
-              <h3 className="font-serif-display text-xl text-ink">No Property Listings Found</h3>
-              <p className="text-xs text-muted">You haven’t submitted any properties yet. Use “Publish New Listing” above to get started.</p>
-            </div>
+            <EmptyState
+              illustration={ListingsIllustration}
+              title="You have not posted a property yet"
+              description="Publish one and it will appear here, with its review status and the viewings people request."
+              actionText="Publish a listing"
+              actionHref="/publish"
+            />
           ) : (
             <div className="space-y-4">
               {filteredProperties.map((property) => (

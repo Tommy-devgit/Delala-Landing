@@ -7,6 +7,8 @@ import { apiClient } from "@/lib/api-client";
 import { Property } from "@/lib/types";
 import { useSession } from "@/lib/use-session";
 import { PropertyCard } from "@/components/property-card";
+import { EmptyState } from "@/components/empty-state";
+import { SavedIllustration } from "@/components/illustrations";
 import { Skeleton, buttonClasses } from "@/components/ui";
 
 export default function FavoritesPage() {
@@ -128,18 +130,13 @@ export default function FavoritesPage() {
             </button>
           </div>
         ) : visible.length === 0 ? (
-          <div className="rounded-panel border border-line bg-surface py-16 px-6 text-center space-y-3">
-            <div className="w-14 h-14 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto">
-              <Heart className="w-7 h-7" aria-hidden="true" />
-            </div>
-            <h2 className="font-serif-display text-xl text-ink">No saved homes yet</h2>
-            <p className="text-micro text-muted max-w-sm mx-auto leading-relaxed">
-              Tap the heart on any listing and it will be kept here for you.
-            </p>
-            <Link href="/search" className={buttonClasses({ size: "md" })}>
-              Start exploring
-            </Link>
-          </div>
+          <EmptyState
+            illustration={SavedIllustration}
+            title="No saved homes yet"
+            description="Tap the heart on any listing and it will be kept here, on your account, for any device you sign in from."
+            actionText="Start exploring"
+            actionHref="/search"
+          />
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
             {visible.map((property) => (

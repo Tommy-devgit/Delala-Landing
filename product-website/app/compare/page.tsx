@@ -7,6 +7,7 @@ import { useAsync } from "@/lib/use-async";
 import { COMPARE_KEY, useLocalCollection } from "@/lib/use-local-collection";
 import { PropertyPhoto } from "@/components/property-photo";
 import { EmptyState } from "@/components/empty-state";
+import { CompareIllustration } from "@/components/illustrations";
 import { ErrorNotice } from "@/components/error-notice";
 import { Button, Skeleton } from "@/components/ui";
 import { Property } from "@/lib/types";
@@ -92,7 +93,7 @@ export default function ComparePage() {
           </div>
         ) : properties.length === 0 ? (
           <EmptyState
-            icon={GitCompare}
+            illustration={CompareIllustration}
             title="Nothing to compare yet"
             description="Add properties from any listing to line them up side by side — price, size, location and what each one actually has."
             actionText="Browse properties"

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { BellOff, Bookmark, Pencil, Trash2 } from "lucide-react";
 import { SAVED_SEARCH_KEY, SavedSearch, useLocalCollection } from "@/lib/use-local-collection";
 import { EmptyState } from "@/components/empty-state";
+import { SavedSearchIllustration } from "@/components/illustrations";
 import { Button, Input, Skeleton } from "@/components/ui";
 
 /** Turns a stored query string back into something a person can read. */
@@ -86,7 +87,7 @@ export default function SavedSearchesPage() {
           </div>
         ) : items.length === 0 ? (
           <EmptyState
-            icon={Bookmark}
+            illustration={SavedSearchIllustration}
             title="No saved searches yet"
             description="Set up filters in Explore and save them, so you can check the same search again without rebuilding it."
             actionText="Open Explore"

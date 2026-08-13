@@ -8,6 +8,7 @@ import { useAsync } from "@/lib/use-async";
 import { useSession } from "@/lib/use-session";
 import { ErrorNotice } from "@/components/error-notice";
 import { EmptyState } from "@/components/empty-state";
+import { HistoryIllustration } from "@/components/illustrations";
 import { Badge, BadgeTone, Button, Skeleton, buttonClasses } from "@/components/ui";
 
 const STATUS_TONE: Record<VisitStatus, BadgeTone> = {
@@ -203,7 +204,7 @@ export default function ViewingsPage() {
           </div>
         ) : visits.length === 0 ? (
           <EmptyState
-            icon={CalendarClock}
+            illustration={HistoryIllustration}
             title="No viewings yet"
             description="When you ask to view a property — or somebody asks to view one of yours — it will show up here."
             actionText="Browse listings"

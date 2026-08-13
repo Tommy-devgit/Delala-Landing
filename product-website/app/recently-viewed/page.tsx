@@ -6,6 +6,7 @@ import { useAsync } from "@/lib/use-async";
 import { RECENT_KEY, useLocalCollection } from "@/lib/use-local-collection";
 import { PropertyCard } from "@/components/property-card";
 import { EmptyState } from "@/components/empty-state";
+import { HistoryIllustration } from "@/components/illustrations";
 import { ErrorNotice } from "@/components/error-notice";
 import { Button, Skeleton } from "@/components/ui";
 import { Property } from "@/lib/types";
@@ -65,7 +66,7 @@ export default function RecentlyViewedPage() {
           </div>
         ) : properties.length === 0 ? (
           <EmptyState
-            icon={History}
+            illustration={HistoryIllustration}
             title="Nothing here yet"
             description="Properties you open will be listed here so you can find your way back to them."
             actionText="Browse properties"
