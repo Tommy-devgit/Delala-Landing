@@ -101,7 +101,10 @@ export interface Overview {
     activeListings: number;
     pendingApprovals: number;
     rejectedListings: number;
-    verifiedBrokers: number;
+    totalProperties: number;
+    brokerAccounts: number;
+    /** Posters who passed at least one verification check — not a role count. */
+    verifiedPosters: number;
     pendingReports: number;
     totalVisitsThisMonth: number;
     averageRentETB: number;

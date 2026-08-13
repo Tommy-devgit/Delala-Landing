@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import {
+  BadgeCheck,
   Users,
   Building2,
   CheckSquare,
@@ -104,9 +105,9 @@ export default function AdminOverviewPage() {
           <Metric icon={Building2} label="Live listings" value={m!.activeListings} change={t?.listingsChangePercent} href="/properties" />
           <Metric icon={CheckSquare} label="Awaiting approval" value={m!.pendingApprovals} href="/approvals" />
           <Metric icon={Flag} label="Open reports" value={m!.pendingReports} href="/reports" />
-          <Metric icon={Users} label="Brokers" value={m!.verifiedBrokers} href="/users" />
+          <Metric icon={BadgeCheck} label="Verified posters" value={m!.verifiedPosters} href="/users" />
           <Metric icon={Calendar} label="Visits this month" value={m!.totalVisitsThisMonth} href="/visits" />
-          <Metric icon={Building2} label="Rejected listings" value={m!.rejectedListings} href="/properties" />
+          <Metric icon={Building2} label="Properties in total" value={m!.totalProperties} href="/properties" />
           <Metric icon={TrendingUp} label="Average rent" value={formatETB(m!.averageRentETB)} />
         </div>
       )}
