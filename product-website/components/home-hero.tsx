@@ -6,8 +6,22 @@ import { Search, MapPin, Home, Banknote } from "lucide-react";
 import { City } from "@/lib/types";
 import { getSubCities } from "@/lib/locations";
 import { Button } from "@/components/ui";
+import { Photo } from "@/components/photo";
 
-const PROPERTY_TYPES = ["Apartment", "Villa", "Studio", "G+1 Residence", "Penthouse", "Commercial Space"];
+/**
+ * The five values `properties_property_type_check` permits.
+ *
+ * This offered Studio, G+1 Residence, Penthouse and Commercial Space as well.
+ * The database rejects all four, so no listing can carry them and every one of
+ * those searches returned an empty page.
+ */
+const PROPERTY_TYPES = [
+  { value: "apartment", label: "Apartment" },
+  { value: "house", label: "House" },
+  { value: "villa", label: "Villa" },
+  { value: "commercial", label: "Commercial" },
+  { value: "land", label: "Land" },
+];
 
 const BUDGETS = [
   { value: "", label: "Any budget" },
@@ -48,22 +62,24 @@ export function HomeHero({ cities, listingCount }: { cities: City[]; listingCoun
 
   return (
     <section className="relative border-b border-line overflow-hidden">
-      <img
-        src="/images/hero-img.jpg"
-        alt=""
-        className="absolute inset-0 h-full w-full object-cover object-center"
-      />
-      <div className="absolute inset-0 bg-gradient-to-br from-ink/92 via-ink/80 to-ink/60" />
+      {/* The photograph is chosen for its sky: the houses sit along the bottom
+          edge, so the headline lands on plain colour rather than fighting
+          detail. Marked `priority` because it is the one image above the fold —
+          everything else on the site stays lazy. */}
+      <div className="absolute inset-0 bg-ink">
+        <Photo slot="hero-homes" sizes="100vw" priority />
+      </div>
+      <div className="absolute inset-0 bg-gradient-to-br from-ink/92 via-ink/78 to-ink/45" />
 
       <div className="relative max-w-[1440px] mx-auto px-4 sm:px-8 py-10 sm:py-14">
         <div className="max-w-2xl">
           <h1 className="font-serif-display text-3xl sm:text-5xl font-light text-white leading-[1.05]">
-            Find a home you can actually trust.
+            Find a place that feels like home.
           </h1>
           <p className="mt-3 text-sm sm:text-base text-white/80 max-w-lg leading-relaxed">
             {listingCount > 0
-              ? `${listingCount.toLocaleString()} ${listingCount === 1 ? "home" : "homes"} across Ethiopia, each with a real location, real photos and the owner's direct number.`
-              : "Homes across Ethiopia with a real location, real photos and the owner's direct number."}
+              ? `${listingCount.toLocaleString()} ${listingCount === 1 ? "property" : "properties"} across Ethiopia — with the area, the price and who posted it, on every one.`
+              : "Properties across Ethiopia — with the area, the price and who posted it, on every one."}
           </p>
         </div>
 
@@ -125,7 +141,9 @@ export function HomeHero({ cities, listingCount }: { cities: City[]; listingCoun
                 >
                   <option value="">Any type</option>
                   {PROPERTY_TYPES.map((t) => (
-                    <option key={t} value={t}>{t}</option>
+                    <option key={t.value} value={t.value}>
+                      {t.label}
+                    </option>
                   ))}
                 </select>
               </div>
