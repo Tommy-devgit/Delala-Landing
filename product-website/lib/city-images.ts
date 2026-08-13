@@ -1,22 +1,15 @@
 /**
- * City imagery, keyed by the slug the API returns.
+ * Short factual context for each market, shown under the city name.
  *
- * Every city previously rendered the same two placeholder photos, so the six
- * markets were visually indistinguishable. Keeping the mapping here means new
- * cities are added in one place rather than hardcoded into components.
+ * This module also held `CITY_IMAGES`, mapping four cities to generated
+ * photographs of themselves. Those are gone and are not coming back: a
+ * photograph on a location card asserts what that place looks like, and an
+ * invented one asserts something false about a real city. Location cards are
+ * typographic now — see `components/city-card.tsx`.
  *
- * A city with no photo yet is deliberately left out: the card falls back to a
- * typographic tile, which reads as intentional, unlike repeating another city's
- * photograph.
+ * The blurbs below are ordinary geographic fact, not statistics. Nothing here
+ * should ever grow into a price, a count or a ranking; those come from the API.
  */
-const CITY_IMAGES: Record<string, string> = {
-  "addis-ababa": "/images/city_addis_ababa.png",
-  hawassa: "/images/city_hawassa.png",
-  adama: "/images/city_adama.png",
-  "bahir-dar": "/images/city_bahir_dar.png",
-};
-
-/** Short, factual context per market. Shown under the city name. */
 const CITY_BLURBS: Record<string, string> = {
   "addis-ababa": "Capital, diplomatic quarter and the deepest rental market",
   hawassa: "Rift Valley lakeside city",
@@ -24,13 +17,11 @@ const CITY_BLURBS: Record<string, string> = {
   "bahir-dar": "Lake Tana waterfront",
   "dire-dawa": "Eastern trade and industrial hub",
   gondar: "Historic royal city in the north",
+  mekelle: "Northern highland regional centre",
+  jimma: "Coffee-growing south-west",
 };
 
 const slugify = (value: string): string => value.toLowerCase().trim().replace(/\s+/g, "-");
-
-/** Photo for a city, or null when none has been added yet. */
-export const cityImage = (slugOrName: string): string | null =>
-  CITY_IMAGES[slugify(slugOrName)] ?? null;
 
 /** One-line description of the market, or an empty string. */
 export const cityBlurb = (slugOrName: string): string =>

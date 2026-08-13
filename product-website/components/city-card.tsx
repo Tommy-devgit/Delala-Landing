@@ -1,63 +1,69 @@
-"use client";
-
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { City } from "@/lib/types";
-import { cityBlurb, cityImage } from "@/lib/city-images";
+import { cityBlurb } from "@/lib/city-images";
 
 /**
- * A market tile.
+ * A location tile — typographic, by design.
  *
- * Cities with a photo get an image with a bottom scrim; cities without one get a
- * typographic tile rather than borrowing another city's photograph, which is
- * what made all six look identical before.
+ * These carried generated photographs of Addis Ababa, Adama, Hawassa and Bahir
+ * Dar. The absence of photography here is deliberate and is the point: a
+ * picture on a location card is a claim about what that place looks like, and
+ * a picture that was never taken there is a false one. Bole and Yeka are not
+ * interchangeable, and a stock skyline standing in for either is worse than no
+ * picture at all.
+ *
+ * What replaces it is the information somebody choosing an area actually wants:
+ * the name at a size you can read across a grid, where it sits in the
+ * hierarchy, and how many homes are in it right now. The oversized initial is
+ * the only decoration, and it is set in the surface colour rather than added as
+ * an image.
  */
-export function CityCard({ city }: { city: City }) {
-  const image = cityImage(city.slug || city.name);
+export function CityCard({
+  city,
+  /** Set when the card sits inside a city, e.g. a sub-city under Addis Ababa. */
+  parentName,
+}: {
+  city: City;
+  parentName?: string;
+}) {
   const blurb = cityBlurb(city.slug || city.name);
   const count = city.propertiesCount;
 
   return (
     <Link
       href={`/cities/${city.slug}`}
-      className="group relative flex flex-col justify-end overflow-hidden rounded-card border border-line bg-ink aspect-4/5 sm:aspect-3/4 transition-shadow hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+      className="group relative flex flex-col justify-between overflow-hidden rounded-card border border-line bg-surface p-4 aspect-4/5 sm:aspect-square transition-colors hover:border-primary/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
     >
-      {image ? (
-        <>
-          <img
-            src={image}
-            alt=""
-            loading="lazy"
-            className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
-          />
-          {/* Scrim only at the base, so the photograph stays legible. */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent" />
-        </>
-      ) : (
-        <div className="absolute inset-0 bg-primary">
-          <span
-            aria-hidden="true"
-            className="absolute -right-3 -top-4 font-serif-display text-[5.5rem] leading-none text-white/10 select-none"
-          >
-            {city.name.charAt(0)}
-          </span>
-        </div>
-      )}
+      {/* The single decorative element: the initial, cropped by the card edge. */}
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute -right-4 -top-6 select-none font-serif-display text-[6.5rem] leading-none text-canvas transition-colors duration-300 group-hover:text-accent/30"
+      >
+        {city.name.charAt(0)}
+      </span>
 
-      <div className="relative p-3.5 text-white">
-        <h3 className="font-serif-display text-lg leading-tight">{city.name}</h3>
+      <div className="relative">
+        {parentName && <p className="text-label text-muted mb-1">{parentName}</p>}
+        <h3 className="font-serif-display text-xl leading-tight text-ink">{city.name}</h3>
+        {blurb && <p className="text-label text-muted mt-1.5 line-clamp-2">{blurb}</p>}
+      </div>
 
-        {blurb && <p className="text-label text-white/75 mt-0.5 line-clamp-2">{blurb}</p>}
-
-        <div className="mt-2.5 flex items-center justify-between gap-2 border-t border-white/20 pt-2">
-          <span className="text-micro text-white/90">
-            {count > 0 ? `${count.toLocaleString()} ${count === 1 ? "home" : "homes"}` : "No homes yet"}
-          </span>
-          <ArrowRight
-            className="w-3.5 h-3.5 text-accent transition-transform group-hover:translate-x-0.5"
-            aria-hidden="true"
-          />
-        </div>
+      <div className="relative mt-3 flex items-end justify-between gap-2 border-t border-line pt-2.5">
+        <span className="text-micro text-body">
+          {count > 0 ? (
+            <>
+              <span className="text-ink font-medium">{count.toLocaleString()}</span>{" "}
+              {count === 1 ? "home" : "homes"}
+            </>
+          ) : (
+            <span className="text-muted">No homes yet</span>
+          )}
+        </span>
+        <ArrowRight
+          className="w-3.5 h-3.5 text-primary transition-transform group-hover:translate-x-0.5"
+          aria-hidden="true"
+        />
       </div>
     </Link>
   );
