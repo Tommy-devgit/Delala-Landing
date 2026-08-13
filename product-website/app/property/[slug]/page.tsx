@@ -36,6 +36,8 @@ import { useFavorites } from "@/lib/use-favorites";
 import { PropertyPhoto } from "@/components/property-photo";
 import { ErrorNotice } from "@/components/error-notice";
 import { ReportListingModal } from "@/components/report-listing-modal";
+import { ReviewsSection } from "@/components/reviews-section";
+import { useAsync } from "@/lib/use-async";
 
 export default function PropertyDetailPage() {
   const params = useParams();
@@ -52,6 +54,12 @@ export default function PropertyDetailPage() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [reloadNonce, setReloadNonce] = useState(0);
   const [isReportOpen, setIsReportOpen] = useState(false);
+  // Keyed on the loaded property rather than the slug, because the slug in
+  // the URL may be a title-derived string while reviews are keyed by id.
+  const reviews = useAsync(
+    async () => (property ? apiClient.getReviews({ propertyId: property.id }) : null),
+    [property?.id]
+  );
   const { isSaved, toggle } = useFavorites();
 
   useEffect(() => {
@@ -418,6 +426,19 @@ export default function PropertyDetailPage() {
 
             </div>
           </div>
+        </div>
+
+        {/* Reviews of this specific property. Loaded on its own so a failure
+            leaves the listing itself readable. */}
+        <div className="mt-10 pt-6 border-t border-line">
+          <ReviewsSection
+            summary={reviews.data}
+            loading={reviews.loading}
+            error={reviews.error}
+            onRetry={reviews.retry}
+            title="Reviews of this property"
+            emptyMessage="Nobody has reviewed this property yet."
+          />
         </div>
 
         {/* Similar Listings */}
