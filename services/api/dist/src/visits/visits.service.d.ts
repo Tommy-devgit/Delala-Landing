@@ -1,73 +1,39 @@
 import { PrismaService } from "../prisma/prisma.service";
-import { CreateVisitDto } from "./dto/create-visit.dto";
+import { CreateVisitDto, UpdateVisitStatusDto } from "./dto/create-visit.dto";
+import { NotificationsService } from "../notifications/notifications.service";
+export declare const VISIT_STATUSES: readonly ["requested", "accepted", "declined", "completed", "cancelled"];
+export type VisitStatus = (typeof VISIT_STATUSES)[number];
 export declare class VisitsService {
     private prisma;
-    constructor(prisma: PrismaService);
-    create(dto: CreateVisitDto): Promise<{
+    private notifications;
+    constructor(prisma: PrismaService, notifications: NotificationsService);
+    create(userId: string, dto: CreateVisitDto): Promise<{
         id: string;
+        userId: string | null;
+        propertyId: string | null;
+        visitDate: Date | null;
         status: string | null;
         createdAt: Date | null;
-        propertyId: string | null;
-        userId: string | null;
-        visitDate: Date | null;
     }>;
-    findAll(): Promise<({
-        property: {
-            id: string;
-            ownerId: string;
-            locationId: string;
-            title: string;
-            description: string | null;
-            propertyType: string | null;
-            listingType: string | null;
-            price: import("@prisma/client/runtime/library").Decimal | null;
-            bedrooms: number | null;
-            bathrooms: number | null;
-            area: import("@prisma/client/runtime/library").Decimal | null;
-            address: string | null;
-            latitude: import("@prisma/client/runtime/library").Decimal | null;
-            longitude: import("@prisma/client/runtime/library").Decimal | null;
-            contactPhone: string | null;
-            generator: boolean | null;
-            waterTank: boolean | null;
-            parking: boolean | null;
-            furnished: boolean | null;
-            securityGuard: boolean | null;
-            balcony: boolean | null;
-            internet: boolean | null;
-            status: string | null;
-            createdAt: Date | null;
-            updatedAt: Date | null;
+    findForUser(userId: string): Promise<{
+        id: any;
+        status: any;
+        visitDate: any;
+        createdAt: any;
+        property: any;
+        role: string;
+        requester: {
+            id: any;
+            name: string;
+            phone: any;
         };
-        user: {
-            profile: {
-                id: string;
-                status: string | null;
-                createdAt: Date | null;
-                updatedAt: Date | null;
-                phone: string | null;
-                firstName: string | null;
-                lastName: string | null;
-                avatarUrl: string | null;
-                bio: string | null;
-                passwordHash: string | null;
-                role: string | null;
-                phoneVerified: boolean;
-                identityVerified: boolean;
-                businessVerified: boolean;
-                posterType: string | null;
-            };
-        } & {
-            id: string;
-            createdAt: Date | null;
-            email: string | null;
-        };
-    } & {
+    }[]>;
+    updateStatus(userId: string, visitId: string, dto: UpdateVisitStatusDto): Promise<{
         id: string;
+        userId: string | null;
+        propertyId: string | null;
+        visitDate: Date | null;
         status: string | null;
         createdAt: Date | null;
-        propertyId: string | null;
-        userId: string | null;
-        visitDate: Date | null;
-    })[]>;
+    }>;
 }

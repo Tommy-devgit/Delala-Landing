@@ -1,73 +1,35 @@
 import { VisitsService } from "./visits.service";
-import { CreateVisitDto } from "./dto/create-visit.dto";
+import { CreateVisitDto, UpdateVisitStatusDto } from "./dto/create-visit.dto";
 export declare class VisitsController {
     private readonly visitsService;
     constructor(visitsService: VisitsService);
-    create(dto: CreateVisitDto): Promise<{
+    create(dto: CreateVisitDto, req: any): Promise<{
         id: string;
+        userId: string | null;
+        propertyId: string | null;
+        visitDate: Date | null;
         status: string | null;
         createdAt: Date | null;
-        propertyId: string | null;
-        userId: string | null;
-        visitDate: Date | null;
     }>;
-    findAll(): Promise<({
-        property: {
-            id: string;
-            ownerId: string;
-            locationId: string;
-            title: string;
-            description: string | null;
-            propertyType: string | null;
-            listingType: string | null;
-            price: import("@prisma/client/runtime/library").Decimal | null;
-            bedrooms: number | null;
-            bathrooms: number | null;
-            area: import("@prisma/client/runtime/library").Decimal | null;
-            address: string | null;
-            latitude: import("@prisma/client/runtime/library").Decimal | null;
-            longitude: import("@prisma/client/runtime/library").Decimal | null;
-            contactPhone: string | null;
-            generator: boolean | null;
-            waterTank: boolean | null;
-            parking: boolean | null;
-            furnished: boolean | null;
-            securityGuard: boolean | null;
-            balcony: boolean | null;
-            internet: boolean | null;
-            status: string | null;
-            createdAt: Date | null;
-            updatedAt: Date | null;
+    findMine(req: any): Promise<{
+        id: any;
+        status: any;
+        visitDate: any;
+        createdAt: any;
+        property: any;
+        role: string;
+        requester: {
+            id: any;
+            name: string;
+            phone: any;
         };
-        user: {
-            profile: {
-                id: string;
-                status: string | null;
-                createdAt: Date | null;
-                updatedAt: Date | null;
-                phone: string | null;
-                firstName: string | null;
-                lastName: string | null;
-                avatarUrl: string | null;
-                bio: string | null;
-                passwordHash: string | null;
-                role: string | null;
-                phoneVerified: boolean;
-                identityVerified: boolean;
-                businessVerified: boolean;
-                posterType: string | null;
-            };
-        } & {
-            id: string;
-            createdAt: Date | null;
-            email: string | null;
-        };
-    } & {
+    }[]>;
+    updateStatus(id: string, dto: UpdateVisitStatusDto, req: any): Promise<{
         id: string;
+        userId: string | null;
+        propertyId: string | null;
+        visitDate: Date | null;
         status: string | null;
         createdAt: Date | null;
-        propertyId: string | null;
-        userId: string | null;
-        visitDate: Date | null;
-    })[]>;
+    }>;
 }

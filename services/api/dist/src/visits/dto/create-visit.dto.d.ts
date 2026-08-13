@@ -1,7 +1,8 @@
+import { VisitStatus } from "../visits.service";
 export declare class CreateVisitDto {
     propertyId: string;
-    seekerId: string;
-    brokerId: string;
-    scheduledDate: string;
-    timeSlot: string;
+    visitDate: string;
+}
+export declare class UpdateVisitStatusDto {
+    status: VisitStatus;
 }
