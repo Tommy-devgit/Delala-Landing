@@ -48,6 +48,8 @@ export class AdminService {
       listingsThisWeek,
       listingsLastWeek,
       brokers,
+      verifiedPosters,
+      totalProperties,
       openReports,
       visitsThisMonth,
       priceAggregate,
@@ -61,6 +63,14 @@ export class AdminService {
       this.prisma.property.count({ where: { createdAt: { gte: weekAgo } } }),
       this.prisma.property.count({ where: { createdAt: { gte: twoWeeksAgo, lt: weekAgo } } }),
       this.prisma.profile.count({ where: { role: "broker" } }),
+      // Posters who have passed at least one check. `brokers` above counts a
+      // *role*, which is a different thing entirely — the dashboard labelled it
+      // "verified brokers" and showed a number that had nothing to do with
+      // verification.
+      this.prisma.profile.count({
+        where: { OR: [{ phoneVerified: true }, { identityVerified: true }, { businessVerified: true }] },
+      }),
+      this.prisma.property.count(),
       this.prisma.report.count({ where: { status: "open" } }),
       this.prisma.visit.count({
         where: { createdAt: { gte: new Date(now.getFullYear(), now.getMonth(), 1) } },
@@ -79,7 +89,9 @@ export class AdminService {
         activeListings: approvedListings,
         pendingApprovals,
         rejectedListings,
-        verifiedBrokers: brokers,
+        totalProperties,
+        brokerAccounts: brokers,
+        verifiedPosters,
         pendingReports: openReports,
         totalVisitsThisMonth: visitsThisMonth,
         averageRentETB: Math.round(Number(priceAggregate._avg.price || 0)),
