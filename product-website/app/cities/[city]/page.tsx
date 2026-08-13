@@ -1,100 +1,279 @@
 "use client";
 
-export const dynamic = "force-dynamic";
-
-import { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
+import { useMemo } from "react";
 import Link from "next/link";
+import { useParams } from "next/navigation";
+import { ArrowRight, Building2, MapPin } from "lucide-react";
 import { apiClient } from "@/lib/api-client";
+import { Property } from "@/lib/types";
 import { useAsync } from "@/lib/use-async";
-import { Photo } from "@/components/photo";
-import { ErrorNotice } from "@/components/error-notice";
-import { Property, City } from "@/lib/types";
+import { cityBlurb } from "@/lib/city-images";
+import { GUIDES } from "@/lib/guides";
 import { PropertyCard } from "@/components/property-card";
-import { MapPin, ShieldCheck, ArrowRight, Building2 } from "lucide-react";
+import { PropertyMap } from "@/components/map";
+import { Photo } from "@/components/photo";
+import { EmptyState } from "@/components/empty-state";
+import { ErrorNotice } from "@/components/error-notice";
 import { Skeleton } from "@/components/ui";
 
-export default function CityDetailPage() {
+const titleCase = (value: string) =>
+  value.replace(/(^|\s|-)([a-z])/g, (_, prefix, letter) => prefix + letter.toUpperCase());
+
+/**
+ * One city (§20).
+ *
+ * Everything numeric is counted from the listings the API returns for this city
+ * — the property-type breakdown, the sub-city counts, the price range. Nothing
+ * is a market statistic: "from ETB X" is the cheapest listing on the page, not
+ * a claim about the city.
+ */
+export default function CityPage() {
   const params = useParams();
   const slug = params?.city as string;
+  const cityName = slug ? titleCase(slug.replace(/-/g, " ")) : "Addis Ababa";
 
-  const cityName = slug ? slug.replace(/-/g, " ") : "Addis Ababa";
-
-  const { data, loading, error, retry } = useAsync(
-    () => apiClient.getProperties({ city: cityName }),
+  const properties = useAsync(
+    () => apiClient.getProperties({ city: cityName, pageSize: 60 }),
     [cityName]
   );
-  const cityProperties: Property[] = data || [];
+  const cityData = useAsync(() => apiClient.getCities(), []);
+
+  const listings: Property[] = properties.data || [];
+  const city = (cityData.data || []).find(
+    (c) => c.slug === slug || c.name.toLowerCase() === cityName.toLowerCase()
+  );
+
+  // Counted from what is on this page, so the breakdown and the grid can never
+  // disagree with each other.
+  const byType = useMemo(() => {
+    const counts = new Map<string, number>();
+    listings.forEach((p) => {
+      if (!p.propertyType) return;
+      counts.set(p.propertyType, (counts.get(p.propertyType) ?? 0) + 1);
+    });
+    return Array.from(counts.entries())
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count);
+  }, [listings]);
+
+  const bySubCity = useMemo(() => {
+    const counts = new Map<string, number>();
+    listings.forEach((p) => {
+      if (!p.subCity) return;
+      counts.set(p.subCity, (counts.get(p.subCity) ?? 0) + 1);
+    });
+    return Array.from(counts.entries())
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count);
+  }, [listings]);
+
+  const prices = listings.map((p) => p.rentETB).filter((n) => n > 0);
+  const cheapest = prices.length > 0 ? Math.min(...prices) : null;
+  const mapped = listings.filter((p) => p.latitude !== null && p.longitude !== null);
+
+  const relatedGuides = GUIDES.filter((g) => g.category === "Renting" || g.category === "Money").slice(0, 2);
+  const blurb = cityBlurb(slug || cityName);
 
   return (
-    <div className="bg-canvas min-h-screen py-8">
-      <div className="max-w-[1440px] mx-auto px-4 sm:px-8">
-        
-        {/* City Hero */}
-        <div className="relative rounded-panel overflow-hidden bg-ink p-6 sm:p-8 mb-6 border border-line shadow-xl text-white">
-          {/* An editorial photograph of rooftops, not a photograph of this
-              city. It is doing a mood job for the header; claiming it shows
-              the place would be the same fiction as the generated city images
-              that used to sit here. */}
-          <Photo slot="editorial-gables" sizes="100vw" className="absolute inset-0 opacity-40" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+    <div className="bg-canvas min-h-screen">
+      <header className="relative border-b border-line">
+        <div className="absolute inset-0 bg-ink">
+          {/* Editorial, not a photograph of this city — see lib/imagery.ts. */}
+          <Photo slot="editorial-gables" sizes="100vw" className="opacity-35" />
+          <div className="absolute inset-0 bg-gradient-to-r from-ink/95 via-ink/80 to-ink/45" />
+        </div>
 
-          <div className="relative z-10 max-w-2xl">
-            <span className="font-mono-label text-label text-accent bg-black/60 border border-white/20 px-3 py-1 rounded-full inline-block mb-4">
-              {cityProperties.length}{" "}
-              {cityProperties.length === 1 ? "listing" : "listings"}
-            </span>
+        <div className="relative max-w-[1440px] mx-auto px-4 sm:px-8 py-16 sm:py-20">
+          <nav aria-label="Breadcrumb" className="mb-4">
+            <ol className="flex items-center gap-2 text-label text-white/70">
+              <li>
+                <Link href="/cities" className="hover:text-white transition-colors">
+                  Locations
+                </Link>
+              </li>
+              <li aria-hidden="true">/</li>
+              <li className="text-white">{cityName}</li>
+            </ol>
+          </nav>
 
-            <h1 className="font-serif-display text-4xl sm:text-6xl font-light mb-2 capitalize">
+          <div className="max-w-2xl text-white">
+            <h1 className="font-serif-display text-4xl sm:text-5xl font-light leading-tight">
               Property in {cityName}
             </h1>
+            {blurb && <p className="text-sm text-white/80 mt-3">{blurb}</p>}
 
-            <p className="text-base text-white/80 font-normal mb-6">
-              Everything posted on Delala in {cityName}, newest first.
-            </p>
+            {!properties.loading && !properties.error && (
+              <p className="text-micro text-white/75 mt-5" aria-live="polite">
+                {listings.length === 0
+                  ? "Nothing listed here yet"
+                  : `${listings.length} ${listings.length === 1 ? "listing" : "listings"}${
+                      cheapest ? ` · from ETB ${cheapest.toLocaleString()}` : ""
+                    }`}
+              </p>
+            )}
           </div>
         </div>
+      </header>
 
-        {/* Verified City Listings */}
-        <div className="mb-5 flex items-center justify-between border-b border-line pb-4">
-          <div>
-            <span className="font-mono-label text-label text-primary block mb-1">
-              Available now
-            </span>
-            <h2 className="font-serif-display text-3xl font-light text-ink">
-              Available Homes in {cityName}
-            </h2>
-          </div>
-        </div>
-
-        {error ? (
-          <ErrorNotice message={error} onRetry={retry} />
-        ) : loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[1, 2, 3, 4].map((i) => (
-              <Skeleton key={i} className="h-80 rounded-panel" />
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-8 py-10 space-y-12">
+        {properties.error ? (
+          <ErrorNotice message={properties.error} onRetry={properties.retry} />
+        ) : properties.loading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {Array.from({ length: 8 }, (_, i) => (
+              <Skeleton key={i} className="h-72" />
             ))}
           </div>
-        ) : cityProperties.length === 0 ? (
-          <div className="py-10 text-center space-y-4 max-w-md mx-auto">
-            <div className="w-16 h-16 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto">
-              <Building2 className="w-8 h-8" />
-            </div>
-            <h2 className="font-serif-display text-2xl text-ink">
-              No Homes Listed in {cityName}
-            </h2>
-            <p className="text-xs text-muted">
-              There are currently no active properties listed in {cityName} in your database.
-            </p>
-          </div>
+        ) : listings.length === 0 ? (
+          <EmptyState
+            icon={Building2}
+            title={`Nothing listed in ${cityName} yet`}
+            description="No properties have been posted here so far. Try another city, or post the first one."
+            actionText="Browse all listings"
+            actionHref="/search"
+          />
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            {cityProperties.map((property) => (
-              <PropertyCard key={property.id} property={property} />
-            ))}
-          </div>
+          <>
+            {/* Areas within the city */}
+            {bySubCity.length > 0 && (
+              <section className="space-y-4">
+                <div className="border-b border-line pb-3">
+                  <h2 className="font-serif-display text-2xl font-light text-ink">Areas</h2>
+                  <p className="text-micro text-muted mt-1">
+                    Where the listings in {cityName} actually are.
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {bySubCity.map((area) => (
+                    <Link
+                      key={area.name}
+                      href={`/search?city=${encodeURIComponent(cityName)}&subCity=${encodeURIComponent(area.name)}`}
+                      className="inline-flex items-center gap-2 px-4 py-2.5 rounded-control border border-line bg-surface text-micro hover:border-primary/40 transition-colors"
+                    >
+                      <span className="text-ink">{area.name}</span>
+                      <span className="text-muted">{area.count}</span>
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* Types available here */}
+            {byType.length > 0 && (
+              <section className="space-y-4">
+                <div className="border-b border-line pb-3">
+                  <h2 className="font-serif-display text-2xl font-light text-ink">
+                    What kind of property
+                  </h2>
+                  <p className="text-micro text-muted mt-1">Counted from the listings below.</p>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                  {byType.map((type) => (
+                    <Link
+                      key={type.name}
+                      href={`/search?city=${encodeURIComponent(cityName)}&propertyType=${encodeURIComponent(type.name.toLowerCase())}`}
+                      className="group p-4 rounded-card bg-surface border border-line hover:border-primary/40 transition-colors"
+                    >
+                      <h3 className="text-sm font-medium text-ink group-hover:text-primary transition-colors">
+                        {type.name}
+                      </h3>
+                      <p className="text-label text-muted mt-0.5">
+                        {type.count} {type.count === 1 ? "listing" : "listings"}
+                      </p>
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* Map, only when something can actually be plotted */}
+            {mapped.length > 0 && (
+              <section className="space-y-4">
+                <div className="border-b border-line pb-3">
+                  <h2 className="font-serif-display text-2xl font-light text-ink">On the map</h2>
+                  <p className="text-micro text-muted mt-1">
+                    {mapped.length} of {listings.length} listings have a position. Pins are
+                    approximate — owners place a rough point, not an exact address.
+                  </p>
+                </div>
+                <div className="h-96 rounded-card overflow-hidden border border-line">
+                  <PropertyMap properties={mapped} selectedPropertyId={null} onSelectProperty={() => {}} />
+                </div>
+              </section>
+            )}
+
+            {/* The listings */}
+            <section className="space-y-4">
+              <div className="flex items-end justify-between gap-4 border-b border-line pb-3">
+                <div>
+                  <h2 className="font-serif-display text-2xl font-light text-ink">
+                    Available in {cityName}
+                  </h2>
+                  <p className="text-micro text-muted mt-1">Newest first.</p>
+                </div>
+                <Link
+                  href={`/search?city=${encodeURIComponent(cityName)}`}
+                  className="text-micro text-primary font-medium hover:underline flex items-center gap-1 shrink-0"
+                >
+                  <span>Filter these</span>
+                  <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
+                </Link>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                {listings.slice(0, 20).map((property) => (
+                  <PropertyCard key={property.id} property={property} />
+                ))}
+              </div>
+
+              {listings.length > 20 && (
+                <div className="text-center pt-2">
+                  <Link
+                    href={`/search?city=${encodeURIComponent(cityName)}`}
+                    className="inline-flex items-center justify-center h-11 px-5 rounded-control border border-line bg-surface text-body text-micro font-medium hover:border-primary/40 transition-colors"
+                  >
+                    See all {listings.length} listings
+                  </Link>
+                </div>
+              )}
+            </section>
+          </>
         )}
 
+        {/* Reading for someone deciding on an area */}
+        <section className="space-y-4">
+          <div className="border-b border-line pb-3">
+            <h2 className="font-serif-display text-2xl font-light text-ink">Before you decide</h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {relatedGuides.map((guide) => (
+              <Link
+                key={guide.slug}
+                href={`/guides/${guide.slug}`}
+                className="group p-5 rounded-card bg-surface border border-line hover:border-primary/40 transition-colors"
+              >
+                <span className="text-label text-primary">{guide.category}</span>
+                <h3 className="text-sm font-medium text-ink mt-1 group-hover:text-primary transition-colors">
+                  {guide.title}
+                </h3>
+                <p className="text-micro text-muted mt-1 line-clamp-2">{guide.summary}</p>
+              </Link>
+            ))}
+
+            {city?.subCities && city.subCities.length > 0 && (
+              <Link
+                href="/living-in-addis"
+                className="group p-5 rounded-card bg-primary text-white hover:bg-primary-hover transition-colors flex flex-col"
+              >
+                <MapPin className="w-5 h-5 text-accent mb-2" aria-hidden="true" />
+                <h3 className="text-sm font-medium">Living in Addis</h3>
+                <p className="text-micro text-white/80 mt-1">
+                  How the sub-cities differ, and what shapes daily life.
+                </p>
+              </Link>
+            )}
+          </div>
+        </section>
       </div>
     </div>
   );
