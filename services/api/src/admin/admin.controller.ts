@@ -71,6 +71,17 @@ export class AdminController {
     return this.adminService.updateUser(id, body, this.actorId(req));
   }
 
+  @Patch("users/:id/password")
+  @Roles("ADMIN")
+  @ApiOperation({ summary: "Set a user's password directly — the only recovery path without email" })
+  setUserPassword(
+    @Param("id") id: string,
+    @Body() body: { password: string },
+    @Req() req: any
+  ) {
+    return this.adminService.setUserPassword(id, body.password, this.actorId(req));
+  }
+
   @Get("reports")
   @ApiOperation({ summary: "Listing reports raised by users" })
   listReports() {

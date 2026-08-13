@@ -1,5 +1,6 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
+import { hashPassword } from "../common/password";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -313,6 +314,50 @@ export class AdminService {
     }
 
     return (await this.listUsers()).find((u) => u.id === id);
+  }
+
+  /**
+   * Sets a user's password directly.
+   *
+   * This exists because Delala has no mailer. A self-service reset needs a
+   * delivery channel and there isn't one — no SMTP, no provider, and Supabase
+   * Auth is not in use, so GoTrue's recovery email never fires either. Without
+   * this, an account whose password is unknown is unrecoverable, which is
+   * exactly the state two of the three live accounts were in.
+   *
+   * The administrator types the new password and passes it to the person out of
+   * band. It is audited, and it clears any outstanding reset token so an old
+   * link cannot be replayed afterwards.
+   */
+  async setUserPassword(id: string, newPassword: string, actorId?: string) {
+    if (!newPassword || newPassword.length < 6) {
+      throw new BadRequestException("Choose a password of at least 6 characters.");
+    }
+
+    const user = await this.prisma.user.findUnique({ where: { id } });
+    if (!user) throw new NotFoundException(`No user with id ${id}`);
+
+    await this.prisma.profile.upsert({
+      where: { id },
+      create: {
+        id,
+        firstName: "User",
+        lastName: "",
+        role: "user",
+        status: "active",
+        passwordHash: await hashPassword(newPassword),
+      },
+      update: {
+        passwordHash: await hashPassword(newPassword),
+        passwordResetHash: null,
+        passwordResetExpires: null,
+      },
+    });
+
+    // Deliberately records that a reset happened and never the password itself.
+    await this.recordAudit(actorId, "user.password.set", "profiles", id);
+
+    return { ok: true };
   }
 
   async listReports() {
