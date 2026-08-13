@@ -49,6 +49,7 @@ import {
 import { ErrorNotice } from "@/components/error-notice";
 import { ReportListingModal } from "@/components/report-listing-modal";
 import { ReviewsSection } from "@/components/reviews-section";
+import { WriteReview } from "@/components/write-review";
 import { useAsync } from "@/lib/use-async";
 
 export default function PropertyDetailPage() {
@@ -469,7 +470,7 @@ export default function PropertyDetailPage() {
 
         {/* Reviews of this specific property. Loaded on its own so a failure
             leaves the listing itself readable. */}
-        <div className="mt-10 pt-6 border-t border-line">
+        <div className="mt-10 pt-6 border-t border-line space-y-4">
           <ReviewsSection
             summary={reviews.data}
             loading={reviews.loading}
@@ -477,6 +478,12 @@ export default function PropertyDetailPage() {
             onRetry={reviews.retry}
             title="Reviews of this property"
             emptyMessage="Nobody has reviewed this property yet."
+          />
+
+          <WriteReview
+            propertyId={property.id}
+            ownerId={property.broker?.id}
+            onPosted={reviews.retry}
           />
         </div>
 
