@@ -382,6 +382,57 @@ design system, and it contradicts the real tokens. The source of truth is the
 `@theme` block in `app/globals.css` — it already carries the burgundy/sage/bronze
 palette and the Manrope + Inter pairing. Do not follow DESIGN.md.
 
+## 3d. Photography
+
+There are two rules and one pipeline.
+
+**Nothing is served at source resolution.** The master photographs live in
+`/new-images` (gitignored, ~36 MB, 14 files). `product-website/scripts/build-images.mjs`
+turns them into WebP derivatives at the widths each slot is actually rendered
+at, and **those are committed** — the site builds and deploys without the
+masters present. Adding a photograph means adding it to that script and to
+`lib/imagery.ts`, then re-running:
+
+```bash
+cd product-website && node scripts/build-images.mjs
+```
+
+`next.config.ts` sets `images: { unoptimized: true }`, so Next resizes nothing
+at request time. If you drop a raw 6000px JPEG into `public/`, that is exactly
+what every visitor downloads. 36 MB of originals currently ship as 6.5 MB of
+derivatives, and no single page loads more than a few hundred KB of it.
+
+**Every photograph has a reason.** `lib/imagery.ts` maps a named slot — a job
+on a page — to a file, alt text and a photographer credit. Components call
+`<Photo slot="…" sizes="…" />`; `sizes` is a required prop precisely so nobody
+forgets it and ships the 2400px file to a phone.
+
+### Location cards carry no photography, deliberately
+
+`components/city-card.tsx` is typographic and must stay that way. It previously
+fronted each city with a generated image of itself. A photograph on a location
+card is a claim about what that place looks like, and an invented one is a false
+claim about a real city — Bole and Yeka are not interchangeable, and a stock
+skyline standing in for either is worse than no picture at all. The card carries
+the name, the hierarchy and the live listing count instead.
+
+Deleted with them: `hero_property.png`, `hero_home_away.jpg` and `hero-img.jpg`,
+which were **byte-identical to each other** — one photograph under three names,
+two of them `.png` extensions on JPEG data.
+
+### What the cities API used to invent
+
+`cities.controller.ts` carried a hardcoded `startingRentETB` per city (35,000
+for Addis Ababa, 22,000 for Hawassa …) and a `propertiesCount` that fell back to
+24 / 12 / 9 whenever the real count came back empty — so a city with nothing in
+it advertised two dozen listings. The count was empty most of the time because
+it only counted properties attached *directly* to the city, and properties hang
+off sub-cities and neighbourhoods.
+
+Both are real now: the count rolls up the whole location subtree, and
+`startingRentETB` is the genuine minimum price among those listings, or **null**
+when there is nothing to measure. Never zero — that reads as "free".
+
 ## 4. Product behaviour worth knowing
 
 **New listings are `pending`, not `approved`.** `properties.service.create()`
