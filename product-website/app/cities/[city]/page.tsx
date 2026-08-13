@@ -76,14 +76,17 @@ export default function CityPage() {
 
   return (
     <div className="bg-canvas min-h-screen">
-      <header className="relative border-b border-line">
+            {/* Pulled up under the sticky navbar, which renders transparent on
+          this route (see `hasDarkHeader` in lib/navigation.ts). The extra top
+          padding keeps this content clear of the bar. */}
+      <header className="relative border-b border-line -mt-[4.5rem]">
         <div className="absolute inset-0 bg-ink">
           {/* Editorial, not a photograph of this city — see lib/imagery.ts. */}
           <Photo slot="editorial-gables" sizes="100vw" className="opacity-35" />
           <div className="absolute inset-0 bg-gradient-to-r from-ink/95 via-ink/80 to-ink/45" />
         </div>
 
-        <div className="relative max-w-[1440px] mx-auto px-4 sm:px-8 py-16 sm:py-20">
+        <div className="relative max-w-[1440px] mx-auto px-4 sm:px-8 pt-[8.5rem] pb-16 sm:pt-[10rem] sm:pb-20">
           <nav aria-label="Breadcrumb" className="mb-4">
             <ol className="flex items-center gap-2 text-label text-white/70">
               <li>

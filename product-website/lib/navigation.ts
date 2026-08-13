@@ -95,3 +95,26 @@ export const TOOL_NAV: NavLink[] = [
   { label: "Recently viewed", href: "/recently-viewed" },
   { label: "Saved searches", href: "/saved-searches" },
 ];
+
+/**
+ * Routes whose first element is a dark, full-bleed header.
+ *
+ * The navbar renders transparent over these and solid everywhere else. It has
+ * to be a list rather than a guess, because getting it wrong is invisible in
+ * one direction and unusable in the other: a transparent bar on a light page
+ * puts white text on `--color-canvas`, where it simply cannot be read.
+ *
+ * Adding a route here is only half the job — the page's header must also carry
+ * `-mt-[4.5rem]` so it actually sits underneath the bar, with matching top
+ * padding so its content clears it. See `components/home-hero.tsx`.
+ */
+const DARK_HEADER_ROUTES = [
+  "/",
+  "/cities",
+  "/about",
+  "/how-it-works",
+  "/living-in-addis",
+];
+
+export const hasDarkHeader = (pathname: string): boolean =>
+  DARK_HEADER_ROUTES.includes(pathname) || pathname.startsWith("/cities/");

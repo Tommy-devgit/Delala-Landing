@@ -56,13 +56,16 @@ const PRINCIPLES = [
 export default function AboutPage() {
   return (
     <div className="bg-canvas min-h-screen">
-      <header className="relative border-b border-line">
+            {/* Pulled up under the sticky navbar, which renders transparent on
+          this route (see `hasDarkHeader` in lib/navigation.ts). The extra top
+          padding keeps this content clear of the bar. */}
+      <header className="relative border-b border-line -mt-[4.5rem]">
         <div className="absolute inset-0 bg-ink">
           <Photo slot="editorial-living" sizes="100vw" className="opacity-40" />
           <div className="absolute inset-0 bg-gradient-to-r from-ink/95 via-ink/75 to-ink/40" />
         </div>
 
-        <div className="relative max-w-[1440px] mx-auto px-4 sm:px-8 py-20 sm:py-28">
+        <div className="relative max-w-[1440px] mx-auto px-4 sm:px-8 pt-[10.5rem] pb-20 sm:pt-[13rem] sm:pb-28">
           <div className="max-w-2xl text-white">
             <p className="text-micro text-accent mb-3">About Delala</p>
             <h1 className="font-serif-display text-4xl sm:text-5xl font-light leading-tight">

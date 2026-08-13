@@ -18,7 +18,7 @@ import { authClient } from "@/lib/auth-client";
 import { useSession } from "@/lib/use-session";
 import { useUnreadNotifications } from "@/lib/use-notifications";
 import { useFavorites } from "@/lib/use-favorites";
-import { ACCOUNT_NAV, PRIMARY_NAV, TOOL_NAV } from "@/lib/navigation";
+import { ACCOUNT_NAV, PRIMARY_NAV, TOOL_NAV, hasDarkHeader } from "@/lib/navigation";
 import { Avatar } from "@/components/avatar";
 
 /**
@@ -85,12 +85,12 @@ export function Header() {
    * near-white — not the hero. White logo, white links and white-bordered
    * buttons on that are invisible, which is exactly what happened.
    *
-   * The homepage hero is pulled up by `-mt-[4.5rem]` (see `home-hero.tsx`) so
-   * it genuinely runs underneath this bar. That negative margin and the height
-   * here must stay in step; if the hero is ever removed from the homepage, this
-   * has to go back to always-solid.
+   * Each qualifying page pulls its header up by `-mt-[4.5rem]` so it genuinely
+   * runs underneath this bar. That negative margin and the height here must
+   * stay in step, and `hasDarkHeader` in `lib/navigation.ts` is the single list
+   * of which routes do it.
    */
-  const overlay = pathname === "/" && !scrolled;
+  const overlay = hasDarkHeader(pathname) && !scrolled;
 
   useEffect(() => {
     let cancelled = false;

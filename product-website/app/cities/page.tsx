@@ -36,13 +36,16 @@ export default function CitiesPage() {
   return (
     <div className="bg-canvas min-h-screen">
       {/* Editorial header */}
-      <header className="relative border-b border-line">
+            {/* Pulled up under the sticky navbar, which renders transparent on
+          this route (see `hasDarkHeader` in lib/navigation.ts). The extra top
+          padding keeps this content clear of the bar. */}
+      <header className="relative border-b border-line -mt-[4.5rem]">
         <div className="absolute inset-0 bg-ink">
           <Photo slot="editorial-neighbourhoods" sizes="100vw" className="opacity-45" />
           <div className="absolute inset-0 bg-gradient-to-r from-ink/90 via-ink/60 to-ink/20" />
         </div>
 
-        <div className="relative max-w-[1440px] mx-auto px-4 sm:px-8 py-16 sm:py-20">
+        <div className="relative max-w-[1440px] mx-auto px-4 sm:px-8 pt-[8.5rem] pb-16 sm:pt-[10rem] sm:pb-20">
           <div className="max-w-2xl text-white">
             <p className="text-micro text-accent mb-3">Locations</p>
             <h1 className="font-serif-display text-4xl sm:text-5xl font-light leading-tight">
