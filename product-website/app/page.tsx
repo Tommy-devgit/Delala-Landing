@@ -6,6 +6,7 @@ import { HomeHero } from "@/components/home-hero";
 import { CityCard } from "@/components/city-card";
 import { PropertyRail } from "@/components/property-rail";
 import { BrowseByType } from "@/components/home/browse-by-type";
+import { FeaturedProperties } from "@/components/home/featured-properties";
 import { GuidesStrip } from "@/components/home/guides-strip";
 import { HowItWorks } from "@/components/home/how-it-works";
 import { TrustedPosters } from "@/components/home/trusted-posters";
@@ -33,7 +34,7 @@ export default function HomePage() {
   const { data, loading, error, retry } = useAsync(
     async () => {
       const [recent, forRent, forSale, facets, cities, posters] = await Promise.all([
-        apiClient.searchProperties({ sort: "newest", pageSize: RAIL_SIZE }),
+        apiClient.searchProperties({ sort: "newest", pageSize: 5 }),
         apiClient.searchProperties({ listingType: "rent", sort: "newest", pageSize: RAIL_SIZE }),
         apiClient.searchProperties({ listingType: "sale", sort: "newest", pageSize: RAIL_SIZE }),
         apiClient.getFacets(),
@@ -67,15 +68,10 @@ export default function HomePage() {
 
       {!error && (
         <>
-          <PropertyRail
-            title="Recently added"
-            description="The newest listings on Delala."
-            href="/search?sort=newest"
-            hrefLabel="See all listings"
+          <FeaturedProperties
             properties={data?.recent.data || []}
             loading={loading}
             error={null}
-            limit={RAIL_SIZE}
           />
 
           <PropertyRail
