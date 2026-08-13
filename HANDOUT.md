@@ -44,6 +44,36 @@ signature of "the code has a column the database doesn't".
 
 Full reasoning lives in `services/api/prisma/README.md`.
 
+### 2.1b Postgres CHECK constraints the schema file does not mention
+
+Four columns are constrained in the database and nowhere in `schema.prisma`, so
+an invalid value fails as a **500 at query time** rather than at validation:
+
+```
+new row for relation "visits" violates check constraint "visits_status_check"
+```
+
+| Column | Allowed |
+|---|---|
+| `visits.status` | requested, approved, accepted, declined, completed, cancelled |
+| `properties.status` | pending, approved, rejected, sold, rented |
+| `properties.listing_type` | rent, sale |
+| `properties.property_type` | apartment, house, villa, commercial, land |
+| `reports.status` | open, reviewing, resolved |
+
+`accepted` and `declined` were added to the visits list by
+`prisma/add-visit-statuses.ts`; the other four are as the database was seeded.
+
+**`properties.property_type` is the one to watch.** The enrichment brief asks for
+Studios, Offices and Penthouses as browse categories. Adding them to the publish
+form without widening this constraint first would make every such submission
+500. Check the constraint before adding a value to any of these lists:
+
+```sql
+SELECT conname, pg_get_constraintdef(oid) FROM pg_constraint
+WHERE conrelid = 'public.properties'::regclass AND contype = 'c';
+```
+
 ### 2.2 Use `DIRECT_URL` for scripts, not `DATABASE_URL`
 
 `DATABASE_URL` is Supabase's **transaction pooler** (port 6543). It is right for
@@ -259,8 +289,12 @@ Not started, in the brief's own priority order:
   invented fields (`securityScore`, `generatorPenetration`, `waterReliability`,
   `lifestyleTags`) with no columns behind them. **Do not start rendering those.**
 - **§14 compare**, **§15 saved searches**, **§13 recently viewed**,
-  **§18 guides**, **§19 market insights**, **§16 messaging**,
-  **§17 viewing request accept/decline** (`Visit` has no PATCH endpoint).
+  **§18 guides**, **§19 market insights**, **§16 messaging**.
+- **§17 viewing requests** — the API is complete (request, list, accept,
+  decline, cancel, with notifications on both sides) but there is **no UI for
+  the owner side**. A poster gets a notification saying somebody wants to view
+  their property and currently has nowhere to accept or decline it. That is the
+  next thing to build.
 - **Admin verification UI** — nothing can currently set `phone_verified`,
   `identity_verified` or `business_verified`, so the trust badges and the
   "verified posters" homepage section stay empty until that exists. This is the
