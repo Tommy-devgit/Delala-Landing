@@ -7,6 +7,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { apiClient } from "@/lib/api-client";
 import { useAsync } from "@/lib/use-async";
+import { Photo } from "@/components/photo";
 import { ErrorNotice } from "@/components/error-notice";
 import { Property, City } from "@/lib/types";
 import { PropertyCard } from "@/components/property-card";
@@ -31,24 +32,25 @@ export default function CityDetailPage() {
         
         {/* City Hero */}
         <div className="relative rounded-panel overflow-hidden bg-ink p-6 sm:p-8 mb-6 border border-line shadow-xl text-white">
-          <img
-            src="/images/hero_property.png"
-            alt={cityName}
-            className="absolute inset-0 w-full h-full object-cover opacity-50"
-          />
+          {/* An editorial photograph of rooftops, not a photograph of this
+              city. It is doing a mood job for the header; claiming it shows
+              the place would be the same fiction as the generated city images
+              that used to sit here. */}
+          <Photo slot="editorial-gables" sizes="100vw" className="absolute inset-0 opacity-40" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
 
           <div className="relative z-10 max-w-2xl">
             <span className="font-mono-label text-label text-accent bg-black/60 border border-white/20 px-3 py-1 rounded-full inline-block mb-4">
-              {cityProperties.length} VERIFIED MARKET LISTINGS
+              {cityProperties.length}{" "}
+              {cityProperties.length === 1 ? "listing" : "listings"}
             </span>
 
             <h1 className="font-serif-display text-4xl sm:text-6xl font-light mb-2 capitalize">
-              {cityName} Real Estate
+              Property in {cityName}
             </h1>
 
             <p className="text-base text-white/80 font-normal mb-6">
-              Verified residential compounds, serviced apartments, and diplomatic residences in {cityName}.
+              Everything posted on Delala in {cityName}, newest first.
             </p>
           </div>
         </div>
@@ -57,7 +59,7 @@ export default function CityDetailPage() {
         <div className="mb-5 flex items-center justify-between border-b border-line pb-4">
           <div>
             <span className="font-mono-label text-label text-primary block mb-1">
-              FIELD VERIFIED MARKETPLACE
+              Available now
             </span>
             <h2 className="font-serif-display text-3xl font-light text-ink">
               Available Homes in {cityName}
