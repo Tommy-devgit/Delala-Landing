@@ -1,229 +1,445 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import {
+  Bell,
+  ChevronDown,
+  GitCompare,
+  Heart,
+  LogOut,
+  Menu,
+  Plus,
+  Search,
+  User,
+  X,
+} from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import { useSession } from "@/lib/use-session";
-import { Avatar } from "@/components/avatar";
 import { useUnreadNotifications } from "@/lib/use-notifications";
-import {
-  Heart,
-  User,
-  MapPin,
-  ShieldCheck,
-  Plus,
-  Bell,
-  BookOpen,
-  Building2,
-  CalendarClock,
-  Home,
-  HelpCircle,
-  Settings,
-  ChevronDown,
-  Compass,
-  LogOut,
-} from "lucide-react";
+import { useFavorites } from "@/lib/use-favorites";
+import { ACCOUNT_NAV, PRIMARY_NAV, TOOL_NAV } from "@/lib/navigation";
+import { Avatar } from "@/components/avatar";
 
-export function Header({ onOpenFilters }: { onOpenFilters?: () => void }) {
+/**
+ * The primary navigation.
+ *
+ * Structure comes from `lib/navigation.ts` so the header, the mobile drawer and
+ * the footer share one tree. Sections with children open a menu on hover and on
+ * focus, and close on Escape or on a click elsewhere.
+ *
+ * Two behaviours worth naming:
+ *
+ * - The bar is transparent over a hero and becomes solid once the page scrolls,
+ *   which is why `scrolled` is tracked rather than the bar simply always being
+ *   opaque. Pages without a hero opt out by rendering the solid variant from the
+ *   first pixel.
+ * - Active state is compared on the path only. Rent and Buy are both `/search`
+ *   and differ by query string; reading the query needs `useSearchParams`, which
+ *   from the root layout forces every page into client rendering and breaks the
+ *   static build outright.
+ */
+export function Header() {
   const pathname = usePathname();
-  const [avatarOpen, setAvatarOpen] = useState(false);
-  const unreadCount = useUnreadNotifications();
   const session = useSession();
-
-  /**
-   * The primary destinations.
-   *
-   * Rent and Buy are separate entries rather than a filter buried in Explore,
-   * because they are the first question every visitor has already answered
-   * before arriving. Support moved into the account menu — it is a destination
-   * people look for deliberately, not one that needs a permanent slot.
-   *
-   * Labels are sentence case. They were typed as "EXPLORE", "CITIES" and
-   * "SUPPORT" — and since `.font-mono-label` stopped applying a text transform,
-   * literal capitals in the markup are exactly what reaches the screen. §5 of
-   * HANDOUT.md asks for sentence case written into the markup; this is the
-   * navigation finally doing that.
-   */
-  const navLinks = [
-    { label: "Explore", href: "/search", icon: Compass },
-    { label: "Rent", href: "/search?listingType=rent", icon: Building2 },
-    { label: "Buy", href: "/search?listingType=sale", icon: Home },
-    { label: "Locations", href: "/cities", icon: MapPin },
-    { label: "Guides", href: "/guides", icon: BookOpen },
-  ];
-
   const user = session?.user;
+  const unreadCount = useUnreadNotifications();
+  const { count: savedCount } = useFavorites();
+
+  const [openSection, setOpenSection] = useState<string | null>(null);
+  const [accountOpen, setAccountOpen] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const navRef = useRef<HTMLDivElement>(null);
+
+  // A hero sits behind the bar only on the homepage; everywhere else the solid
+  // treatment applies immediately so text never lands on a light background.
+  const overlay = pathname === "/" && !scrolled;
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // Any navigation closes everything — otherwise a menu stays open over the
+  // page it just took you to.
+  useEffect(() => {
+    setOpenSection(null);
+    setAccountOpen(false);
+    setDrawerOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      setOpenSection(null);
+      setAccountOpen(false);
+      setDrawerOpen(false);
+    };
+    const onClick = (e: MouseEvent) => {
+      if (navRef.current && !navRef.current.contains(e.target as Node)) {
+        setOpenSection(null);
+        setAccountOpen(false);
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    document.addEventListener("mousedown", onClick);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.removeEventListener("mousedown", onClick);
+    };
+  }, []);
+
+  useEffect(() => {
+    document.body.style.overflow = drawerOpen ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [drawerOpen]);
+
+  const isActive = (href: string) => {
+    const [path] = href.split("?");
+    if (path === "/") return pathname === "/";
+    return pathname === path || pathname.startsWith(`${path}/`);
+  };
+
+  /** Utility buttons all share one shape, so none of them shouts. */
+  const utilityClasses = `relative w-9 h-9 rounded-full border flex items-center justify-center transition-colors ${
+    overlay
+      ? "border-white/25 text-white hover:bg-white/10"
+      : "border-line bg-surface text-muted hover:text-primary hover:border-primary/40"
+  }`;
+
+  const badgeClasses =
+    "absolute -top-1 -right-1 min-w-4 h-4 px-1 rounded-full bg-primary text-white text-[9px] font-medium flex items-center justify-center";
 
   return (
-    <header className="sticky top-0 z-40 glass-nav transition-all duration-300 border-b border-line/80">
-      <div className="max-w-[1440px] mx-auto px-4 sm:px-8">
-        <div className="flex items-center justify-between h-20 gap-6">
-
-          {/* LEFT: Brand Logomark */}
-          <Link href="/" className="flex items-center gap-2.5 shrink-0 group">
-            <span className="font-serif-display font-light text-2xl tracking-tight text-primary group-hover:text-primary-hover transition-colors">
+    <>
+      <header
+        className={`sticky top-0 z-50 transition-colors duration-300 ${
+          overlay ? "bg-transparent" : "bg-canvas/95 backdrop-blur-md border-b border-line"
+        }`}
+      >
+        <div ref={navRef} className="max-w-[1440px] mx-auto px-4 sm:px-8">
+          <div className="flex items-center justify-between h-18 gap-4 py-3">
+            {/* Logo, with room around it. */}
+            <Link
+              href="/"
+              className={`font-serif-display font-light text-2xl tracking-tight shrink-0 pr-2 transition-colors ${
+                overlay ? "text-white" : "text-primary hover:text-primary-hover"
+              }`}
+            >
               ደላላ
-            </span>
-          </Link>
-
-          {/* CENTER: Navigation Links */}
-          <nav className="hidden md:flex items-center gap-1 lg:gap-2">
-            {navLinks.map((item) => {
-              const Icon = item.icon;
-              // Path only, and only for links without a query string.
-              //
-              // Rent and Buy are both `/search`, so a path comparison would
-              // light up all three at once. Reading the query to tell them
-              // apart needs `useSearchParams`, which forces every page into
-              // client rendering from here in the root layout and fails the
-              // static build outright — so those two simply do not carry an
-              // active state.
-              const isActive =
-                !item.href.includes("?") &&
-                (pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href)));
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`flex items-center gap-1.5 px-3 lg:px-4 py-2.5 rounded-full text-micro transition-colors ${isActive
-                    ? "bg-primary text-white font-medium"
-                    : "text-muted hover:text-primary hover:bg-canvas"
-                    }`}
-                >
-                  <Icon className="w-3.5 h-3.5" />
-                  <span>{item.label}</span>
-                </Link>
-              );
-            })}
-          </nav>
-
-          {/* RIGHT: List Property Button & Utility Icons */}
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-
-            {/* List Property CTA Button */}
-            <Link
-              href={user ? "/publish" : "/auth/signin?callbackUrl=/publish"}
-              className="flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-primary text-white font-mono-label text-xs font-bold hover:bg-primary-hover transition-colors shadow-sm"
-            >
-              <Plus className="w-3.5 h-3.5 text-accent" />
-              <span className="hidden sm:inline">List property</span>
-              <span className="sm:hidden">List</span>
             </Link>
 
-            {/* Notifications Bell */}
-            <Link
-              href="/notifications"
-              className="p-2.5 rounded-full bg-surface border border-line text-muted hover:text-primary hover:border-primary transition-colors relative"
-              aria-label={
-                unreadCount > 0 ? `Notifications, ${unreadCount} unread` : "Notifications"
-              }
-            >
-              <Bell className="w-4 h-4" aria-hidden="true" />
-              {unreadCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 min-w-4 h-4 px-1 rounded-full bg-primary text-white text-[9px] font-bold flex items-center justify-center">
-                  {unreadCount > 9 ? "9+" : unreadCount}
-                </span>
-              )}
-            </Link>
+            {/* Sections */}
+            <nav className="hidden lg:flex items-center gap-0.5" aria-label="Primary">
+              {PRIMARY_NAV.map((section) => {
+                const active = isActive(section.href);
+                const open = openSection === section.label;
 
-            {/* Saved Wishlist */}
-            <Link
-              href="/favorites"
-              className={`p-2.5 rounded-full border border-line transition-colors ${pathname === "/favorites"
-                ? "bg-primary text-white border-primary"
-                : "bg-surface text-muted hover:border-primary"
-                }`}
-              title="Saved Wishlist"
-            >
-              <Heart className="w-4 h-4 fill-rose-500 text-rose-500" />
-            </Link>
-
-            {/* User Avatar / Auth Gateway Menu */}
-            {user ? (
-              <div className="relative">
-                <button
-                  onClick={() => setAvatarOpen(!avatarOpen)}
-                  className="flex items-center gap-1.5 p-1.5 pl-3 pr-2 rounded-full bg-surface border border-line hover:border-primary transition-all shadow-xs text-ink"
-                >
-                  <Avatar src={user.avatarUrl} name={user.fullName} size={28} />
-                  <ChevronDown className="w-3.5 h-3.5 text-muted" />
-                </button>
-
-                {avatarOpen && (
-                  <div className="absolute right-0 mt-2 w-56 bg-surface rounded-card border border-line shadow-xl py-2 z-50 text-xs font-sans animate-in fade-in-50">
-                    <div className="px-4 py-2.5 border-b border-line flex items-center gap-2.5">
-                      <Avatar src={user.avatarUrl} name={user.fullName} size={36} />
-                      <div className="min-w-0">
-                      <div className="font-bold text-ink truncate">{user.fullName}</div>
-                      <div className="text-label text-muted">{user.role} account</div>
-                      </div>
-                    </div>
-
+                if (!section.children) {
+                  return (
                     <Link
-                      href="/profile"
-                      onClick={() => setAvatarOpen(false)}
-                      className="flex items-center gap-2.5 px-4 py-2.5 text-ink hover:bg-canvas transition-colors font-medium"
+                      key={section.label}
+                      href={section.href}
+                      className={`px-3 py-2 rounded-control text-micro transition-colors ${
+                        overlay
+                          ? active
+                            ? "text-white font-medium"
+                            : "text-white/75 hover:text-white"
+                          : active
+                            ? "text-primary font-medium"
+                            : "text-muted hover:text-primary"
+                      }`}
                     >
-                      <User className="w-4 h-4 text-primary" />
-                      <span>My Profile</span>
+                      {section.label}
                     </Link>
+                  );
+                }
 
-                    <Link
-                      href="/my-listings"
-                      onClick={() => setAvatarOpen(false)}
-                      className="flex items-center gap-2.5 px-4 py-2.5 text-ink hover:bg-canvas transition-colors font-medium"
-                    >
-                      <Building2 className="w-4 h-4 text-primary" />
-                      <span>My listings</span>
-                    </Link>
-
-                    {/* Requesting a viewing notifies the owner; this is where
-                        they answer it. Without a route in, the notification
-                        led nowhere. */}
-                    <Link
-                      href="/viewings"
-                      onClick={() => setAvatarOpen(false)}
-                      className="flex items-center gap-2.5 px-4 py-2.5 text-ink hover:bg-canvas transition-colors font-medium"
-                    >
-                      <CalendarClock className="w-4 h-4 text-primary" />
-                      <span>Viewings</span>
-                    </Link>
-
+                return (
+                  <div
+                    key={section.label}
+                    className="relative"
+                    onMouseEnter={() => setOpenSection(section.label)}
+                    onMouseLeave={() => setOpenSection(null)}
+                  >
                     <button
-                      onClick={() => {
-                        setAvatarOpen(false);
-                        authClient.signOut();
-                      }}
-                      className="w-full flex items-center gap-2.5 px-4 py-2.5 text-red-600 hover:bg-red-50 transition-colors border-t border-line mt-1 text-left font-bold"
+                      type="button"
+                      aria-expanded={open}
+                      aria-haspopup="true"
+                      onClick={() => setOpenSection(open ? null : section.label)}
+                      onFocus={() => setOpenSection(section.label)}
+                      className={`inline-flex items-center gap-1 px-3 py-2 rounded-control text-micro transition-colors ${
+                        overlay
+                          ? active
+                            ? "text-white font-medium"
+                            : "text-white/75 hover:text-white"
+                          : active
+                            ? "text-primary font-medium"
+                            : "text-muted hover:text-primary"
+                      }`}
                     >
-                      <LogOut className="w-4 h-4" />
-                      <span>Sign Out</span>
+                      {section.label}
+                      <ChevronDown
+                        className={`w-3 h-3 transition-transform ${open ? "rotate-180" : ""}`}
+                        aria-hidden="true"
+                      />
                     </button>
+
+                    {open && (
+                      <div className="absolute left-0 top-full pt-2 w-72">
+                        <ul className="bg-surface border border-line rounded-card shadow-lg py-2 overflow-hidden">
+                          {section.children.map((child) => (
+                            <li key={child.href + child.label}>
+                              <Link
+                                href={child.href}
+                                className="block px-4 py-2.5 hover:bg-canvas transition-colors"
+                              >
+                                <span className="block text-micro text-ink">{child.label}</span>
+                                {child.description && (
+                                  <span className="block text-label text-muted mt-0.5">
+                                    {child.description}
+                                  </span>
+                                )}
+                              </Link>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </nav>
+
+            {/* Utilities */}
+            <div className="flex items-center gap-2 shrink-0">
+              <Link href="/search" aria-label="Search properties" className={utilityClasses}>
+                <Search className="w-4 h-4" aria-hidden="true" />
+              </Link>
+
+              <Link href="/compare" aria-label="Compare properties" className={`${utilityClasses} hidden sm:flex`}>
+                <GitCompare className="w-4 h-4" aria-hidden="true" />
+              </Link>
+
+              {/* Same treatment as the bell. The heart was permanently filled
+                  rose-500 regardless of whether anything was saved, which read
+                  as an alert sitting in the bar at all times. */}
+              <Link
+                href="/favorites"
+                aria-label={savedCount > 0 ? `Saved homes, ${savedCount}` : "Saved homes"}
+                className={utilityClasses}
+              >
+                <Heart className="w-4 h-4" aria-hidden="true" />
+                {savedCount > 0 && <span className={badgeClasses}>{savedCount > 9 ? "9+" : savedCount}</span>}
+              </Link>
+
+              <Link
+                href="/notifications"
+                aria-label={unreadCount > 0 ? `Notifications, ${unreadCount} unread` : "Notifications"}
+                className={utilityClasses}
+              >
+                <Bell className="w-4 h-4" aria-hidden="true" />
+                {unreadCount > 0 && <span className={badgeClasses}>{unreadCount > 9 ? "9+" : unreadCount}</span>}
+              </Link>
+
+              {user ? (
+                <div className="relative hidden sm:block">
+                  <button
+                    type="button"
+                    onClick={() => setAccountOpen(!accountOpen)}
+                    aria-expanded={accountOpen}
+                    aria-haspopup="true"
+                    aria-label="Account menu"
+                    className={`flex items-center gap-1 p-1 pr-2 rounded-full border transition-colors ${
+                      overlay ? "border-white/25 hover:bg-white/10" : "border-line bg-surface hover:border-primary/40"
+                    }`}
+                  >
+                    <Avatar src={user.avatarUrl} name={user.fullName} size={26} />
+                    <ChevronDown
+                      className={`w-3 h-3 ${overlay ? "text-white/70" : "text-muted"}`}
+                      aria-hidden="true"
+                    />
+                  </button>
+
+                  {accountOpen && (
+                    <div className="absolute right-0 mt-2 w-60 bg-surface rounded-card border border-line shadow-lg py-2 z-50">
+                      <div className="px-4 py-2.5 border-b border-line">
+                        <p className="text-micro text-ink truncate">{user.fullName}</p>
+                        <p className="text-label text-muted truncate">{user.email}</p>
+                      </div>
+
+                      <ul className="py-1">
+                        {ACCOUNT_NAV.map((item) => (
+                          <li key={item.href}>
+                            <Link
+                              href={item.href}
+                              className="block px-4 py-2 text-micro text-body hover:bg-canvas hover:text-primary transition-colors"
+                            >
+                              {item.label}
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+
+                      <button
+                        type="button"
+                        onClick={() => authClient.signOut()}
+                        className="w-full flex items-center gap-2 px-4 py-2.5 text-micro text-primary hover:bg-canvas transition-colors border-t border-line text-left"
+                      >
+                        <LogOut className="w-3.5 h-3.5" aria-hidden="true" />
+                        Sign out
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <Link
+                  href="/auth/signin"
+                  className={`hidden sm:inline-flex items-center h-9 px-3 rounded-control text-micro transition-colors ${
+                    overlay ? "text-white hover:bg-white/10" : "text-body hover:text-primary"
+                  }`}
+                >
+                  Sign in
+                </Link>
+              )}
+
+              <Link
+                href={user ? "/publish" : "/auth/signin?callbackUrl=/publish"}
+                className="hidden sm:inline-flex items-center gap-1.5 h-9 px-4 rounded-control bg-primary text-white text-micro font-medium hover:bg-primary-hover transition-colors"
+              >
+                <Plus className="w-3.5 h-3.5 text-accent" aria-hidden="true" />
+                <span>Post property</span>
+              </Link>
+
+              <button
+                type="button"
+                onClick={() => setDrawerOpen(true)}
+                aria-label="Open menu"
+                className={`lg:hidden ${utilityClasses}`}
+              >
+                <Menu className="w-4 h-4" aria-hidden="true" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Mobile drawer. Purpose-built rather than the desktop bar collapsed:
+          every section is expanded, because a nested accordion on a phone hides
+          the thing people came for. */}
+      {drawerOpen && (
+        <div className="fixed inset-0 z-[60] lg:hidden" role="dialog" aria-modal="true" aria-label="Menu">
+          <div className="absolute inset-0 bg-ink/50" onClick={() => setDrawerOpen(false)} />
+
+          <div className="absolute inset-y-0 right-0 w-full max-w-sm bg-canvas overflow-y-auto">
+            <div className="flex items-center justify-between px-4 h-18 border-b border-line sticky top-0 bg-canvas">
+              <span className="font-serif-display font-light text-xl text-primary">ደላላ</span>
+              <button
+                type="button"
+                onClick={() => setDrawerOpen(false)}
+                aria-label="Close menu"
+                className="w-9 h-9 rounded-full border border-line bg-surface text-muted flex items-center justify-center"
+              >
+                <X className="w-4 h-4" aria-hidden="true" />
+              </button>
+            </div>
+
+            <div className="p-4 space-y-6 pb-24">
+              <Link
+                href={user ? "/publish" : "/auth/signin?callbackUrl=/publish"}
+                className="flex items-center justify-center gap-1.5 h-12 rounded-control bg-primary text-white text-micro font-medium"
+              >
+                <Plus className="w-4 h-4 text-accent" aria-hidden="true" />
+                Post a property
+              </Link>
+
+              {PRIMARY_NAV.map((section) => (
+                <div key={section.label} className="space-y-1">
+                  <Link
+                    href={section.href}
+                    className="block text-sm font-medium text-ink py-1.5"
+                  >
+                    {section.label}
+                  </Link>
+                  {section.children && (
+                    <ul className="pl-3 border-l border-line space-y-0.5">
+                      {section.children.map((child) => (
+                        <li key={child.href + child.label}>
+                          <Link
+                            href={child.href}
+                            className="block py-1.5 text-micro text-muted hover:text-primary transition-colors"
+                          >
+                            {child.label}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              ))}
+
+              <div className="space-y-1 pt-2 border-t border-line">
+                <p className="text-label text-muted py-1.5">Your tools</p>
+                <ul className="space-y-0.5">
+                  {TOOL_NAV.map((item) => (
+                    <li key={item.href}>
+                      <Link href={item.href} className="block py-1.5 text-micro text-body hover:text-primary">
+                        {item.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="space-y-1 pt-2 border-t border-line">
+                {user ? (
+                  <>
+                    <p className="text-label text-muted py-1.5">{user.fullName}</p>
+                    <ul className="space-y-0.5">
+                      {ACCOUNT_NAV.map((item) => (
+                        <li key={item.href}>
+                          <Link href={item.href} className="block py-1.5 text-micro text-body hover:text-primary">
+                            {item.label}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                    <button
+                      type="button"
+                      onClick={() => authClient.signOut()}
+                      className="flex items-center gap-2 py-2 text-micro text-primary"
+                    >
+                      <LogOut className="w-3.5 h-3.5" aria-hidden="true" />
+                      Sign out
+                    </button>
+                  </>
+                ) : (
+                  <div className="flex gap-2 pt-1">
+                    <Link
+                      href="/auth/signin"
+                      className="flex-1 h-11 rounded-control border border-line bg-surface text-body text-micro flex items-center justify-center"
+                    >
+                      Sign in
+                    </Link>
+                    <Link
+                      href="/auth/signup"
+                      className="flex-1 h-11 rounded-control bg-primary text-white text-micro flex items-center justify-center"
+                    >
+                      Create account
+                    </Link>
                   </div>
                 )}
               </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                <Link
-                  href="/auth/signin"
-                  className="px-4 py-2.5 rounded-full bg-canvas border border-line text-xs font-mono-label font-bold text-primary hover:bg-line transition-colors"
-                >
-                  SIGN IN
-                </Link>
-                <Link
-                  href="/auth/signup"
-                  className="hidden sm:inline-block px-4 py-2.5 rounded-full bg-accent text-primary text-xs font-mono-label font-bold hover:bg-surface transition-colors"
-                >
-                  CREATE ACCOUNT
-                </Link>
-              </div>
-            )}
-
+            </div>
           </div>
-
         </div>
-      </div>
-    </header>
+      )}
+    </>
   );
 }
