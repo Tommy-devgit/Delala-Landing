@@ -107,21 +107,33 @@ export function BrowseByType({
               );
             }
 
+            /**
+             * The typographic card, for types the photo library does not cover
+             * — Land and Commercial.
+             *
+             * It has to read as a deliberate treatment rather than a card whose
+             * image failed to load, which is what the first version looked
+             * like: the icon was `text-canvas` on a white surface, so it was
+             * invisible, leaving an all-but-empty box beside four photographs.
+             * A burgundy ground and a large visible mark give it the same
+             * weight as the photographic cards without inventing a picture of
+             * a field or a shopfront.
+             */
             return (
               <Link
                 key={type.value}
                 href={`/search?propertyType=${encodeURIComponent(type.value)}`}
-                className="group relative flex flex-col justify-end overflow-hidden rounded-card bg-surface border border-line p-4 aspect-4/5 hover:border-primary/50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                className="group relative flex flex-col justify-end overflow-hidden rounded-card bg-primary text-white p-4 aspect-4/5 transition-colors hover:bg-primary-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
               >
                 <Icon
-                  className="absolute right-3 top-3 w-8 h-8 text-canvas transition-colors group-hover:text-accent/40"
+                  className="absolute -right-3 -top-3 w-24 h-24 text-white/10 transition-colors group-hover:text-accent/25"
                   aria-hidden="true"
+                  strokeWidth={1}
                 />
                 <div className="relative">
-                  <h3 className="text-sm font-medium text-ink group-hover:text-primary transition-colors">
-                    {label}
-                  </h3>
-                  <p className="text-label text-muted mt-0.5">{count}</p>
+                  <Icon className="w-5 h-5 text-accent mb-2" aria-hidden="true" />
+                  <h3 className="text-sm font-medium">{label}</h3>
+                  <p className="text-label text-white/70 mt-0.5">{count}</p>
                 </div>
               </Link>
             );
