@@ -29,6 +29,10 @@ export function Avatar({
   className?: string;
 }) {
   const [failed, setFailed] = useState(false);
+  // The explicit check is for profile rows still holding the old placeholder
+  // path. The file itself has been deleted, so a stale value would 404 and fall
+  // back anyway — this just skips the failed request and the flash of a broken
+  // image on the way there.
   const usable = Boolean(src) && !failed && src !== "/images/hero_home_away.jpg";
 
   const dimension = { width: size, height: size };
