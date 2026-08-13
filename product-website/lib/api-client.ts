@@ -1,5 +1,6 @@
 import { Property, City, Broker, LocationNode, PropertyType, ListingType, PosterType, PosterVerification } from "./types";
 import { toCoordinates } from "./map";
+import { clearStoredSession } from "./auth-client";
 
 /**
  * Loose shapes of the NestJS payloads. The API is generous with optional and
@@ -320,6 +321,35 @@ const authHeaders = (): Record<string, string> => {
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
+/** Thrown when the server rejects the stored session. */
+export const SESSION_ENDED_MESSAGE = "Your session has ended. Please sign in again.";
+
+/**
+ * `fetch` for calls that carry the session, with one behaviour every call site
+ * needs and none of them had: a 401 means the stored token is dead, so it is
+ * discarded and the app is told it is signed out.
+ *
+ * Every authenticated request previously treated 401 as an ordinary failure.
+ * The token stayed in localStorage, `useSession` kept reporting a signed-in
+ * user, and the navbar, favourites and notifications all kept firing requests
+ * that could never succeed — an unrecoverable state visible only as a wall of
+ * 401s in the console. Two things produce it routinely: a session older than
+ * thirty days, and any token issued before session tokens were signed.
+ */
+const authedFetch = async (input: string, init: RequestInit = {}): Promise<Response> => {
+  const res = await fetch(input, {
+    ...init,
+    headers: { ...(init.headers || {}), ...authHeaders() },
+  });
+
+  if (res.status === 401) {
+    clearStoredSession();
+    throw new Error(SESSION_ENDED_MESSAGE);
+  }
+
+  return res;
+};
+
 /** Public profile of a property poster. Never includes the email address. */
 export interface PublicProfile {
   id: string;
@@ -452,9 +482,9 @@ export const apiClient = {
   },
 
   async createReview(input: { propertyId: string; rating: number; comment?: string }): Promise<Review> {
-    const res = await fetch(`${API_BASE}/reviews`, {
+    const res = await authedFetch(`${API_BASE}/reviews`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", ...authHeaders() },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(input),
     });
 
@@ -468,9 +498,9 @@ export const apiClient = {
   },
 
   async reportProperty(input: { propertyId: string; reason: string; details?: string }): Promise<void> {
-    const res = await fetch(`${API_BASE}/reports`, {
+    const res = await authedFetch(`${API_BASE}/reports`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", ...authHeaders() },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(input),
     });
 
@@ -539,7 +569,10 @@ export const apiClient = {
 
     (input.images || []).forEach((file) => formData.append("images", file));
 
-    const res = await fetch(`${API_BASE}/properties`, {
+    // Through the same handler as everything else, so publishing with a dead
+    // session signs the user out and says so, rather than failing with a raw
+    // 401 after they have filled in the whole form and uploaded photographs.
+    const res = await authedFetch(`${API_BASE}/properties`, {
       method: "POST",
       headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
       body: formData,
@@ -568,9 +601,8 @@ export const apiClient = {
 
   /** Ids the signed-in user has saved, for marking hearts across a grid. */
   async getFavoriteIds(): Promise<string[]> {
-    const res = await fetch(`${API_BASE}/favorites/ids`, {
+    const res = await authedFetch(`${API_BASE}/favorites/ids`, {
       cache: "no-store",
-      headers: authHeaders(),
     });
     if (!res.ok) throw new Error("Could not load your saved homes.");
     const data = await res.json();
@@ -580,9 +612,8 @@ export const apiClient = {
   async getFavorites(): Promise<Property[]> {
     // The API resolves the wishlist from the session; the path segment is
     // retained only because the route shape predates that.
-    const res = await fetch(`${API_BASE}/favorites/user/me`, {
+    const res = await authedFetch(`${API_BASE}/favorites/user/me`, {
       cache: "no-store",
-      headers: authHeaders(),
     });
     if (!res.ok) throw new Error("Could not load your saved homes.");
     const data = await res.json();
@@ -591,9 +622,9 @@ export const apiClient = {
 
   /** Returns the new saved state so the caller can reconcile optimistic UI. */
   async toggleFavorite(propertyId: string): Promise<boolean> {
-    const res = await fetch(`${API_BASE}/favorites`, {
+    const res = await authedFetch(`${API_BASE}/favorites`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", ...authHeaders() },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ propertyId }),
     });
     if (!res.ok) throw new Error("Could not update your saved homes.");
@@ -604,9 +635,8 @@ export const apiClient = {
   /* ------------------------------ notifications ---------------------------- */
 
   async getNotifications(): Promise<AppNotification[]> {
-    const res = await fetch(`${API_BASE}/notifications`, {
+    const res = await authedFetch(`${API_BASE}/notifications`, {
       cache: "no-store",
-      headers: authHeaders(),
     });
     if (!res.ok) throw new Error("Could not load your notifications.");
     const data = await res.json();
@@ -614,9 +644,8 @@ export const apiClient = {
   },
 
   async getUnreadNotificationCount(): Promise<number> {
-    const res = await fetch(`${API_BASE}/notifications/unread-count`, {
+    const res = await authedFetch(`${API_BASE}/notifications/unread-count`, {
       cache: "no-store",
-      headers: authHeaders(),
     });
     if (!res.ok) return 0;
     const data = await res.json();
@@ -627,17 +656,15 @@ export const apiClient = {
   // unread on the server while the page showed it as read — and the navbar
   // badge reappeared on the next load with no explanation.
   async markNotificationRead(id: string): Promise<void> {
-    const res = await fetch(`${API_BASE}/notifications/${id}/read`, {
+    const res = await authedFetch(`${API_BASE}/notifications/${id}/read`, {
       method: "PATCH",
-      headers: authHeaders(),
     });
     if (!res.ok) throw new Error("Could not mark that as read.");
   },
 
   async markAllNotificationsRead(): Promise<void> {
-    const res = await fetch(`${API_BASE}/notifications/read-all`, {
+    const res = await authedFetch(`${API_BASE}/notifications/read-all`, {
       method: "PATCH",
-      headers: authHeaders(),
     });
     if (!res.ok) throw new Error("Could not mark your notifications as read.");
   },
@@ -690,9 +717,9 @@ export const apiClient = {
    * the failure is reported.
    */
   async scheduleVisit(input: { propertyId: string; visitDate: string }): Promise<{ visitId: string }> {
-    const res = await fetch(`${API_BASE}/visits`, {
+    const res = await authedFetch(`${API_BASE}/visits`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", ...authHeaders() },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(input),
     });
 
@@ -709,16 +736,16 @@ export const apiClient = {
 
   /** Viewings the caller requested, plus those booked on their own properties. */
   async getVisits(): Promise<Visit[]> {
-    const res = await fetch(`${API_BASE}/visits`, { cache: "no-store", headers: authHeaders() });
+    const res = await authedFetch(`${API_BASE}/visits`, { cache: "no-store" });
     if (!res.ok) throw new Error("Could not load your viewings.");
     const payload = await res.json();
     return Array.isArray(payload) ? payload : [];
   },
 
   async updateVisitStatus(visitId: string, status: VisitStatus): Promise<void> {
-    const res = await fetch(`${API_BASE}/visits/${visitId}/status`, {
+    const res = await authedFetch(`${API_BASE}/visits/${visitId}/status`, {
       method: "PATCH",
-      headers: { "Content-Type": "application/json", ...authHeaders() },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status }),
     });
     if (!res.ok) {
