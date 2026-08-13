@@ -106,9 +106,6 @@ export declare class AdminService {
         listingCount: any;
         joinedAt: any;
     }>;
-    setUserPassword(id: string, newPassword: string, actorId?: string): Promise<{
-        ok: boolean;
-    }>;
     listReports(): Promise<{
         id: any;
         reporterName: string;
@@ -138,7 +135,7 @@ export declare class AdminService {
         parentName: any;
         latitude: number;
         longitude: number;
-        listingCount: any;
+        listingCount: number;
         averageRentETB: number;
     }[]>;
     getAuditLogs(): Promise<{

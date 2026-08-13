@@ -11,6 +11,7 @@ import {
   verifyPassword,
 } from "../common/password";
 import { issueSessionToken, verifySessionToken } from "../common/session-token";
+import { MailerService } from "../common/mailer.service";
 
 /**
  * The same answer for "no such account" and "wrong password", so the endpoint
@@ -44,7 +45,10 @@ const LOGIN_PROFILE_FIELDS = {
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
 
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private mailer: MailerService
+  ) {}
 
   async register(dto: RegisterDto) {
     try {
@@ -157,16 +161,18 @@ export class AuthService {
    * go unused, which is why no recovery mail appears in the Supabase dashboard
    * and why the reset page never delivered anything.
    *
-   * So this issues a token and says plainly that it cannot deliver it. An
-   * administrator can hand the link over out of band from the dashboard, which
-   * is how a reset actually completes today. When a mail provider is wired up,
-   * the only change needed is to send `token` from here.
+   * Sends a single-use link when SMTP is configured, and says plainly that it
+   * could not when SMTP is absent — see `MailerService` for the variables that
+   * switch it on.
    *
-   * The response never reveals whether the email exists — that would turn this
-   * endpoint into an account-enumeration oracle.
+   * The response never reveals whether the email exists. Reporting "no such
+   * account" here would turn this endpoint into a way to enumerate who has one,
+   * so a stranger's address and a real one produce the same answer.
    */
   async requestPasswordReset(email: string): Promise<{ delivered: boolean; message: string }> {
     const user = await this.prisma.user.findFirst({ where: { email }, include: { profile: true } });
+
+    let delivered = false;
 
     if (user?.profile) {
       const token = generateResetToken();
@@ -178,12 +184,19 @@ export class AuthService {
           passwordResetExpires: new Date(Date.now() + 60 * 60 * 1000),
         },
       });
+
+      delivered = await this.mailer.sendPasswordReset(email, token);
+    } else if (this.mailer.enabled) {
+      // No account, but the mailer works — answer as though it had, so the two
+      // cases are indistinguishable from outside.
+      delivered = true;
     }
 
     return {
-      delivered: false,
-      message:
-        "Delala cannot send password reset emails yet. Ask an administrator to reset your password for you.",
+      delivered,
+      message: delivered
+        ? "If that email has an account, a reset link is on its way. It expires in an hour."
+        : "Delala cannot send password reset emails yet — no email provider is configured. Contact Delala and someone will help you recover the account.",
     };
   }
 

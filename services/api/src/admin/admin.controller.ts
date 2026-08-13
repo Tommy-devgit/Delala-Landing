@@ -71,16 +71,12 @@ export class AdminController {
     return this.adminService.updateUser(id, body, this.actorId(req));
   }
 
-  @Patch("users/:id/password")
-  @Roles("ADMIN")
-  @ApiOperation({ summary: "Set a user's password directly — the only recovery path without email" })
-  setUserPassword(
-    @Param("id") id: string,
-    @Body() body: { password: string },
-    @Req() req: any
-  ) {
-    return this.adminService.setUserPassword(id, body.password, this.actorId(req));
-  }
+  // There is deliberately no endpoint for an administrator to set somebody
+  // else's password. A password belongs to the person who chose it; recovery is
+  // the emailed single-use link in AuthService. For the handful of accounts that
+  // predate password storage entirely, `npm run set-password` is the operator
+  // tool — run against the database by someone with shell access, not exposed
+  // as a button in a web UI.
 
   @Get("reports")
   @ApiOperation({ summary: "Listing reports raised by users" })

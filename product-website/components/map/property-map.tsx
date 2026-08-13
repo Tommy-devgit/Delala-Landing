@@ -73,7 +73,9 @@ function PropertyMarkers({
           icon={createPropertyIcon(property.rentETB, property.id === selectedPropertyId)}
           zIndexOffset={property.id === selectedPropertyId ? 1000 : 0}
           keyboard
-          alt={`${property.title} — ETB ${property.rentETB.toLocaleString()} per month`}
+          alt={`${property.title} — ETB ${property.rentETB.toLocaleString()}${
+            property.listingType === "sale" ? "" : " per month"
+          }`}
           eventHandlers={{ click: () => onSelectProperty?.(property.id) }}
         />
       ))}
@@ -110,7 +112,9 @@ function PropertyPreview({ property, onClose }: { property: Property; onClose: (
 
           <p className="text-xs font-bold text-primary mt-0.5">
             ETB {property.rentETB.toLocaleString()}
-            <span className="font-normal text-muted"> /mo</span>
+            {property.listingType !== "sale" && (
+              <span className="font-normal text-muted"> /mo</span>
+            )}
           </p>
         </div>
 

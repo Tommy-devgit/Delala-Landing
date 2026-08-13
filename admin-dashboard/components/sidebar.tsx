@@ -130,20 +130,19 @@ export function Sidebar() {
         collapsed ? "w-16" : "w-56"
       }`}
     >
+      {/* The wordmark, as on the marketplace. The shield badge and the
+          "Marketplace control" tagline are gone: an operator inside the admin
+          dashboard already knows which product they are in and what it is for,
+          and the two together took a third of the sidebar's header. */}
       <div
         className={`h-16 flex items-center border-b border-white/10 shrink-0 ${
-          collapsed ? "justify-center px-2" : "gap-2.5 px-4"
+          collapsed ? "justify-center px-2" : "px-4"
         }`}
       >
-        <span className="w-8 h-8 rounded-control bg-white/10 flex items-center justify-center shrink-0">
-          <ShieldCheck className="w-4 h-4 text-accent" aria-hidden="true" />
+        <span className="font-serif-display font-light text-2xl leading-none tracking-tight">
+          {collapsed ? "ደ" : "ደላላ"}
         </span>
-        {!collapsed && (
-          <div className="min-w-0">
-            <p className="font-serif-display text-base leading-tight truncate">Delala Admin</p>
-            <p className="text-label text-white/55">Marketplace control</p>
-          </div>
-        )}
+        <span className="sr-only">Delala admin</span>
       </div>
 
       <nav className="flex-1 overflow-y-auto overflow-x-hidden py-3" aria-label="Admin sections">

@@ -108,7 +108,13 @@ export default function AdminOverviewPage() {
           <Metric icon={BadgeCheck} label="Verified posters" value={m!.verifiedPosters} href="/users" />
           <Metric icon={Calendar} label="Visits this month" value={m!.totalVisitsThisMonth} href="/visits" />
           <Metric icon={Building2} label="Properties in total" value={m!.totalProperties} href="/properties" />
-          <Metric icon={TrendingUp} label="Average rent" value={formatETB(m!.averageRentETB)} />
+          {/* Rentals only, and absent rather than zero when there are none —
+              a sale price averaged in here would be meaningless. */}
+          <Metric
+            icon={TrendingUp}
+            label="Average rent"
+            value={m!.averageRentETB === null ? "No rentals yet" : formatETB(m!.averageRentETB)}
+          />
         </div>
       )}
 

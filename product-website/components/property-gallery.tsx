@@ -121,9 +121,14 @@ export function PropertyGallery({ images, title }: { images: string[]; title: st
           )}
         </div>
 
-        {/* Thumbnails. Every photograph, not the first four. */}
+        {/* Thumbnails — every photograph, not the first four.
+            `auto-rows-min` and `content-start` fix a real layout bug: without
+            them the grid rows stretch to fill the height of the main image
+            beside them, so two rows of thumbnails sat pinned to the top and
+            bottom with a wide empty band between. The rows now take their
+            natural height and stack from the top. */}
         {count > 1 && (
-          <div className="lg:col-span-4 grid grid-cols-4 lg:grid-cols-2 gap-3 lg:max-h-[calc(100%)] lg:overflow-y-auto">
+          <div className="lg:col-span-4 grid grid-cols-4 lg:grid-cols-2 gap-3 auto-rows-min content-start lg:max-h-full lg:overflow-y-auto">
             {images.map((img, idx) => (
               <button
                 key={img + idx}

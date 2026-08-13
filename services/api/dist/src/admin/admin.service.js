@@ -12,7 +12,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AdminService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
-const password_1 = require("../common/password");
 const DAY_MS = 24 * 60 * 60 * 1000;
 const startOfDay = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
 const propertyStatus = (raw) => {
@@ -59,7 +58,10 @@ let AdminService = class AdminService {
             this.prisma.visit.count({
                 where: { createdAt: { gte: new Date(now.getFullYear(), now.getMonth(), 1) } },
             }),
-            this.prisma.property.aggregate({ _avg: { price: true }, where: { status: "approved" } }),
+            this.prisma.property.aggregate({
+                _avg: { price: true },
+                where: { status: "approved", listingType: "rent" },
+            }),
         ]);
         const percentChange = (current, previous) => {
             if (previous === 0)
@@ -77,7 +79,7 @@ let AdminService = class AdminService {
                 verifiedPosters,
                 pendingReports: openReports,
                 totalVisitsThisMonth: visitsThisMonth,
-                averageRentETB: Math.round(Number(priceAggregate._avg.price || 0)),
+                averageRentETB: priceAggregate._avg.price === null ? null : Math.round(Number(priceAggregate._avg.price)),
             },
             trends: {
                 usersThisWeek,
@@ -122,16 +124,19 @@ let AdminService = class AdminService {
                 const name = key(p);
                 if (!name)
                     return;
-                const entry = counts.get(name) || { name, count: 0, totalRent: 0 };
+                const entry = counts.get(name) || { name, count: 0, totalRent: 0, rentedCount: 0 };
                 entry.count += 1;
-                entry.totalRent += Number(p.price || 0);
+                if ((p.listingType || "rent") === "rent") {
+                    entry.totalRent += Number(p.price || 0);
+                    entry.rentedCount += 1;
+                }
                 counts.set(name, entry);
             });
             return Array.from(counts.values())
                 .map((e) => ({
                 name: e.name,
                 count: e.count,
-                averageRentETB: e.count ? Math.round(e.totalRent / e.count) : 0,
+                averageRentETB: e.rentedCount ? Math.round(e.totalRent / e.rentedCount) : null,
             }))
                 .sort((a, b) => b.count - a.count);
         };
@@ -264,32 +269,6 @@ let AdminService = class AdminService {
         }
         return (await this.listUsers()).find((u) => u.id === id);
     }
-    async setUserPassword(id, newPassword, actorId) {
-        if (!newPassword || newPassword.length < 6) {
-            throw new common_1.BadRequestException("Choose a password of at least 6 characters.");
-        }
-        const user = await this.prisma.user.findUnique({ where: { id } });
-        if (!user)
-            throw new common_1.NotFoundException(`No user with id ${id}`);
-        await this.prisma.profile.upsert({
-            where: { id },
-            create: {
-                id,
-                firstName: "User",
-                lastName: "",
-                role: "user",
-                status: "active",
-                passwordHash: await (0, password_1.hashPassword)(newPassword),
-            },
-            update: {
-                passwordHash: await (0, password_1.hashPassword)(newPassword),
-                passwordResetHash: null,
-                passwordResetExpires: null,
-            },
-        });
-        await this.recordAudit(actorId, "user.password.set", "profiles", id);
-        return { ok: true };
-    }
     async listReports() {
         const reports = await this.prisma.report.findMany({
             include: { user: { include: { profile: true } }, property: true },
@@ -332,21 +311,43 @@ let AdminService = class AdminService {
     async listLocations(type) {
         const locations = await this.prisma.location.findMany({
             where: { type },
-            include: { properties: { select: { id: true, price: true } }, parent: true },
+            include: {
+                properties: { select: { price: true, listingType: true } },
+                parent: true,
+                children: {
+                    include: {
+                        properties: { select: { price: true, listingType: true } },
+                        children: { include: { properties: { select: { price: true, listingType: true } } } },
+                    },
+                },
+            },
             orderBy: { name: "asc" },
         });
-        return locations.map((l) => ({
-            id: l.id,
-            name: l.name,
-            type: l.type,
-            parentName: l.parent?.name || null,
-            latitude: l.latitude === null ? null : Number(l.latitude),
-            longitude: l.longitude === null ? null : Number(l.longitude),
-            listingCount: l.properties.length,
-            averageRentETB: l.properties.length
-                ? Math.round(l.properties.reduce((sum, p) => sum + Number(p.price || 0), 0) / l.properties.length)
-                : 0,
-        }));
+        return locations.map((l) => {
+            const all = [
+                ...(l.properties || []),
+                ...(l.children || []).flatMap((child) => [
+                    ...(child.properties || []),
+                    ...(child.children || []).flatMap((grandchild) => grandchild.properties || []),
+                ]),
+            ];
+            const rentPrices = all
+                .filter((p) => (p.listingType || "rent") === "rent")
+                .map((p) => Number(p.price))
+                .filter((n) => Number.isFinite(n) && n > 0);
+            return {
+                id: l.id,
+                name: l.name,
+                type: l.type,
+                parentName: l.parent?.name || null,
+                latitude: l.latitude === null ? null : Number(l.latitude),
+                longitude: l.longitude === null ? null : Number(l.longitude),
+                listingCount: all.length,
+                averageRentETB: rentPrices.length
+                    ? Math.round(rentPrices.reduce((sum, n) => sum + n, 0) / rentPrices.length)
+                    : null,
+            };
+        });
     }
     async getAuditLogs() {
         const logs = await this.prisma.auditLog.findMany({

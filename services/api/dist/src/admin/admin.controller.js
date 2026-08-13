@@ -43,9 +43,6 @@ let AdminController = class AdminController {
     updateUser(id, body, req) {
         return this.adminService.updateUser(id, body, this.actorId(req));
     }
-    setUserPassword(id, body, req) {
-        return this.adminService.setUserPassword(id, body.password, this.actorId(req));
-    }
     listReports() {
         return this.adminService.listReports();
     }
@@ -108,17 +105,6 @@ __decorate([
     __metadata("design:paramtypes", [String, Object, Object]),
     __metadata("design:returntype", void 0)
 ], AdminController.prototype, "updateUser", null);
-__decorate([
-    (0, common_1.Patch)("users/:id/password"),
-    (0, roles_decorator_1.Roles)("ADMIN"),
-    (0, swagger_1.ApiOperation)({ summary: "Set a user's password directly — the only recovery path without email" }),
-    __param(0, (0, common_1.Param)("id")),
-    __param(1, (0, common_1.Body)()),
-    __param(2, (0, common_1.Req)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object, Object]),
-    __metadata("design:returntype", void 0)
-], AdminController.prototype, "setUserPassword", null);
 __decorate([
     (0, common_1.Get)("reports"),
     (0, swagger_1.ApiOperation)({ summary: "Listing reports raised by users" }),

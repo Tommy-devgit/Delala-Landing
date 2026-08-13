@@ -299,7 +299,11 @@ export default function PropertyDetailPage() {
           <div className="shrink-0 md:text-right">
             <div className="text-2xl font-bold text-primary leading-none">
               ETB {property.rentETB.toLocaleString()}
-              <span className="text-sm font-normal text-muted"> /month</span>
+              {/* Only rentals are per month. A sale price with "/month" on
+                  it misrepresents the asking price by a factor of twelve. */}
+              {property.listingType !== "sale" && (
+                <span className="text-sm font-normal text-muted"> /month</span>
+              )}
             </div>
           </div>
         </div>

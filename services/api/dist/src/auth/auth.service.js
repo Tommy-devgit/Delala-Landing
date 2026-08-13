@@ -16,6 +16,7 @@ const prisma_service_1 = require("../prisma/prisma.service");
 const crypto_1 = require("crypto");
 const password_1 = require("../common/password");
 const session_token_1 = require("../common/session-token");
+const mailer_service_1 = require("../common/mailer.service");
 const BAD_CREDENTIALS = "Email or password is incorrect.";
 const DECOY_DIGEST = "scrypt$16384$8$1$y2i8H8N2hkbXiwy6QJH8/Q==$RB663gFQFvRph5lMr4VqEEYGM5A8BlVnTEXOSAc0p2f6zeFmSLHqlJVJZ6U8nR74t27LGvSJCdkEdZ32yk4X2A==";
 const LOGIN_PROFILE_FIELDS = {
@@ -28,8 +29,9 @@ const LOGIN_PROFILE_FIELDS = {
     passwordHash: true,
 };
 let AuthService = AuthService_1 = class AuthService {
-    constructor(prisma) {
+    constructor(prisma, mailer) {
         this.prisma = prisma;
+        this.mailer = mailer;
         this.logger = new common_1.Logger(AuthService_1.name);
     }
     async register(dto) {
@@ -115,6 +117,7 @@ let AuthService = AuthService_1 = class AuthService {
     }
     async requestPasswordReset(email) {
         const user = await this.prisma.user.findFirst({ where: { email }, include: { profile: true } });
+        let delivered = false;
         if (user?.profile) {
             const token = (0, password_1.generateResetToken)();
             await this.prisma.profile.update({
@@ -124,10 +127,16 @@ let AuthService = AuthService_1 = class AuthService {
                     passwordResetExpires: new Date(Date.now() + 60 * 60 * 1000),
                 },
             });
+            delivered = await this.mailer.sendPasswordReset(email, token);
+        }
+        else if (this.mailer.enabled) {
+            delivered = true;
         }
         return {
-            delivered: false,
-            message: "Delala cannot send password reset emails yet. Ask an administrator to reset your password for you.",
+            delivered,
+            message: delivered
+                ? "If that email has an account, a reset link is on its way. It expires in an hour."
+                : "Delala cannot send password reset emails yet — no email provider is configured. Contact Delala and someone will help you recover the account.",
         };
     }
     async resetPassword(email, token, newPassword) {
@@ -175,6 +184,7 @@ let AuthService = AuthService_1 = class AuthService {
 exports.AuthService = AuthService;
 exports.AuthService = AuthService = AuthService_1 = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        mailer_service_1.MailerService])
 ], AuthService);
 //# sourceMappingURL=auth.service.js.map

@@ -144,7 +144,9 @@ export default function MyListingsPage() {
                     <div>
                       <h4 className="font-serif-display text-lg text-ink">{property.title}</h4>
                       <p className="text-xs text-muted font-mono-label">
-                        {property.subCity}, {property.city} • ETB {property.rentETB.toLocaleString()}/mo
+                        {property.subCity}, {property.city} • ETB{" "}
+                        {property.rentETB.toLocaleString()}
+                        {property.listingType === "sale" ? "" : "/mo"}
                       </p>
                     </div>
                   </div>

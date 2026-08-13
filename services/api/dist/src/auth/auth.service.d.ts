@@ -1,10 +1,12 @@
 import { PrismaService } from "../prisma/prisma.service";
 import { RegisterDto } from "./dto/register.dto";
 import { LoginDto } from "./dto/login.dto";
+import { MailerService } from "../common/mailer.service";
 export declare class AuthService {
     private prisma;
+    private mailer;
     private readonly logger;
-    constructor(prisma: PrismaService);
+    constructor(prisma: PrismaService, mailer: MailerService);
     register(dto: RegisterDto): Promise<{
         token: string;
         user: {

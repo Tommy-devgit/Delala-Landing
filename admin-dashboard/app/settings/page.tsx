@@ -1,10 +1,9 @@
 "use client";
 
 import { ScrollText } from "lucide-react";
-import { API_BASE, adminApi, formatDate } from "@/lib/admin-api";
+import { adminApi, formatDate } from "@/lib/admin-api";
 import { useAdminSession, useResource } from "@/lib/use-admin";
 import {
-  Badge,
   DataTable,
   EmptyState,
   ErrorNotice,
@@ -38,27 +37,10 @@ export default function SettingsPage() {
           </dl>
         </Panel>
 
-        <Panel className="p-4">
-          <h2 className="text-micro font-semibold text-ink mb-3">Connection</h2>
-          <dl className="space-y-2">
-            <div className="flex items-center justify-between gap-3">
-              <dt className="text-label text-muted">API</dt>
-              <dd className="text-label text-ink truncate max-w-56">{API_BASE}</dd>
-            </div>
-            <div className="flex items-center justify-between gap-3">
-              <dt className="text-label text-muted">Admin endpoints</dt>
-              <dd>
-                <Badge tone={error ? "danger" : "ok"}>{error ? "Unreachable" : "Reachable"}</Badge>
-              </dd>
-            </div>
-            <div className="flex items-center justify-between gap-3">
-              <dt className="text-label text-muted">Access control</dt>
-              <dd>
-                <Badge tone="ok">Role enforced</Badge>
-              </dd>
-            </div>
-          </dl>
-        </Panel>
+        {/* The "Connection" panel that sat here — API base URL, a reachable
+            badge, an "access control: role enforced" badge — told an operator
+            nothing they could act on. If the API is unreachable every screen
+            already says so, loudly, where it matters. */}
       </div>
 
       <div>

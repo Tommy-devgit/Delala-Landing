@@ -65,7 +65,7 @@ function Breakdown({
   showRent = true,
 }: {
   title: string;
-  rows: { name: string; count: number; averageRentETB?: number }[];
+  rows: { name: string; count: number; averageRentETB?: number | null }[];
   showRent?: boolean;
 }) {
   const max = Math.max(1, ...rows.map((r) => r.count));

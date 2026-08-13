@@ -75,7 +75,13 @@ export class AdminService {
       this.prisma.visit.count({
         where: { createdAt: { gte: new Date(now.getFullYear(), now.getMonth(), 1) } },
       }),
-      this.prisma.property.aggregate({ _avg: { price: true }, where: { status: "approved" } }),
+      // Rentals only. Averaging a sale price into "average rent" mixes a
+      // monthly figure with a purchase price and produces a number that
+      // describes nothing.
+      this.prisma.property.aggregate({
+        _avg: { price: true },
+        where: { status: "approved", listingType: "rent" },
+      }),
     ]);
 
     const percentChange = (current: number, previous: number): number | null => {
@@ -94,7 +100,7 @@ export class AdminService {
         verifiedPosters,
         pendingReports: openReports,
         totalVisitsThisMonth: visitsThisMonth,
-        averageRentETB: Math.round(Number(priceAggregate._avg.price || 0)),
+        averageRentETB: priceAggregate._avg.price === null ? null : Math.round(Number(priceAggregate._avg.price)),
       },
       trends: {
         usersThisWeek,
@@ -141,21 +147,29 @@ export class AdminService {
       include: { location: { include: { parent: { include: { parent: true } } } } },
     });
 
+    /**
+     * Counts everything, but averages rent over rentals only — `rentedCount`
+     * tracks the divisor separately so a group of mostly-for-sale listings does
+     * not report a "rent" in the millions.
+     */
     const tally = (key: (p: any) => string | undefined) => {
-      const counts = new Map<string, { name: string; count: number; totalRent: number }>();
+      const counts = new Map<string, { name: string; count: number; totalRent: number; rentedCount: number }>();
       allProperties.forEach((p: any) => {
         const name = key(p);
         if (!name) return;
-        const entry = counts.get(name) || { name, count: 0, totalRent: 0 };
+        const entry = counts.get(name) || { name, count: 0, totalRent: 0, rentedCount: 0 };
         entry.count += 1;
-        entry.totalRent += Number(p.price || 0);
+        if ((p.listingType || "rent") === "rent") {
+          entry.totalRent += Number(p.price || 0);
+          entry.rentedCount += 1;
+        }
         counts.set(name, entry);
       });
       return Array.from(counts.values())
         .map((e) => ({
           name: e.name,
           count: e.count,
-          averageRentETB: e.count ? Math.round(e.totalRent / e.count) : 0,
+          averageRentETB: e.rentedCount ? Math.round(e.totalRent / e.rentedCount) : null,
         }))
         .sort((a, b) => b.count - a.count);
     };
@@ -328,50 +342,6 @@ export class AdminService {
     return (await this.listUsers()).find((u) => u.id === id);
   }
 
-  /**
-   * Sets a user's password directly.
-   *
-   * This exists because Delala has no mailer. A self-service reset needs a
-   * delivery channel and there isn't one — no SMTP, no provider, and Supabase
-   * Auth is not in use, so GoTrue's recovery email never fires either. Without
-   * this, an account whose password is unknown is unrecoverable, which is
-   * exactly the state two of the three live accounts were in.
-   *
-   * The administrator types the new password and passes it to the person out of
-   * band. It is audited, and it clears any outstanding reset token so an old
-   * link cannot be replayed afterwards.
-   */
-  async setUserPassword(id: string, newPassword: string, actorId?: string) {
-    if (!newPassword || newPassword.length < 6) {
-      throw new BadRequestException("Choose a password of at least 6 characters.");
-    }
-
-    const user = await this.prisma.user.findUnique({ where: { id } });
-    if (!user) throw new NotFoundException(`No user with id ${id}`);
-
-    await this.prisma.profile.upsert({
-      where: { id },
-      create: {
-        id,
-        firstName: "User",
-        lastName: "",
-        role: "user",
-        status: "active",
-        passwordHash: await hashPassword(newPassword),
-      },
-      update: {
-        passwordHash: await hashPassword(newPassword),
-        passwordResetHash: null,
-        passwordResetExpires: null,
-      },
-    });
-
-    // Deliberately records that a reset happened and never the password itself.
-    await this.recordAudit(actorId, "user.password.set", "profiles", id);
-
-    return { ok: true };
-  }
-
   async listReports() {
     const reports = await this.prisma.report.findMany({
       include: { user: { include: { profile: true } }, property: true },
@@ -417,27 +387,61 @@ export class AdminService {
   }
 
   /** Locations with their live listing counts, for the cities/neighborhoods screens. */
+  /**
+   * Locations of one level, with the listings beneath them counted.
+   *
+   * The count used to be `l.properties.length` — properties attached *directly*
+   * to that location. Properties hang off whichever level the poster chose,
+   * which is almost always a neighborhood, so every city reported 0 listings
+   * and an average rent of 0. The count now rolls up the whole subtree, which
+   * is what an operator means by "listings in Addis Ababa".
+   */
   async listLocations(type: "city" | "sub_city" | "neighborhood") {
     const locations = await this.prisma.location.findMany({
       where: { type },
-      include: { properties: { select: { id: true, price: true } }, parent: true },
+      include: {
+        properties: { select: { price: true, listingType: true } },
+        parent: true,
+        children: {
+          include: {
+            properties: { select: { price: true, listingType: true } },
+            children: { include: { properties: { select: { price: true, listingType: true } } } },
+          },
+        },
+      },
       orderBy: { name: "asc" },
     });
 
-    return locations.map((l: any) => ({
-      id: l.id,
-      name: l.name,
-      type: l.type,
-      parentName: l.parent?.name || null,
-      latitude: l.latitude === null ? null : Number(l.latitude),
-      longitude: l.longitude === null ? null : Number(l.longitude),
-      listingCount: l.properties.length,
-      averageRentETB: l.properties.length
-        ? Math.round(
-            l.properties.reduce((sum: number, p: any) => sum + Number(p.price || 0), 0) / l.properties.length
-          )
-        : 0,
-    }));
+    return locations.map((l: any) => {
+      const all = [
+        ...(l.properties || []),
+        ...(l.children || []).flatMap((child: any) => [
+          ...(child.properties || []),
+          ...(child.children || []).flatMap((grandchild: any) => grandchild.properties || []),
+        ]),
+      ];
+
+      // Everything counts towards the listing total; only rentals count towards
+      // the rent average, because a sale price is not a monthly rent.
+      const rentPrices = all
+        .filter((p: any) => (p.listingType || "rent") === "rent")
+        .map((p: any) => Number(p.price))
+        .filter((n: number) => Number.isFinite(n) && n > 0);
+
+      return {
+        id: l.id,
+        name: l.name,
+        type: l.type,
+        parentName: l.parent?.name || null,
+        latitude: l.latitude === null ? null : Number(l.latitude),
+        longitude: l.longitude === null ? null : Number(l.longitude),
+        listingCount: all.length,
+        // Zero would read as "free"; there is simply nothing to average.
+        averageRentETB: rentPrices.length
+          ? Math.round(rentPrices.reduce((sum, n) => sum + n, 0) / rentPrices.length)
+          : null,
+      };
+    });
   }
 
   async getAuditLogs() {

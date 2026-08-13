@@ -61,7 +61,12 @@ export function LocationDirectory({
               <td className="px-4 py-3 text-micro text-body">{l.parentName || "—"}</td>
               <td className="px-4 py-3 text-micro text-body tabular">{l.listingCount}</td>
               <td className="px-4 py-3 text-micro text-body tabular whitespace-nowrap">
-                {formatETB(l.averageRentETB)}
+                {/* Nothing to average is not an average of zero. */}
+                {l.averageRentETB === null ? (
+                  <span className="text-muted">—</span>
+                ) : (
+                  formatETB(l.averageRentETB)
+                )}
               </td>
               <td className="px-4 py-3">
                 {l.latitude !== null && l.longitude !== null ? (

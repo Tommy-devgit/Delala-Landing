@@ -107,7 +107,8 @@ export interface Overview {
     verifiedPosters: number;
     pendingReports: number;
     totalVisitsThisMonth: number;
-    averageRentETB: number;
+    /** null when no rentals exist to average. Sale prices are excluded. */
+    averageRentETB: number | null;
   };
   trends: {
     usersThisWeek: number;
@@ -121,8 +122,8 @@ export interface Overview {
 export interface Analytics {
   rangeDays: number;
   series: { date: string; listings: number; users: number; visits: number }[];
-  byCity: { name: string; count: number; averageRentETB: number }[];
-  byPropertyType: { name: string; count: number; averageRentETB: number }[];
+  byCity: { name: string; count: number; averageRentETB: number | null }[];
+  byPropertyType: { name: string; count: number; averageRentETB: number | null }[];
   byStatus: { name: string; count: number }[];
 }
 
@@ -212,7 +213,8 @@ export interface AdminLocation {
   latitude: number | null;
   longitude: number | null;
   listingCount: number;
-  averageRentETB: number;
+  /** null when nothing is listed there — never 0, which reads as free. */
+  averageRentETB: number | null;
 }
 
 export interface AuditEntry {
@@ -275,19 +277,6 @@ export const adminApi = {
 
   updateUser: (id: string, changes: AdminUserChanges) =>
     request<AdminUser>(`/admin/users/${id}`, { method: "PATCH", body: JSON.stringify(changes) }),
-
-  /**
-   * Sets a user's password directly.
-   *
-   * The only working recovery path: Delala has no mailer, and it does not use
-   * Supabase Auth, so no recovery email is ever sent by anything. An admin sets
-   * the password and passes it on out of band.
-   */
-  setUserPassword: (id: string, password: string) =>
-    request(`/admin/users/${id}/password`, {
-      method: "PATCH",
-      body: JSON.stringify({ password }),
-    }),
 
   getReports: () => request<AdminReport[]>("/admin/reports"),
   resolveReport: (id: string, status: "RESOLVED" | "DISMISSED") =>
