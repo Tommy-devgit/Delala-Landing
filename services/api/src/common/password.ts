@@ -1,4 +1,4 @@
-import { randomBytes, scrypt, timingSafeEqual } from "crypto";
+import { createHash, randomBytes, scrypt, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 
 const scryptAsync = promisify(scrypt) as (
@@ -68,4 +68,29 @@ export async function verifyPassword(password: string, digest: string | null | u
     // A corrupt digest is a failed sign-in, not a 500.
     return false;
   }
+}
+
+/**
+ * A single-use password reset token.
+ *
+ * Returned in the clear once — that value is the whole credential — while only
+ * its digest is stored, exactly as for a password. Anyone holding the token can
+ * take over the account, so a database dump must not contain usable ones.
+ */
+export function generateResetToken(): string {
+  return randomBytes(32).toString("base64url");
+}
+
+/** Cheap digest for reset tokens: they are already 256 bits of entropy, so
+ *  there is nothing to brute-force and scrypt's cost buys nothing here. */
+export function hashResetToken(token: string): string {
+  return createHash("sha256").update(token).digest("hex");
+}
+
+/** Constant-time comparison of a supplied token against a stored digest. */
+export function resetTokenMatches(token: string, digest: string | null | undefined): boolean {
+  if (!digest) return false;
+  const actual = Buffer.from(hashResetToken(token), "utf8");
+  const expected = Buffer.from(digest, "utf8");
+  return actual.length === expected.length && timingSafeEqual(actual, expected);
 }
