@@ -1,0 +1,112 @@
+[
+  {
+    "name": "hero-homes",
+    "widths": [
+      640,
+      1024,
+      1600,
+      2400
+    ],
+    "source": "braden-jarvis-Z6WmHx0nQXw-unsplash.jpg"
+  },
+  {
+    "name": "type-apartments",
+    "widths": [
+      480,
+      800,
+      1200
+    ],
+    "source": "etienne-beauregard-riverin-B0aCvAVSX8E-unsplash.jpg"
+  },
+  {
+    "name": "type-villas",
+    "widths": [
+      480,
+      800,
+      1200
+    ],
+    "source": "naomi-ellsworth-EMPLSuvDuhQ-unsplash.jpg"
+  },
+  {
+    "name": "type-houses",
+    "widths": [
+      480,
+      800,
+      1200
+    ],
+    "source": "matt-jones-xpDHTc-pkog-unsplash.jpg"
+  },
+  {
+    "name": "editorial-neighbourhoods",
+    "widths": [
+      640,
+      1024,
+      1600,
+      2400
+    ],
+    "source": "breno-assis-r3WAWU5Fi5Q-unsplash.jpg"
+  },
+  {
+    "name": "editorial-living",
+    "widths": [
+      480,
+      800,
+      1200
+    ],
+    "source": "clay-banks-obnpdOXBaU8-unsplash.jpg"
+  },
+  {
+    "name": "editorial-interior",
+    "widths": [
+      640,
+      1024,
+      1600
+    ],
+    "source": "lotus-design-n-print-wRzBarqn3hs-unsplash.jpg"
+  },
+  {
+    "name": "editorial-doorway",
+    "widths": [
+      480,
+      800,
+      1200
+    ],
+    "source": "austin-wehrwein-EZERpkl3Lso-unsplash.jpg"
+  },
+  {
+    "name": "editorial-gables",
+    "widths": [
+      480,
+      800,
+      1200
+    ],
+    "source": "alexander-andrews-A3DPhhAL6Zg-unsplash.jpg"
+  },
+  {
+    "name": "guide-bedroom",
+    "widths": [
+      640,
+      1024,
+      1600
+    ],
+    "source": "steven-ungermann-ydudT6TqqmI-unsplash.jpg"
+  },
+  {
+    "name": "guide-keys-in-door",
+    "widths": [
+      640,
+      1024,
+      1600
+    ],
+    "source": "jaye-haych-7tkDoo2L_Eg-unsplash.jpg"
+  },
+  {
+    "name": "guide-handover",
+    "widths": [
+      640,
+      1024,
+      1600
+    ],
+    "source": "jakub-zerdzicki-Ebj87ehFNNU-unsplash.jpg"
+  }
+]
