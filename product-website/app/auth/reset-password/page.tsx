@@ -1,146 +1,135 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { ArrowLeft, KeyRound } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
-import { Lock, Eye, EyeOff, CheckCircle2, ArrowRight } from "lucide-react";
 import { Button, Input, buttonClasses } from "@/components/ui";
 
-export const dynamic = "force-dynamic";
-
-function ResetPasswordContent() {
+/**
+ * Completes a reset with a token.
+ *
+ * Reachable only with `?email=…&token=…` — the token is minted by
+ * `/auth/forgot-password` and, because there is no mailer, is handed over by an
+ * administrator rather than emailed. The page used to accept any input and
+ * report success unconditionally against an endpoint that did not exist.
+ */
+function ResetPasswordForm() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const token = searchParams.get("token") || "";
+  const params = useSearchParams();
+  const email = params.get("email") || "";
+  const token = params.get("token") || "";
 
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
+  const [confirm, setConfirm] = useState("");
   const [loading, setLoading] = useState(false);
-  const [completed, setCompleted] = useState(false);
   const [error, setError] = useState("");
+  const [done, setDone] = useState(false);
+
+  const missingLink = !email || !token;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
     if (password.length < 6) {
-      setError("Password must be at least 6 characters long.");
+      setError("Choose a password of at least 6 characters.");
       return;
     }
-
-    if (password !== confirmPassword) {
-      setError("Passwords do not match.");
+    if (password !== confirm) {
+      setError("Those two passwords do not match.");
       return;
     }
 
     setLoading(true);
     try {
-      await authClient.resetPassword(password, token);
-      setCompleted(true);
+      await authClient.resetPassword(email, token, password);
+      setDone(true);
     } catch (err) {
-      setError((err instanceof Error ? err.message : "") || "Failed to reset password.");
+      setError(err instanceof Error ? err.message : "That reset link is invalid or has expired.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-[calc(100vh-80px)] bg-canvas flex items-center justify-center p-4 sm:p-6">
-      <div className="w-full max-w-md">
-        {/* Brand Header */}
-        <div className="text-center mb-5">
-          <Link href="/" className="inline-flex items-center gap-2 mb-3">
-            <span className="font-serif-display font-light text-3xl tracking-tight text-primary">
-              DELALA
-            </span>
-          </Link>
-          <h1 className="font-serif-display text-3xl font-light text-ink">
-            Create New Password
-          </h1>
-          <p className="text-xs text-muted mt-1.5 font-medium">
-            Set a new secure password for your Delala account.
-          </p>
-        </div>
+    <div className="bg-canvas min-h-screen flex items-center justify-center px-4 py-16">
+      <div className="w-full max-w-md space-y-6">
+        <Link
+          href="/auth/signin"
+          className="inline-flex items-center gap-1.5 text-micro text-muted hover:text-primary transition-colors"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" aria-hidden="true" />
+          Back to sign in
+        </Link>
 
-        {/* Reset Password Card */}
-        <div className="bg-surface rounded-panel border border-line shadow-xl p-6 sm:p-6 space-y-4">
-          {completed ? (
-            <div className="text-center py-4 space-y-4">
-              <div className="w-12 h-12 rounded-full bg-accent/20 text-primary flex items-center justify-center mx-auto">
-                <CheckCircle2 className="w-6 h-6 text-primary" />
-              </div>
-              <h3 className="font-serif-display text-xl text-ink">
-                Password Reset Successfully
-              </h3>
-              <p className="text-xs text-muted">
-                Your password has been updated. You can now sign in with your new password.
+        <div className="bg-surface border border-line rounded-panel p-6 sm:p-8 space-y-5">
+          <div className="space-y-2">
+            <KeyRound className="w-6 h-6 text-primary" aria-hidden="true" />
+            <h1 className="font-serif-display text-2xl text-ink">Choose a new password</h1>
+            {email && <p className="text-micro text-muted">For {email}</p>}
+          </div>
+
+          {done ? (
+            <div className="space-y-4">
+              <p className="text-micro text-body leading-relaxed">
+                Your password has been changed. You can sign in with it now.
+              </p>
+              <Button size="lg" className="w-full" onClick={() => router.push("/auth/signin")}>
+                Sign in
+              </Button>
+            </div>
+          ) : missingLink ? (
+            <div className="space-y-4">
+              <p className="text-micro text-body leading-relaxed">
+                This page needs a reset link. Delala cannot email one — ask an administrator to
+                reset your password and pass you the link, or a new password directly.
               </p>
               <Link
-                href="/auth/signin"
-                className={buttonClasses({ size: "lg", className: "w-full" })}
+                href="/auth/forgot-password"
+                className={buttonClasses({ variant: "secondary", size: "md", className: "w-full" })}
               >
-                <span>Proceed to Sign In →</span>
+                How to get a reset
               </Link>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label htmlFor="new-password" className="text-micro text-body block mb-1.5">
+                  New password
+                </label>
+                <Input
+                  id="new-password"
+                  type="password"
+                  autoComplete="new-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="At least 6 characters"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="confirm-password" className="text-micro text-body block mb-1.5">
+                  Confirm new password
+                </label>
+                <Input
+                  id="confirm-password"
+                  type="password"
+                  autoComplete="new-password"
+                  value={confirm}
+                  onChange={(e) => setConfirm(e.target.value)}
+                />
+              </div>
+
               {error && (
-                <div className="p-4 rounded-card bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium">
+                <p role="alert" className="text-micro text-primary">
                   {error}
-                </div>
+                </p>
               )}
 
-              <div>
-                <label className="block text-label font-mono-label text-muted font-bold uppercase mb-1.5">
-                  NEW PASSWORD *
-                </label>
-                <div className="relative">
-                  <input
-              aria-label="NEW PASSWORD"
-                    type={showPassword ? "text" : "password"}
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Min 6 characters"
-                    className="pl-11 pr-11"
-                  />
-                  <Lock className="w-4 h-4 text-muted absolute left-4 top-3.5 pointer-events-none" />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-3.5 text-muted hover:text-ink transition-colors"
-                  >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-label font-mono-label text-muted font-bold uppercase mb-1.5">
-                  CONFIRM NEW PASSWORD *
-                </label>
-                <div className="relative">
-                  <Input
-                    type="password"
-                    required
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Re-enter new password"
-                    className="pl-11"
-                  />
-                  <Lock className="w-4 h-4 text-muted absolute left-4 top-3.5 pointer-events-none" />
-                </div>
-              </div>
-
-              <Button
-                type="submit"
-                size="lg"
-                disabled={loading}
-                className="w-full"
-              >
-                <span>{loading ? "Updating Password..." : "Update Password →"}</span>
+              <Button type="submit" size="lg" className="w-full" disabled={loading}>
+                {loading ? "Saving…" : "Set new password"}
               </Button>
             </form>
           )}
@@ -152,8 +141,10 @@ function ResetPasswordContent() {
 
 export default function ResetPasswordPage() {
   return (
-    <Suspense fallback={<div className="min-h-[calc(100vh-80px)] bg-canvas flex items-center justify-center text-xs text-muted">Loading...</div>}>
-      <ResetPasswordContent />
+    <Suspense
+      fallback={<div className="bg-canvas min-h-screen p-12 text-center text-micro text-muted">Loading…</div>}
+    >
+      <ResetPasswordForm />
     </Suspense>
   );
 }

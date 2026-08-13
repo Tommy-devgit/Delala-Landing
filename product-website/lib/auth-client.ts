@@ -160,34 +160,46 @@ export const authClient = {
     }
   },
 
-  // Request Password Reset
-  async forgotPassword(email: string) {
-    try {
-      const res = await fetch(`${API_BASE}/auth/forgot-password`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      });
-      if (res.ok) return { success: true };
-    } catch {
-      // Fallback response
+  /**
+   * Starts a password reset.
+   *
+   * Both of these used to swallow every failure and `return { success: true }`
+   * unconditionally — the endpoints did not exist at all, so the reset page
+   * reported success for a request that 404'd, every single time. That is the
+   * behaviour behind "it says it sent an email and nothing arrives".
+   *
+   * `delivered` is what the caller must branch on. It is false today because
+   * Delala has no mailer: the API mints a token but cannot send it anywhere.
+   */
+  async forgotPassword(email: string): Promise<{ delivered: boolean; message: string }> {
+    const res = await fetch(`${API_BASE}/auth/forgot-password`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+
+    const payload = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error(payload?.message || "Could not start a password reset.");
     }
-    return { success: true };
+    return {
+      delivered: Boolean(payload?.delivered),
+      message: payload?.message || "",
+    };
   },
 
-  // Reset Password
-  async resetPassword(password: string, token?: string) {
-    try {
-      const res = await fetch(`${API_BASE}/auth/reset-password`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password, token }),
-      });
-      if (res.ok) return { success: true };
-    } catch {
-      // Fallback response
+  /** Completes a reset with a token issued by `forgotPassword`. */
+  async resetPassword(email: string, token: string, password: string): Promise<void> {
+    const res = await fetch(`${API_BASE}/auth/reset-password`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, token, password }),
+    });
+
+    if (!res.ok) {
+      const payload = await res.json().catch(() => ({}));
+      throw new Error(payload?.message || "That reset link is invalid or has expired.");
     }
-    return { success: true };
   },
 
   // Logout
