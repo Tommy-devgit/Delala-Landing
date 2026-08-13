@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  BadgeCheck,
   BarChart3,
   Building,
   Building2,
@@ -43,7 +42,9 @@ const NAV_GROUPS: {
     items: [
       { label: "Approvals", href: "/approvals", icon: CheckSquare, badge: "pending" },
       { label: "Reports", href: "/reports", icon: Flag, badge: "reports" },
-      { label: "Verification", href: "/users", icon: BadgeCheck },
+      // No separate "Verification" entry: granting a badge happens on the Users
+      // screen, and a second label pointing at the same route is just a longer
+      // menu with nothing extra behind it.
     ],
   },
   {
