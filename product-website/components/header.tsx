@@ -15,6 +15,7 @@ import {
   Plus,
   Bell,
   Building2,
+  CalendarClock,
   HelpCircle,
   Settings,
   ChevronDown,
@@ -138,6 +139,27 @@ export function Header({ onOpenFilters }: { onOpenFilters?: () => void }) {
                     >
                       <User className="w-4 h-4 text-primary" />
                       <span>My Profile</span>
+                    </Link>
+
+                    <Link
+                      href="/my-listings"
+                      onClick={() => setAvatarOpen(false)}
+                      className="flex items-center gap-2.5 px-4 py-2.5 text-ink hover:bg-canvas transition-colors font-medium"
+                    >
+                      <Building2 className="w-4 h-4 text-primary" />
+                      <span>My listings</span>
+                    </Link>
+
+                    {/* Requesting a viewing notifies the owner; this is where
+                        they answer it. Without a route in, the notification
+                        led nowhere. */}
+                    <Link
+                      href="/viewings"
+                      onClick={() => setAvatarOpen(false)}
+                      className="flex items-center gap-2.5 px-4 py-2.5 text-ink hover:bg-canvas transition-colors font-medium"
+                    >
+                      <CalendarClock className="w-4 h-4 text-primary" />
+                      <span>Viewings</span>
                     </Link>
 
                     <button
