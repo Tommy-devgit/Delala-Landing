@@ -273,6 +273,19 @@ export const adminApi = {
   updateUser: (id: string, changes: AdminUserChanges) =>
     request<AdminUser>(`/admin/users/${id}`, { method: "PATCH", body: JSON.stringify(changes) }),
 
+  /**
+   * Sets a user's password directly.
+   *
+   * The only working recovery path: Delala has no mailer, and it does not use
+   * Supabase Auth, so no recovery email is ever sent by anything. An admin sets
+   * the password and passes it on out of band.
+   */
+  setUserPassword: (id: string, password: string) =>
+    request(`/admin/users/${id}/password`, {
+      method: "PATCH",
+      body: JSON.stringify({ password }),
+    }),
+
   getReports: () => request<AdminReport[]>("/admin/reports"),
   resolveReport: (id: string, status: "RESOLVED" | "DISMISSED") =>
     request(`/admin/reports/${id}`, { method: "PATCH", body: JSON.stringify({ status }) }),

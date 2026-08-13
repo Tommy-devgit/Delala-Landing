@@ -64,6 +64,26 @@ export default function UsersPage() {
     }
   };
 
+  const [resetFor, setResetFor] = useState<{ id: string; email: string } | null>(null);
+  const [newPassword, setNewPassword] = useState("");
+  const [resetDone, setResetDone] = useState("");
+
+  const submitPassword = async () => {
+    if (!resetFor) return;
+    setBusyId(resetFor.id);
+    setActionError("");
+    try {
+      await adminApi.setUserPassword(resetFor.id, newPassword);
+      setResetDone(resetFor.email);
+      setResetFor(null);
+      setNewPassword("");
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : "The password could not be set.");
+    } finally {
+      setBusyId(null);
+    }
+  };
+
   const users = data ?? [];
 
   return (
@@ -188,12 +208,80 @@ export default function UsersPage() {
                       {suspended ? "Reactivate" : "Suspend"}
                     </Button>
                   )}
+                  {isAdmin && !isSelf && (
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      className="ml-2"
+                      disabled={busyId === u.id}
+                      onClick={() => {
+                        setResetFor({ id: u.id, email: u.email });
+                        setNewPassword("");
+                        setResetDone("");
+                      }}
+                    >
+                      Set password
+                    </Button>
+                  )}
                   {isSelf && <span className="text-label text-muted">You</span>}
                 </td>
               </tr>
             );
           })}
         </DataTable>
+      )}
+
+      {resetDone && (
+        <div className="mt-3 p-4 rounded-card border border-ok/25 bg-ok-soft">
+          <p className="text-micro text-ok">
+            Password set for <strong>{resetDone}</strong>. Pass it to them directly — Delala cannot
+            email it, and this is the only copy.
+          </p>
+        </div>
+      )}
+
+      {resetFor && (
+        <div
+          className="fixed inset-0 z-50 bg-ink/50 flex items-center justify-center p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="set-password-title"
+        >
+          <div className="bg-surface rounded-card border border-line p-6 w-full max-w-md space-y-4">
+            <div>
+              <h2 id="set-password-title" className="text-sm font-semibold text-ink">
+                Set a password for {resetFor.email}
+              </h2>
+              <p className="text-label text-muted mt-1 leading-relaxed">
+                There is no email delivery configured, so this is how an account is recovered. Type
+                a password and give it to them yourself — it is not shown again.
+              </p>
+            </div>
+
+            <div>
+              <label htmlFor="new-password" className="text-label text-muted block mb-1">
+                New password
+              </label>
+              <Input
+                id="new-password"
+                type="text"
+                value={newPassword}
+                autoComplete="off"
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="At least 6 characters"
+              />
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Button onClick={submitPassword} disabled={newPassword.length < 6 || busyId !== null}>
+                Set password
+              </Button>
+              <Button variant="secondary" onClick={() => setResetFor(null)}>
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
