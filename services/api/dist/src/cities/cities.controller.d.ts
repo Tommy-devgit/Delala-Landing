@@ -15,10 +15,8 @@ export declare class CitiesController {
         id: any;
         name: any;
         slug: string;
-        tagline: string;
+        propertiesCount: number;
         startingRentETB: number;
-        propertiesCount: any;
-        image: string;
         latitude: number;
         longitude: number;
         subCities: LocationNodeResponse[];
@@ -26,10 +24,8 @@ export declare class CitiesController {
         id: string;
         name: string;
         slug: string;
-        tagline: string;
-        startingRentETB: number;
         propertiesCount: number;
-        image: string;
+        startingRentETB: any;
         latitude: number;
         longitude: number;
         subCities: {
@@ -45,10 +41,8 @@ export declare class CitiesController {
         id: any;
         name: any;
         slug: string;
-        tagline: string;
+        propertiesCount: number;
         startingRentETB: number;
-        propertiesCount: any;
-        image: string;
         latitude: number;
         longitude: number;
         subCities: LocationNodeResponse[];
@@ -56,10 +50,8 @@ export declare class CitiesController {
         id: string;
         name: string;
         slug: string;
-        tagline: string;
-        startingRentETB: number;
         propertiesCount: number;
-        image: string;
+        startingRentETB: any;
         latitude: number;
         longitude: number;
         subCities: {
