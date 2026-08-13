@@ -27,6 +27,24 @@ export interface UserSession {
   createdAt?: string;
 }
 
+/**
+ * Drops the stored session and tells the app it is signed out.
+ *
+ * Exported so the API client can call it the moment the server rejects a token.
+ * Without that, a token the server no longer accepts sits in localStorage
+ * indefinitely: `getSession()` keeps returning it, the navbar keeps showing the
+ * user as signed in, and every authenticated request 401s with nothing in the
+ * interface to explain why or any way to recover short of clearing site data by
+ * hand. That is what happened to every session issued before tokens were
+ * signed, and it is what will happen to every session that passes thirty days.
+ */
+export const clearStoredSession = (): void => {
+  if (typeof window === "undefined") return;
+  localStorage.removeItem("delala_token");
+  localStorage.removeItem("delala_user");
+  window.dispatchEvent(new Event("delala_auth_change"));
+};
+
 export const authClient = {
   // Better Auth Register (Creates Real Row in Supabase Database)
   async signUp(credentials: { email: string; password: string; fullName: string; role?: string }) {
