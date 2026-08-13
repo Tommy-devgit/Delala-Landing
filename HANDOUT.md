@@ -185,6 +185,38 @@ cd services/api
 npm run make-admin -- someone@example.com   # no arg lists accounts + roles
 ```
 
+### There is no email anywhere in this system
+
+This is the single most confusing thing about the auth setup, so it is worth
+stating plainly:
+
+**Delala does not use Supabase Auth.** It writes rows into `auth.users` —
+Supabase's own table — but rolls its own authentication in `auth.service.ts`.
+`auth.users.encrypted_password` is empty for every row, and GoTrue's entire
+recovery machinery (`recovery_token`, `confirmation_sent_at`, the Authentication
+tab in the Supabase dashboard) is unused. That is why nothing about these
+accounts appears in Supabase and why no recovery email is ever sent by it.
+
+**There is also no mailer of any kind** — no SMTP, no Resend, no SendGrid, no
+provider configured anywhere in `services/api`. Nothing in this system can send
+an email to anybody.
+
+The consequence: **self-service password reset cannot work.** `POST
+/auth/forgot-password` mints a token and returns `{ delivered: false }` with a
+message saying so. It is honest rather than useful, which is an improvement on
+what it replaced — the endpoints did not exist at all, and the client caught the
+404 and returned `{ success: true }` every time, so the reset page reported
+success for a request that never happened.
+
+**The working recovery path is the admin dashboard.** Users → *Set password*
+sets a password directly and clears any outstanding reset token; the
+administrator passes it to the person out of band. It is audited as
+`user.password.set` and the password itself is never written to the log.
+
+To wire real email later: send the token from `AuthService.requestPasswordReset`
+and change `delivered` to true. Everything else — hashed single-use tokens, an
+hour's expiry, `POST /auth/reset-password`, the reset page — already works.
+
 ### Passwords
 
 Stored as a scrypt digest in `profiles.password_hash`, via
@@ -351,12 +383,29 @@ marketplace say precisely what each one claims.
 
 Still missing, in priority order:
 
-- **§14 compare**, **§15 saved searches**, **§13 recently viewed**,
-  **§19 market insights**, **§16 messaging**.
 - **Writing a review has no UI.** `POST /reviews` works and both the property
   page and the poster profile render the list, but there is no form anywhere
-  that calls it, so every review list is empty in practice.
-- Location pages (`/cities/[city]`, `/neighborhoods/[slug]`) are still thin.
+  that calls it, so every review list is empty in practice. This is the smallest
+  remaining gap with the largest effect on the trust surfaces.
+- **§16 messaging** — no model, no endpoints, nothing. Contact is by phone.
+- **§19 market insights** — nothing measures rents by area over time.
+- **§34/§35 admin** — no single-property moderation view and no per-poster
+  management screen; both currently mean moving between several tables.
+- **§27 illustration system** — empty states use icons, not a coherent
+  illustration language.
+- `/neighborhoods/[slug]` is still thin, and `Neighborhood` in `lib/types.ts`
+  still declares `securityScore`, `generatorPenetration`, `waterReliability` and
+  `lifestyleTags` with no columns behind them. **Do not start rendering those.**
+
+### Device-local features
+
+Compare, recently viewed and saved searches live entirely in `localStorage` via
+`lib/use-local-collection.ts`. That is deliberate for recently-viewed — §13 asks
+for it without invasive tracking, and the honest way to honour that is for the
+history never to reach the server.
+
+Saved searches deliberately offer **no notifications**. There is no scheduled job
+to re-run a search and no email delivery, so a toggle would be wired to nothing.
 
 `GET /properties` now filters, sorts and pages **in Postgres**, and returns
 `{ data, total, page, pageSize, totalPages }` rather than a bare array. The
