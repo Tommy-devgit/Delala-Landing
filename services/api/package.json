@@ -10,7 +10,7 @@
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
     "prisma:generate": "prisma generate",
-    "prisma:migrate": "ts-node prisma/add-contact-phone.ts && ts-node prisma/add-bio.ts && ts-node prisma/alter-avatar-url.ts && ts-node prisma/add-coordinates.ts && ts-node prisma/add-profile-status.ts && ts-node prisma/add-notifications.ts && ts-node prisma/add-password-hash.ts && ts-node prisma/add-property-features.ts && ts-node prisma/add-profile-verification.ts",
+    "prisma:migrate": "ts-node prisma/add-contact-phone.ts && ts-node prisma/add-bio.ts && ts-node prisma/alter-avatar-url.ts && ts-node prisma/add-coordinates.ts && ts-node prisma/add-profile-status.ts && ts-node prisma/add-notifications.ts && ts-node prisma/add-password-hash.ts && ts-node prisma/add-property-features.ts && ts-node prisma/add-profile-verification.ts && ts-node prisma/add-visit-statuses.ts",
     "make-admin": "ts-node prisma/make-admin.ts",
     "set-password": "ts-node prisma/set-password.ts",
     "prisma:seed": "ts-node prisma/seed.ts"
