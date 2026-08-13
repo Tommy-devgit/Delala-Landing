@@ -2,36 +2,53 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Search, Heart, Building2, User } from "lucide-react";
+import { BookOpen, Heart, Home, Search, User } from "lucide-react";
 
+/**
+ * The bottom bar on small screens.
+ *
+ * Purpose-built rather than a shrunken desktop nav (§27): five destinations, a
+ * thumb-sized target for each, and no dropdowns. It carried "Listings", which
+ * pointed at the poster's own listings — a screen most visitors have no use for
+ * — while Home and Guides, which nearly everyone wants, were unreachable
+ * without going through the desktop header.
+ */
 export function MobileNav() {
   const pathname = usePathname();
 
   const navItems = [
-    { label: "Search", href: "/search", icon: Search },
+    { label: "Home", href: "/", icon: Home },
+    { label: "Explore", href: "/search", icon: Search },
     { label: "Saved", href: "/favorites", icon: Heart },
-    { label: "Listings", href: "/my-listings", icon: Building2 },
+    { label: "Guides", href: "/guides", icon: BookOpen },
     { label: "Account", href: "/profile", icon: User },
   ];
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-canvas/95 backdrop-blur-md border-t border-line px-4 py-2 flex items-center justify-around shadow-2xl">
+    <nav
+      aria-label="Primary"
+      className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-canvas/95 backdrop-blur-md border-t border-line px-2 py-2 flex items-center justify-around"
+    >
       {navItems.map((item) => {
         const Icon = item.icon;
-        const isActive = pathname === item.href;
+        // Exact match for the home route, prefix for the rest, so a guide
+        // article still marks Guides as the section you are in.
+        const isActive = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
+
         return (
           <Link
             key={item.href}
             href={item.href}
-            className={`flex flex-col items-center gap-1 p-2 rounded-card transition-colors ${
-              isActive ? "text-primary font-bold" : "text-muted hover:text-ink"
+            aria-current={isActive ? "page" : undefined}
+            className={`flex flex-col items-center gap-1 px-3 py-1.5 rounded-card transition-colors min-w-14 ${
+              isActive ? "text-primary" : "text-muted hover:text-ink"
             }`}
           >
-            <Icon className={`w-5 h-5 ${isActive ? "text-primary" : "text-muted"}`} />
-            <span className="text-label font-mono-label">{item.label}</span>
+            <Icon className="w-5 h-5" aria-hidden="true" />
+            <span className={`text-label ${isActive ? "font-medium" : ""}`}>{item.label}</span>
           </Link>
         );
       })}
-    </div>
+    </nav>
   );
 }
