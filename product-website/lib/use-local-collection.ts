@@ -71,10 +71,18 @@ export function useLocalCollection<T>(
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    const sync = () => setItems(read<T>(key));
+    let cancelled = false;
+    const sync = () => {
+      if (!cancelled) setItems(read<T>(key));
+    };
 
-    sync();
-    setReady(true);
+    // Deferred so the first write is not synchronous within the effect body —
+    // `react-hooks/set-state-in-effect`. See §6 of HANDOUT.md.
+    void Promise.resolve().then(() => {
+      if (cancelled) return;
+      sync();
+      setReady(true);
+    });
 
     const set = listeners.get(key) ?? new Set<Listener>();
     set.add(sync);
@@ -90,6 +98,7 @@ export function useLocalCollection<T>(
     window.addEventListener("storage", onStorage);
 
     return () => {
+      cancelled = true;
       set.delete(sync);
       window.removeEventListener("storage", onStorage);
     };

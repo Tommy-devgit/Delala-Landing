@@ -12,7 +12,6 @@ import {
   Menu,
   Plus,
   Search,
-  User,
   X,
 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
@@ -47,9 +46,34 @@ export function Header() {
   const unreadCount = useUnreadNotifications();
   const { count: savedCount } = useFavorites();
 
-  const [openSection, setOpenSection] = useState<string | null>(null);
-  const [accountOpen, setAccountOpen] = useState(false);
-  const [drawerOpen, setDrawerOpen] = useState(false);
+  /**
+   * Which menu is open, and on which route it was opened.
+   *
+   * Storing the path alongside the state means navigating closes everything by
+   * derivation rather than by resetting state from an effect — writing state
+   * synchronously in an effect body is what `react-hooks/set-state-in-effect`
+   * forbids, and the alternative of deferring the reset would leave a menu
+   * visibly open over the page it just navigated to.
+   */
+  const [menu, setMenu] = useState<{ path: string; section: string | null; account: boolean; drawer: boolean }>({
+    path: pathname,
+    section: null,
+    account: false,
+    drawer: false,
+  });
+
+  const onCurrentRoute = menu.path === pathname;
+  const openSection = onCurrentRoute ? menu.section : null;
+  const accountOpen = onCurrentRoute && menu.account;
+  const drawerOpen = onCurrentRoute && menu.drawer;
+
+  const setOpenSection = (section: string | null) =>
+    setMenu({ path: pathname, section, account: false, drawer: false });
+  const setAccountOpen = (account: boolean) =>
+    setMenu({ path: pathname, section: null, account, drawer: false });
+  const setDrawerOpen = (drawer: boolean) =>
+    setMenu({ path: pathname, section: null, account: false, drawer });
+
   const [scrolled, setScrolled] = useState(false);
   const navRef = useRef<HTMLDivElement>(null);
 
@@ -58,31 +82,32 @@ export function Header() {
   const overlay = pathname === "/" && !scrolled;
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
-    onScroll();
+    let cancelled = false;
+    const onScroll = () => {
+      if (!cancelled) setScrolled(window.scrollY > 24);
+    };
+
+    // The initial read is deferred so the first write is not synchronous —
+    // `react-hooks/set-state-in-effect`. See §6 of HANDOUT.md.
+    void Promise.resolve().then(onScroll);
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+
+    return () => {
+      cancelled = true;
+      window.removeEventListener("scroll", onScroll);
+    };
   }, []);
 
-  // Any navigation closes everything — otherwise a menu stays open over the
-  // page it just took you to.
   useEffect(() => {
-    setOpenSection(null);
-    setAccountOpen(false);
-    setDrawerOpen(false);
-  }, [pathname]);
+    const closeAll = () =>
+      setMenu((m) => ({ ...m, section: null, account: false, drawer: false }));
 
-  useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key !== "Escape") return;
-      setOpenSection(null);
-      setAccountOpen(false);
-      setDrawerOpen(false);
+      if (e.key === "Escape") closeAll();
     };
     const onClick = (e: MouseEvent) => {
       if (navRef.current && !navRef.current.contains(e.target as Node)) {
-        setOpenSection(null);
-        setAccountOpen(false);
+        setMenu((m) => ({ ...m, section: null, account: false }));
       }
     };
     document.addEventListener("keydown", onKey);
