@@ -51,7 +51,10 @@ export function Hero() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
-              className="font-serif-display text-5xl sm:text-6xl lg:text-7xl font-light text-primary tracking-tight leading-[0.92] mb-6"
+              // Starts at 4xl like every other heading on the site. At 5xl the
+              // first line ran to the edge of a 320px screen, where `leading-[0.92]`
+              // then stacked the wrapped lines almost on top of each other.
+              className="font-serif-display text-4xl sm:text-6xl lg:text-7xl font-light text-primary tracking-tight leading-[0.95] sm:leading-[0.92] mb-6"
             >
               The <span className="italic font-normal text-ink">Best Way</span> to Find Your Next Home.
             </motion.h1>
