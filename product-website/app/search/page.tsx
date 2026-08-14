@@ -253,15 +253,56 @@ function SearchContent() {
       <div className="bg-surface border-b border-line py-3 px-4 sm:px-8 sticky top-[var(--header-h)] z-30">
         <div className="max-w-[1440px] mx-auto flex flex-wrap items-center justify-between gap-3">
 
-          <div className="flex items-center gap-3 min-w-0">
-            <h1 className="font-serif-display text-2xl font-light text-ink">Explore</h1>
-            {/* The real total from the database, not the length of one page. */}
-            <Badge tone="accent" aria-live="polite">
-              {loading ? "Loading…" : `${total} ${total === 1 ? "home" : "homes"}`}
-            </Badge>
+          {/* Title and the small-screen view toggle share a row, so the controls
+              below them get a full row of their own rather than being pushed to
+              a third line. At `lg` this collapses to just the title. */}
+          <div className="flex items-center justify-between gap-3 w-full lg:w-auto">
+            <div className="flex items-center gap-3 min-w-0">
+              <h1 className="font-serif-display text-2xl font-light text-ink">Explore</h1>
+              {/* The real total from the database, not the length of one page. */}
+              <Badge tone="accent" aria-live="polite">
+                {loading ? "Loading…" : `${total} ${total === 1 ? "home" : "homes"}`}
+              </Badge>
+            </div>
+
+            {/* Mobile / tablet: never a forced split — plain List / Map */}
+            <div
+              className="flex lg:hidden items-center gap-1 bg-canvas p-1 rounded-full border border-line shrink-0"
+              role="group"
+              aria-label="Result view"
+            >
+              <button
+                type="button"
+                onClick={() => setViewMode("split")}
+                aria-pressed={viewMode !== "map"}
+                className={segmentClasses(viewMode !== "map")}
+              >
+                <List className="w-3.5 h-3.5" aria-hidden="true" />
+                <span>List</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode("map")}
+                aria-pressed={viewMode === "map"}
+                className={segmentClasses(viewMode === "map")}
+              >
+                <Map className="w-3.5 h-3.5" aria-hidden="true" />
+                <span>Map</span>
+              </button>
+            </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          {/*
+           * Wraps, and takes a full row of its own below `lg`.
+           *
+           * This was a plain `flex` holding a fixed 176px input, two buttons and
+           * a sort control whose `<select>` is sized by its longest option
+           * ("Price: low to high"). That is roughly 480px of unshrinkable
+           * content, so on any phone it pushed straight out of the bar. The
+           * outer row's `flex-wrap` could not help because this group counted as
+           * a single, rigid item.
+           */}
+          <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto">
             <label htmlFor="search-query" className="sr-only">
               Search listings
             </label>
@@ -276,7 +317,8 @@ function SearchContent() {
               onBlur={(e) => {
                 if (e.currentTarget.value !== filters.q) applyFilters({ ...filters, q: e.currentTarget.value });
               }}
-              className="h-8 px-3 rounded-full bg-canvas border border-line text-micro text-body w-44 sm:w-56 focus:outline-none focus:border-primary/40"
+              // Fluid on small screens, fixed once there is room for it.
+              className="h-8 px-3 rounded-full bg-canvas border border-line text-micro text-body flex-1 min-w-40 sm:flex-initial sm:w-56 focus:outline-none focus:border-primary/40"
             />
 
             <Button variant="secondary" size="sm" onClick={() => setIsFilterModalOpen(true)}>
@@ -289,13 +331,15 @@ function SearchContent() {
               <span className="hidden sm:inline">Save search</span>
             </Button>
 
-            <div className="flex items-center gap-1.5 h-8 pl-3 pr-1 rounded-full bg-canvas border border-line">
+            {/* `min-w-0` lets the pill shrink; without it the select's longest
+                option sets a floor the flex row cannot go below. */}
+            <div className="flex items-center gap-1.5 h-8 pl-3 pr-1 rounded-full bg-canvas border border-line min-w-0">
               <ArrowUpDown className="w-3.5 h-3.5 text-primary shrink-0" aria-hidden="true" />
               <select
                 value={filters.sortBy}
                 aria-label="Sort results"
                 onChange={(e) => applyFilters({ ...filters, sortBy: e.target.value as FilterState["sortBy"] })}
-                className="bg-transparent text-micro text-body cursor-pointer pr-1 focus:outline-none"
+                className="bg-transparent text-micro text-body cursor-pointer pr-1 focus:outline-none min-w-0 max-w-full"
               >
                 <option value="newest">Newest first</option>
                 <option value="oldest">Oldest first</option>
@@ -336,32 +380,6 @@ function SearchContent() {
               className={segmentClasses(viewMode === "map")}
             >
               <Map className="w-3.5 h-3.5" aria-hidden="true" />
-            </button>
-          </div>
-
-          {/* Mobile / tablet: never a forced split — plain List / Map */}
-          <div
-            className="flex lg:hidden items-center gap-1 bg-canvas p-1 rounded-full border border-line"
-            role="group"
-            aria-label="Result view"
-          >
-            <button
-              type="button"
-              onClick={() => setViewMode("split")}
-              aria-pressed={viewMode !== "map"}
-              className={segmentClasses(viewMode !== "map")}
-            >
-              <List className="w-3.5 h-3.5" aria-hidden="true" />
-              <span>List</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setViewMode("map")}
-              aria-pressed={viewMode === "map"}
-              className={segmentClasses(viewMode === "map")}
-            >
-              <Map className="w-3.5 h-3.5" aria-hidden="true" />
-              <span>Map</span>
             </button>
           </div>
 
