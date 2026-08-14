@@ -65,7 +65,12 @@ export function PageHeader({
         <h1 className="font-serif-display text-2xl sm:text-3xl text-ink">{title}</h1>
         {description && <p className="text-micro text-muted mt-1">{description}</p>}
       </div>
-      {actions && <div className="flex items-center gap-2 shrink-0">{actions}</div>}
+      {/* `flex-wrap` because several pages pass a search box plus one or two
+          selects; `shrink-0` alone forced them onto a single row that ran off
+          the side of a phone. */}
+      {actions && (
+        <div className="flex flex-wrap items-center gap-2 sm:shrink-0">{actions}</div>
+      )}
     </div>
   );
 }

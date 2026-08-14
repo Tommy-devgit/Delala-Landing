@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -17,15 +17,16 @@ import {
   Settings,
   ShieldCheck,
   Users,
+  X,
 } from "lucide-react";
 import { adminApi } from "@/lib/admin-api";
 import { useResource } from "@/lib/use-admin";
 
 /**
- * Grouped by the job being done rather than by table (§31).
+ * Grouped by the job being done rather than by table (Â§31).
  *
- * An operator arrives with an intent — moderate the queue, look something up,
- * check the numbers — and a flat list of ten tables makes them scan for the
+ * An operator arrives with an intent â€” moderate the queue, look something up,
+ * check the numbers â€” and a flat list of ten tables makes them scan for the
  * right one every time. Every entry points at a route that exists; nothing is
  * listed that has no screen behind it.
  */
@@ -81,12 +82,20 @@ const STORAGE_KEY = "delala_admin_sidebar_collapsed";
  * operator who wants the width back for a wide table wants it back on every
  * screen, not just the one they were on.
  *
- * Tooltips only exist while collapsed — they are the label, and showing them
+ * Tooltips only exist while collapsed â€” they are the label, and showing them
  * next to a visible label would be noise. They are CSS-only (`group-hover`
  * plus `group-focus-visible`) rather than JavaScript, so keyboard focus
  * surfaces them too and there is no positioning library involved.
  */
-export function Sidebar() {
+export function Sidebar({
+  mobileOpen = false,
+  onCloseMobile,
+}: {
+  /** Drawer state below `lg`. Ignored at desktop widths, where the rail is
+   *  always present. */
+  mobileOpen?: boolean;
+  onCloseMobile?: () => void;
+} = {}) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
   const { data: overview } = useResource(() => adminApi.getOverview(), []);
@@ -108,6 +117,25 @@ export function Sidebar() {
     };
   }, []);
 
+  // Below `lg` the sidebar is an overlay, so the page behind it must not
+  // scroll while it is open, and Escape must close it.
+  useEffect(() => {
+    if (!mobileOpen) return;
+
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onCloseMobile?.();
+    };
+    document.addEventListener("keydown", onKey);
+
+    return () => {
+      document.body.style.overflow = previous;
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [mobileOpen, onCloseMobile]);
+
   const toggle = () => {
     setCollapsed((current) => {
       const next = !current;
@@ -120,27 +148,57 @@ export function Sidebar() {
     });
   };
 
+  /**
+   * Whether to render labels or just icons.
+   *
+   * `collapsed` is a desktop preference; the mobile drawer is always 256px wide
+   * and must show full labels regardless of it. When the drawer is shut it is
+   * off-screen, so what it renders then does not matter â€” which makes this one
+   * expression correct at every width.
+   */
+  const iconsOnly = collapsed && !mobileOpen;
+
   // Badges reflect the real queues; they used to be the strings "12" and "3".
   const badgeCount = (kind: "pending" | "reports"): number =>
     kind === "pending" ? overview?.metrics.pendingApprovals ?? 0 : overview?.metrics.pendingReports ?? 0;
 
   return (
-    <aside
-      className={`bg-primary text-white flex flex-col shrink-0 h-screen sticky top-0 transition-[width] duration-300 ease-out ${
-        collapsed ? "w-16" : "w-56"
-      }`}
-    >
+    <>
+      {/* Backdrop, below `lg` only. */}
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-ink/50 lg:hidden"
+          onClick={onCloseMobile}
+          aria-hidden="true"
+        />
+      )}
+
+      {/*
+       * One element, two behaviours.
+       *
+       * At `lg` and up it is a sticky rail inside the flex row, collapsible to
+       * icons. Below that it leaves the flow entirely and becomes a fixed
+       * overlay drawer: a 224px column pinned open on a 360px phone leaves
+       * nothing for the tables this dashboard exists to show.
+       */}
+      <aside
+        className={`bg-primary text-white flex flex-col h-screen z-50 transition-transform duration-300 ease-out fixed inset-y-0 left-0 w-64 ${
+          mobileOpen ? "translate-x-0" : "-translate-x-full"
+        } lg:translate-x-0 lg:sticky lg:top-0 lg:shrink-0 lg:transition-[width] ${
+          collapsed ? "lg:w-16" : "lg:w-56"
+        }`}
+      >
       {/* The wordmark, as on the marketplace. The shield badge and the
           "Marketplace control" tagline are gone: an operator inside the admin
           dashboard already knows which product they are in and what it is for,
           and the two together took a third of the sidebar's header. */}
       <div
         className={`h-16 flex items-center border-b border-white/10 shrink-0 ${
-          collapsed ? "justify-center px-2" : "px-4"
+          iconsOnly ? "justify-center px-2" : "px-4"
         }`}
       >
         <span className="font-serif-display font-light text-2xl leading-none tracking-tight">
-          {collapsed ? "ደ" : "ደላላ"}
+          {collapsed ? "á‹°" : "á‹°áˆ‹áˆ‹"}
         </span>
         <span className="sr-only">Delala admin</span>
       </div>
@@ -149,7 +207,7 @@ export function Sidebar() {
         {NAV_GROUPS.map((group, groupIndex) => (
           <div key={group.label || `group-${groupIndex}`} className="mb-3 last:mb-0">
             {group.label &&
-              (collapsed ? (
+              (iconsOnly ? (
                 // A rule stands in for the heading, so the grouping survives
                 // the collapse without a label that would not fit.
                 <div className="mx-3 my-2 border-t border-white/10" aria-hidden="true" />
@@ -169,7 +227,7 @@ export function Sidebar() {
                       href={item.href}
                       aria-current={isActive ? "page" : undefined}
                       className={`flex items-center h-9 rounded-control text-micro transition-colors ${
-                        collapsed ? "justify-center px-0" : "gap-2.5 px-3"
+                        iconsOnly ? "justify-center px-0" : "gap-2.5 px-3"
                       } ${
                         isActive
                           ? "bg-white/15 text-white font-semibold"
@@ -179,13 +237,13 @@ export function Sidebar() {
                       <span className="relative shrink-0">
                         <Icon className="w-4 h-4" aria-hidden="true" />
                         {/* Collapsed, the count has nowhere to sit inline, so it
-                            becomes a dot on the icon — still visible, no width. */}
-                        {collapsed && count > 0 && (
+                            becomes a dot on the icon â€” still visible, no width. */}
+                        {iconsOnly && count > 0 && (
                           <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-accent" />
                         )}
                       </span>
 
-                      {!collapsed && (
+                      {!iconsOnly && (
                         <>
                           <span className="flex-1 truncate">{item.label}</span>
                           {count > 0 && (
@@ -196,10 +254,10 @@ export function Sidebar() {
                         </>
                       )}
 
-                      {collapsed && <span className="sr-only">{item.label}</span>}
+                      {iconsOnly && <span className="sr-only">{item.label}</span>}
                     </Link>
 
-                    {collapsed && (
+                    {iconsOnly && (
                       <span
                         role="tooltip"
                         className="pointer-events-none absolute left-full top-1/2 -translate-y-1/2 ml-2 z-50 whitespace-nowrap rounded-control bg-ink text-white text-label px-2.5 py-1.5 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-150"
@@ -216,7 +274,10 @@ export function Sidebar() {
         ))}
       </nav>
 
-      <div className="border-t border-white/10 p-2 shrink-0">
+      {/* Collapsing is a desktop affordance only: the mobile drawer is already
+          the full width it needs and is dismissed by the backdrop, Escape, or
+          navigating. */}
+      <div className="border-t border-white/10 p-2 shrink-0 hidden lg:block">
         <button
           type="button"
           onClick={toggle}
@@ -236,6 +297,19 @@ export function Sidebar() {
           )}
         </button>
       </div>
-    </aside>
+
+        {/* Closes the drawer below `lg`; invisible at desktop widths. */}
+        <div className="border-t border-white/10 p-2 shrink-0 lg:hidden">
+          <button
+            type="button"
+            onClick={onCloseMobile}
+            className="flex items-center gap-2.5 px-3 h-9 w-full rounded-control text-micro text-white/70 hover:text-white hover:bg-white/10 transition-colors"
+          >
+            <X className="w-4 h-4 shrink-0" aria-hidden="true" />
+            <span>Close menu</span>
+          </button>
+        </div>
+      </aside>
+    </>
   );
 }

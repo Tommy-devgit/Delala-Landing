@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { Sidebar } from "@/components/sidebar";
 import { Topbar } from "@/components/topbar";
@@ -17,6 +17,18 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const session = useAdminSession();
+  /**
+   * Drawer state, owned here because the trigger is in the topbar and the
+   * drawer is the sidebar — siblings, so it has to sit above both.
+   *
+   * The route it was opened on is stored with it, so navigating closes the
+   * drawer by derivation. Resetting it from an effect trips
+   * `react-hooks/set-state-in-effect`, and deferring that reset would leave the
+   * drawer visibly open over the page it just navigated to.
+   */
+  const [menu, setMenu] = useState({ path: pathname, open: false });
+  const menuOpen = menu.open && menu.path === pathname;
+  const setMenuOpen = (open: boolean) => setMenu({ path: pathname, open });
 
   const isLoginRoute = pathname === "/login";
 
@@ -43,10 +55,14 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex min-h-screen w-full">
-      <Sidebar />
+      <Sidebar mobileOpen={menuOpen} onCloseMobile={() => setMenuOpen(false)} />
       <div className="flex-1 flex flex-col min-w-0">
-        <Topbar />
-        <main className="p-5 md:p-7 flex-1 max-w-7xl w-full mx-auto">{children}</main>
+        <Topbar onOpenMenu={() => setMenuOpen(true)} />
+        {/* `min-w-0` on the column above is what lets the wide tables inside
+            scroll rather than forcing the whole page wider than the viewport. */}
+        <main className="p-4 sm:p-5 md:p-7 flex-1 max-w-7xl w-full mx-auto min-w-0">
+          {children}
+        </main>
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { Search } from "lucide-react";
@@ -37,7 +37,7 @@ export default function PropertiesPage() {
         description="Every listing in the marketplace, whatever its status"
         actions={
           <>
-            <div className="relative">
+            <div className="relative flex-1 min-w-40 sm:flex-initial">
               <Search
                 className="w-3.5 h-3.5 text-muted absolute left-3 top-1/2 -translate-y-1/2"
                 aria-hidden="true"
@@ -47,7 +47,7 @@ export default function PropertiesPage() {
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search titles"
                 aria-label="Search listings by title"
-                className="pl-8 w-44"
+                className="pl-8 w-full sm:w-44"
               />
             </div>
             <Select value={status} onChange={(e) => setStatus(e.target.value)} aria-label="Filter by status">

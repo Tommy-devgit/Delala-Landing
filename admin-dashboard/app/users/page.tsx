@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { BadgeCheck, Search, Users as UsersIcon } from "lucide-react";
@@ -26,7 +26,7 @@ const ROLES = ["USER", "BROKER", "MODERATOR", "ADMIN"];
  *
  * This is the only place in the entire system that writes these. Until somebody
  * ticks one here, every trust badge on the marketplace and the "verified
- * posters" section of the homepage are empty — which is correct, and was the
+ * posters" section of the homepage are empty â€” which is correct, and was the
  * point of removing the `verified: true` that used to be attached to every
  * poster automatically.
  *
@@ -72,14 +72,14 @@ export default function UsersPage() {
         title="Users"
         description="Accounts, roles and access across the marketplace"
         actions={
-          <div className="relative">
+          <div className="relative flex-1 min-w-40 sm:flex-initial">
             <Search className="w-3.5 h-3.5 text-muted absolute left-3 top-1/2 -translate-y-1/2" aria-hidden="true" />
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by email"
               aria-label="Search users by email"
-              className="pl-8 w-52"
+              className="pl-8 w-full sm:w-52"
             />
           </div>
         }
