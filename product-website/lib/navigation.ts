@@ -105,7 +105,7 @@ export const TOOL_NAV: NavLink[] = [
  * puts white text on `--color-canvas`, where it simply cannot be read.
  *
  * Adding a route here is only half the job — the page's header must also carry
- * `-mt-[4.5rem]` so it actually sits underneath the bar, with matching top
+ * `-mt-[var(--header-h)]` so it actually sits underneath the bar, with top
  * padding so its content clears it. See `components/home-hero.tsx`.
  */
 const DARK_HEADER_ROUTES = [

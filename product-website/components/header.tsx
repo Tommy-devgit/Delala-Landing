@@ -85,7 +85,7 @@ export function Header() {
    * near-white — not the hero. White logo, white links and white-bordered
    * buttons on that are invisible, which is exactly what happened.
    *
-   * Each qualifying page pulls its header up by `-mt-[4.5rem]` so it genuinely
+   * Each qualifying page pulls its header up by `-mt-[var(--header-h)]` so it
    * runs underneath this bar. That negative margin and the height here must
    * stay in step, and `hasDarkHeader` in `lib/navigation.ts` is the single list
    * of which routes do it.
@@ -160,7 +160,7 @@ export function Header() {
         }`}
       >
         <div ref={navRef} className="max-w-[1440px] mx-auto px-4 sm:px-8">
-          <div className="flex items-center justify-between h-[4.5rem] gap-4">
+          <div className="flex items-center justify-between h-[var(--header-h)] gap-4">
             {/* Logo, with room around it. */}
             <Link
               href="/"
@@ -374,7 +374,7 @@ export function Header() {
           <div className="absolute inset-0 bg-ink/50" onClick={() => setDrawerOpen(false)} />
 
           <div className="absolute inset-y-0 right-0 w-full max-w-sm bg-canvas overflow-y-auto">
-            <div className="flex items-center justify-between px-4 h-[4.5rem] border-b border-line sticky top-0 bg-canvas">
+            <div className="flex items-center justify-between px-4 h-[var(--header-h)] border-b border-line sticky top-0 bg-canvas">
               <span className="font-serif-display font-light text-xl text-primary">ደላላ</span>
               <button
                 type="button"

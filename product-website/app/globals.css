@@ -34,6 +34,17 @@
   --radius-control: 0.75rem;       /* inputs, buttons */
   --radius-card: 1rem;             /* listing + content cards */
   --radius-panel: 1.5rem;          /* page-level panels, modals */
+
+  /*
+   * Height of the sticky site header.
+   *
+   * Referenced rather than repeated because half a dozen things are pinned to
+   * it: the hero's negative offset, Explore's sticky filter bar, the full-height
+   * map panes, and the auth pages' min-height. When this was a literal 80px in
+   * each of those and the header changed to 4.5rem, every one of them silently
+   * drifted out of alignment. Change it here and they all follow.
+   */
+  --header-h: 4.5rem;
 }
 
 @theme inline {

@@ -41,7 +41,7 @@ function SignInContent() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-80px)] bg-canvas flex items-center justify-center p-4 sm:p-6">
+    <div className="min-h-[calc(100vh-var(--header-h))] bg-canvas flex items-center justify-center p-4 sm:p-6">
       <div className="w-full max-w-md">
         {/* Top Logo / Brand Header */}
         <div className="text-center mb-5">
@@ -156,7 +156,7 @@ function SignInContent() {
 
 export default function SignInPage() {
   return (
-    <Suspense fallback={<div className="min-h-[calc(100vh-80px)] bg-canvas flex items-center justify-center text-xs text-muted">Loading...</div>}>
+    <Suspense fallback={<div className="min-h-[calc(100vh-var(--header-h))] bg-canvas flex items-center justify-center text-xs text-muted">Loading...</div>}>
       <SignInContent />
     </Suspense>
   );

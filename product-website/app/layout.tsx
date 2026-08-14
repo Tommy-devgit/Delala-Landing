@@ -59,7 +59,13 @@ export default function RootLayout({
       lang="en"
       className={`${manrope.variable} ${inter.variable} ${serifDisplay.variable} ${monoLabel.variable} scroll-smooth`}
     >
-      <body className="bg-canvas text-body antialiased flex flex-col min-h-screen">
+      {/*
+       * `pb-[4.5rem]` below `md` reserves the height of `MobileNav`, which is
+       * `fixed bottom-0`. Without it the bar floats over the end of the page —
+       * covering the footer on every route, and the last row of any list.
+       * Removed at `md`, where the bar is hidden.
+       */}
+      <body className="bg-canvas text-body antialiased flex flex-col min-h-screen pb-[4.5rem] md:pb-0">
         <Header />
         <main className="flex-1">{children}</main>
         <Footer />

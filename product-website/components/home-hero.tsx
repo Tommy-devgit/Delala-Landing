@@ -60,13 +60,13 @@ export function HomeHero({ cities, listingCount }: { cities: City[]; listingCoun
   const fieldWrap = "flex items-center gap-2 px-3 h-12 bg-canvas border border-line rounded-control focus-within:border-primary transition-colors";
   const fieldInput = "w-full bg-transparent text-micro text-ink focus:outline-none cursor-pointer";
 
-  // `-mt-[4.5rem]` pulls the hero up under the sticky header, so the
+  // `-mt-[var(--header-h)]` pulls the hero up under the sticky header, so the
   // transparent bar has this dark section behind it rather than the near-white
   // page background — white links on `--color-canvas` are invisible. The offset
   // matches the header's own `h-[4.5rem]`, and the extra top padding below
   // keeps this content clear of the bar.
   return (
-    <section className="relative border-b border-line overflow-hidden -mt-[4.5rem]">
+    <section className="relative border-b border-line overflow-hidden -mt-[var(--header-h)]">
       {/* The photograph is chosen for its sky: the houses sit along the bottom
           edge, so the headline lands on plain colour rather than fighting
           detail. Marked `priority` because it is the one image above the fold —

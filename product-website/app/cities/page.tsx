@@ -39,7 +39,7 @@ export default function CitiesPage() {
             {/* Pulled up under the sticky navbar, which renders transparent on
           this route (see `hasDarkHeader` in lib/navigation.ts). The extra top
           padding keeps this content clear of the bar. */}
-      <header className="relative border-b border-line -mt-[4.5rem]">
+      <header className="relative border-b border-line -mt-[var(--header-h)]">
         <div className="absolute inset-0 bg-ink">
           <Photo slot="editorial-neighbourhoods" sizes="100vw" className="opacity-45" />
           <div className="absolute inset-0 bg-gradient-to-r from-ink/90 via-ink/60 to-ink/20" />

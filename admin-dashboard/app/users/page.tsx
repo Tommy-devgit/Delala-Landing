@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { BadgeCheck, Search, Users as UsersIcon } from "lucide-react";
@@ -26,7 +26,7 @@ const ROLES = ["USER", "BROKER", "MODERATOR", "ADMIN"];
  *
  * This is the only place in the entire system that writes these. Until somebody
  * ticks one here, every trust badge on the marketplace and the "verified
- * posters" section of the homepage are empty â€” which is correct, and was the
+ * posters" section of the homepage are empty — which is correct, and was the
  * point of removing the `verified: true` that used to be attached to every
  * poster automatically.
  *

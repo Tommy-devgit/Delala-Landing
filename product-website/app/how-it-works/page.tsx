@@ -66,7 +66,7 @@ export default function HowItWorksPage() {
             {/* Pulled up under the sticky navbar, which renders transparent on
           this route (see `hasDarkHeader` in lib/navigation.ts). The extra top
           padding keeps this content clear of the bar. */}
-      <header className="relative border-b border-line -mt-[4.5rem]">
+      <header className="relative border-b border-line -mt-[var(--header-h)]">
         <div className="absolute inset-0 bg-ink">
           <Photo slot="editorial-doorway" sizes="100vw" className="opacity-35" />
           <div className="absolute inset-0 bg-gradient-to-r from-ink/95 via-ink/80 to-ink/50" />

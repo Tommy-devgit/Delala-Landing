@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -23,10 +23,10 @@ import { adminApi } from "@/lib/admin-api";
 import { useResource } from "@/lib/use-admin";
 
 /**
- * Grouped by the job being done rather than by table (Â§31).
+ * Grouped by the job being done rather than by table (§31).
  *
- * An operator arrives with an intent â€” moderate the queue, look something up,
- * check the numbers â€” and a flat list of ten tables makes them scan for the
+ * An operator arrives with an intent — moderate the queue, look something up,
+ * check the numbers — and a flat list of ten tables makes them scan for the
  * right one every time. Every entry points at a route that exists; nothing is
  * listed that has no screen behind it.
  */
@@ -82,7 +82,7 @@ const STORAGE_KEY = "delala_admin_sidebar_collapsed";
  * operator who wants the width back for a wide table wants it back on every
  * screen, not just the one they were on.
  *
- * Tooltips only exist while collapsed â€” they are the label, and showing them
+ * Tooltips only exist while collapsed — they are the label, and showing them
  * next to a visible label would be noise. They are CSS-only (`group-hover`
  * plus `group-focus-visible`) rather than JavaScript, so keyboard focus
  * surfaces them too and there is no positioning library involved.
@@ -153,7 +153,7 @@ export function Sidebar({
    *
    * `collapsed` is a desktop preference; the mobile drawer is always 256px wide
    * and must show full labels regardless of it. When the drawer is shut it is
-   * off-screen, so what it renders then does not matter â€” which makes this one
+   * off-screen, so what it renders then does not matter — which makes this one
    * expression correct at every width.
    */
   const iconsOnly = collapsed && !mobileOpen;
@@ -198,7 +198,7 @@ export function Sidebar({
         }`}
       >
         <span className="font-serif-display font-light text-2xl leading-none tracking-tight">
-          {collapsed ? "á‹°" : "á‹°áˆ‹áˆ‹"}
+          {iconsOnly ? "ደ" : "ደላላ"}
         </span>
         <span className="sr-only">Delala admin</span>
       </div>
@@ -237,7 +237,7 @@ export function Sidebar({
                       <span className="relative shrink-0">
                         <Icon className="w-4 h-4" aria-hidden="true" />
                         {/* Collapsed, the count has nowhere to sit inline, so it
-                            becomes a dot on the icon â€” still visible, no width. */}
+                            becomes a dot on the icon — still visible, no width. */}
                         {iconsOnly && count > 0 && (
                           <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-accent" />
                         )}

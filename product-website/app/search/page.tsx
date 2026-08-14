@@ -250,7 +250,7 @@ function SearchContent() {
     <div className="min-h-screen bg-canvas flex flex-col">
 
       {/* Controls bar */}
-      <div className="bg-surface border-b border-line py-3 px-4 sm:px-8 sticky top-20 z-30">
+      <div className="bg-surface border-b border-line py-3 px-4 sm:px-8 sticky top-[var(--header-h)] z-30">
         <div className="max-w-[1440px] mx-auto flex flex-wrap items-center justify-between gap-3">
 
           <div className="flex items-center gap-3 min-w-0">
@@ -410,7 +410,7 @@ function SearchContent() {
             )}
 
             {viewMode === "split" && (
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:h-[calc(100vh-172px)]">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:h-[calc(100vh-var(--header-h)-5.75rem)]">
                 <div className="lg:col-span-7 lg:overflow-y-auto lg:pr-1 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5 items-start content-start auto-rows-max">
                   {filteredListings.length === 0 ? emptyResults : renderCards(filteredListings)}
                   {pagination}
@@ -422,7 +422,7 @@ function SearchContent() {
             )}
 
             {viewMode === "map" && (
-              <div className="h-[calc(100vh-210px)] min-h-[26rem] rounded-panel overflow-hidden border border-line shadow-sm">
+              <div className="h-[calc(100vh-var(--header-h)-8.25rem)] min-h-[26rem] rounded-panel overflow-hidden border border-line shadow-sm">
                 {mapPane}
               </div>
             )}

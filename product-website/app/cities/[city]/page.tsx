@@ -79,7 +79,7 @@ export default function CityPage() {
             {/* Pulled up under the sticky navbar, which renders transparent on
           this route (see `hasDarkHeader` in lib/navigation.ts). The extra top
           padding keeps this content clear of the bar. */}
-      <header className="relative border-b border-line -mt-[4.5rem]">
+      <header className="relative border-b border-line -mt-[var(--header-h)]">
         <div className="absolute inset-0 bg-ink">
           {/* Editorial, not a photograph of this city — see lib/imagery.ts. */}
           <Photo slot="editorial-gables" sizes="100vw" className="opacity-35" />
