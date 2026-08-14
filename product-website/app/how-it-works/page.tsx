@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { CalendarCheck, MessageSquare, Search, ShieldCheck, Sparkles } from "lucide-react";
+import { CalendarCheck, Compass, MessageSquare, Search, ShieldCheck } from "lucide-react";
 import { Photo } from "@/components/photo";
 
 export const metadata: Metadata = {
@@ -19,7 +19,7 @@ const STEPS = [
     youDo: "Narrow to two or three areas and a real budget before you start viewing.",
   },
   {
-    Icon: Sparkles,
+    Icon: Compass,
     number: "02",
     title: "Explore",
     body: "Open a listing to see its photographs, its position on the map, what the poster said it has, and the price for rent or for sale. Save the ones worth a second look, and compare them side by side.",

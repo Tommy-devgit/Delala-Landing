@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CalendarCheck, MessageSquare, Search, ShieldCheck, Sparkles } from "lucide-react";
+import { CalendarCheck, Compass, MessageSquare, Search, ShieldCheck } from "lucide-react";
 
 const STEPS = [
   {
@@ -8,7 +8,7 @@ const STEPS = [
     body: "Filter by area, price, bedrooms and what the property actually has — a generator, a water tank, parking.",
   },
   {
-    Icon: Sparkles,
+    Icon: Compass,
     title: "Explore",
     body: "Compare listings side by side, see where each one sits on the map, and save the ones worth a second look.",
   },

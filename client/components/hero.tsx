@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
-import { ArrowRight, ShieldCheck, Search, Sparkles, CheckCircle2 } from "lucide-react";
+import { ArrowRight, ShieldCheck, Search, CheckCircle2 } from "lucide-react";
 import { HERO_EDITORIAL_CONTENT } from "@/lib/constants";
 
 export function Hero() {
