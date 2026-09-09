@@ -40,4 +40,3 @@ Delala Landing is the marketing/landing website for the Delala platform. It high
 
 If this repo uses a specific framework (Next.js, Vite, Astro, etc.), I'll update this section to list the exact commands and configuration.
 
-## Folder structure (top-level, adjust if different)
